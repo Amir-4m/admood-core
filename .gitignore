@@ -51,7 +51,7 @@ media/*
 static/*
 db.sqlite3
 .idea
-*/migrations/0*.py
+**/migrations/0*.py
 *.session
 *.pid
 # Flask stuff:
