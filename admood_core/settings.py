@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.accounts',
     'apps.publish',
+    'apps.campaign',
 ]
 
 MIDDLEWARE = [
