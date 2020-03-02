@@ -42,3 +42,7 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user
+
+
+class LegalProfile(models.Model):
+    pass
