@@ -40,7 +40,7 @@ class Province(models.Model):
 class Publisher(models.Model):
     ACTIVE = "Active"
     SUSPEND = "Suspend"
-    PAUSED = "PAUSED"
+    PAUSED = "Paused"
     VERIFIED = "Verified"
 
     STATUS_CHOICES = (

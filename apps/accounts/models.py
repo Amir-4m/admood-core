@@ -21,8 +21,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     username = models.CharField(max_length=36, unique=True)
     phone_number = models.CharField(max_length=11, unique=True, null=True, blank=True)
-    first_name = models.CharField(max_length=50, blank=True, null=True)
-    last_name = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(unique=True, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -47,6 +45,8 @@ class Profile(models.Model):
     )
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     type = models.CharField(max_length=30, choices=TYPE_CHOICES, default=REAL)
+    first_name = models.CharField(max_length=50, blank=True, null=True)
+    last_name = models.CharField(max_length=50, blank=True, null=True)
     image = models.ImageField(null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     national_id = models.CharField(max_length=10)
