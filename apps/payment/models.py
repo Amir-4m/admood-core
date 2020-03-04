@@ -1,6 +1,7 @@
 from django.db import models
 
 from admood_core import settings
+from apps.core.constants import Bank
 
 
 class Invoice(models.Model):
@@ -18,4 +19,10 @@ class Invoice(models.Model):
 
 
 class Payment(models.Model):
-    pass
+    bank_name = models.CharField(max_length=20, choices=Bank.BANK_CHOICES)
+    transaction_no = models.CharField(max_length=50)
+    status = models.CharField(max_length=20)
+    amount = models.DecimalField(max_length=20, decimal_places=2)
+    card_no = models.CharField(max_length=20)
+    ip = models.IPAddressField()
+    created_time = models.DateTimeField(auto_now_add=True)
