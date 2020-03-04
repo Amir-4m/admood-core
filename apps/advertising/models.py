@@ -58,7 +58,6 @@ class Publisher(models.Model):
 
 
 class Campaign(models.Model):
-
     ACTIVE = "Active"
     SUSPEND = "Suspend"
     PAUSED = "PAUSED"
@@ -73,7 +72,7 @@ class Campaign(models.Model):
 
     advertiser = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
-    medium_type = models.CharField(max_length=20, choices=MediumType.MEDIUM_TYPE_CHOICES)
+    medium = models.CharField(max_length=20, choices=Medium.MEDIUM_CHOICES)
 
     name = models.CharField(max_length=50)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
@@ -103,7 +102,8 @@ class CampaignTargetDevice(models.Model):
     platform = models.ForeignKey(Platform, on_delete=models.CASCADE, null=True, blank=True)
     os = models.ForeignKey(OS, on_delete=models.CASCADE, null=True, blank=True)
     os_version = models.ForeignKey(OSVersion, on_delete=models.CASCADE, null=True, blank=True)
-    service_provider = models.CharField(max_length=10, choices=ServiceProvider.SERVICE_PROVIDER_CHOICES)
+    service_provider = models.CharField(max_length=10, choices=ServiceProvider.SERVICE_PROVIDER_CHOICES,
+                                        null=True, blank=True)
 
 
 class CampaignContent(models.Model):
