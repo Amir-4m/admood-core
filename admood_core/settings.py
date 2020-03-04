@@ -41,8 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.core',
     'apps.accounts',
-    'apps.publish',
-    'apps.campaign',
+    'apps.advertising',
 ]
 
 MIDDLEWARE = [
