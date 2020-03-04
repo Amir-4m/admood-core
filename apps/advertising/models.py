@@ -41,20 +41,24 @@ class Campaign(models.Model):
     devices = models.ManyToManyField(Device, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=50)
+    status = models.CharField(max_length=20)
     description = models.TextField(null=True, blank=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
+
     utm_source = models.CharField(max_length=50, null=True, blank=True)
     utm_medium = models.CharField(max_length=50, null=True, blank=True)
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
     utm_content = models.CharField(max_length=50, null=True, blank=True)
+
     cpm = models.CharField(max_length=50, null=True, blank=True)
     cpc = models.CharField(max_length=50, null=True, blank=True)
     cpa = models.CharField(max_length=50, null=True, blank=True)
+
     daily_cost = models.IntegerField()
     total_cost = models.IntegerField()
     finish_balance = models.IntegerField(null=True, blank=True)
-    campaign_status = models.CharField(max_length=20)
+
     is_enabled = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
