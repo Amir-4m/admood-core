@@ -74,6 +74,14 @@ class Campaign(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
 
+class CampaignTargetDevice(models.Model):
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    platform = models.ForeignKey(Platform, on_delete=models.CASCADE, null=True, blank=True)
+    os = models.ForeignKey(OS, on_delete=models.CASCADE, null=True, blank=True)
+    os_version = models.ForeignKey(OSVersion, on_delete=models.CASCADE, null=True, blank=True)
+    service_provider = models.CharField(max_length=10, choices=ServiceProvider.SERVICE_PROVIDER_CHOICES)
+
+
 class CampaignContent(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     title = models.CharField(max_length=250)
