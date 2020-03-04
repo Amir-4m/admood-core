@@ -79,8 +79,9 @@ class Campaign(models.Model):
     medium = models.CharField(max_length=20, choices=Medium.MEDIUM_CHOICES)
 
     name = models.CharField(max_length=50)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    locations = models.ManyToManyField(Province)
     description = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
 
