@@ -3,6 +3,8 @@ from django.db import models
 from admood_core import settings
 from apps.core.constants import MediumType, ServiceProvider, MediumInterface
 
+class Category(models.Model):
+    name = models.CharField(max_length=50)
 
 class MediumCategory(models.Model):
     medium_type = models.CharField(max_length=30, choices=MediumType.MEDIUM_TYPE_CHOICES)
