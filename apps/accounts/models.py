@@ -7,14 +7,6 @@ from .managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    REAL = "real"
-    LEGAL = "legal"
-
-    TYPE_CHOICES = (
-        (REAL, "real"),
-        (LEGAL, "legal"),
-    )
-    type = models.CharField(max_length=30, choices=TYPE_CHOICES, default=REAL)
     username = models.CharField(max_length=36, unique=True)
     phone_number = models.CharField(max_length=11, unique=True)
     first_name = models.CharField(max_length=50, blank=True, null=True)
@@ -33,7 +25,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Profile(models.Model):
+    REAL = "real"
+    LEGAL = "legal"
+
+    TYPE_CHOICES = (
+        (REAL, "real"),
+        (LEGAL, "legal"),
+    )
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    type = models.CharField(max_length=30, choices=TYPE_CHOICES, default=REAL)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     image_id = models.CharField(max_length=10)
