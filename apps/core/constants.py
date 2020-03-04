@@ -1,32 +1,32 @@
 class Medium:
+    WEB = "Web"
+    IN_APP = "InAPP"
     TELEGRAM = "Telegram"
     INSTAGRAM = "Instagram"
-    PUSH_NOTIF = "PushNotif"
-    BANNER = "Banner"
-    NATIVE = "Native"
 
     MEDIUM_CHOICES = (
+        (WEB, "Web"),
+        (IN_APP, "InAPP"),
         (TELEGRAM, "Telegram"),
         (INSTAGRAM, "Instagram"),
-        (PUSH_NOTIF, "PushNotif"),
-        (BANNER, "Banner"),
-        (NATIVE, "Native"),
     )
 
 
 class MediumInterface:
-    WEB = "Web"
-    IN_APP = "InAPP"
     CHANNEL = "Channel"
     POST = "Post"
     STORY = "Story"
+    PUSH_NOTIF = "PushNotif"
+    BANNER = "Banner"
+    NATIVE = "Native"
 
     MEDIUM_INTERFACE_CHOICES = (
-        (WEB, "Web"),
-        (IN_APP, "InAPP"),
         (CHANNEL, "Channel"),
         (POST, "Post"),
         (STORY, "Story"),
+        (PUSH_NOTIF, "PushNotif"),
+        (BANNER, "Banner"),
+        (NATIVE, "Native"),
     )
 
 
@@ -42,8 +42,6 @@ class MediumStatus:
         (PAUSED, "PAUSED"),
         (VERIFIED, "VERIFIED"),
     )
-
-
 
 
 class Bank:
@@ -74,4 +72,3 @@ class Platform:
         (PC, "PC"),
         (MOBILE, "Mobile")
     )
-
