@@ -1,7 +1,8 @@
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from admood_core import settings
-from apps.core.constants import MediumType, ServiceProvider, MediumInterface
+from apps.core.constants import Medium, ServiceProvider
+
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
@@ -46,11 +47,13 @@ class Publisher(models.Model):
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    medium_type = models.CharField(max_length=20, choices=MediumType.MEDIUM_TYPE_CHOICES)
+    medium = models.CharField(max_length=20, choices=Medium.MEDIUM_CHOICES)
+    categories = models.ManyToManyField(Category)
+
     name = models.CharField(max_length=50)
-    description = models.TextField(null=True, blank=True)
     url = models.URLField(null=True, blank=True)
-    status = models.CharField(max_length=10)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    description = models.TextField(null=True, blank=True)
     updated_time = models.DateTimeField(auto_now=True)
 
 
