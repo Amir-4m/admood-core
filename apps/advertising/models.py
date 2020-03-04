@@ -18,7 +18,7 @@ class OS(models.Model):
     name = models.CharField(max_length=50)
 
 
-class Device(models.Model):
+class OSVersion(models.Model):
     os = models.ForeignKey(OS, on_delete=models.CASCADE)
     version = models.CharField(max_length=10)
 
