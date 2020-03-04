@@ -6,9 +6,16 @@ from apps.core.constants import MediumType, ServiceProvider, MediumInterface
 class Category(models.Model):
     name = models.CharField(max_length=50)
 
-class MediumCategory(models.Model):
-    medium_type = models.CharField(max_length=30, choices=MediumType.MEDIUM_TYPE_CHOICES)
-    medium_interface = models.CharField(max_length=30, choices=MediumInterface.MEDIUM_INTERFACE_CHOICES)
+
+class MediumCategoryDisplayText(models.Model):
+    medium = models.CharField(max_length=30, choices=Medium.MEDIUM_CHOICES)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    display_text = models.CharField(max_length=50)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['medium', 'category'], name="unique_medium_category")
+        ]
 
 
 class Platform(models.Model):
