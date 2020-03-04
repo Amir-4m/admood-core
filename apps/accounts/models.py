@@ -53,21 +53,12 @@ class Profile(models.Model):
     street_address = models.CharField(max_length=10)
     post_code = models.CharField(max_length=10)
     id_location = models.CharField(max_length=10)
-    created_time = models.DateTimeField(auto_now_add=True)
-    updated_time = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return self.user
-
-
-class Legal(models.Model):
     company_name = models.CharField(max_length=50)
     eco_code = models.CharField(max_length=10)
     register_code = models.CharField(max_length=10)
 
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
 
-class Real(models.Model):
-    pass
+    def __str__(self):
+        return self.user
