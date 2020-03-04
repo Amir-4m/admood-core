@@ -9,6 +9,11 @@ class MediumCategory(models.Model):
     medium_interface = models.CharField(max_length=30, choices=MediumInterface.MEDIUM_INTERFACE_CHOICES)
 
 
+class Platform(models.Model):
+    name = models.CharField(max_length=50)
+
+
+
 class Publisher(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     medium_type = models.CharField(max_length=20, choices=MediumType.MEDIUM_TYPE_CHOICES)
