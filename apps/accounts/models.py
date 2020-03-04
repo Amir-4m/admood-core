@@ -7,6 +7,18 @@ from .managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    ACTIVE = "Active"
+    VERIFIED = "Verified"
+    SUSPEND = "Suspend"
+    WAITING = "Waiting"
+
+    STATUS_CHOICES = (
+        (ACTIVE, "Active"),
+        (VERIFIED, "Verified"),
+        (SUSPEND, "Suspend"),
+        (WAITING, "Waiting"),
+    )
+
     username = models.CharField(max_length=36, unique=True)
     phone_number = models.CharField(max_length=11, unique=True)
     first_name = models.CharField(max_length=50, blank=True, null=True)
@@ -14,6 +26,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
 
