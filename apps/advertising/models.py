@@ -1,7 +1,12 @@
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from admood_core import settings
-from apps.core.constants import MediumType, ServiceProvider
+from apps.core.constants import MediumType, ServiceProvider, MediumInterface
+
+
+class MediumCategory(models.Model):
+    medium_type = models.CharField(max_length=30, choices=MediumType.MEDIUM_TYPE_CHOICES)
+    medium_interface = models.CharField(max_length=30, choices=MediumInterface.MEDIUM_INTERFACE_CHOICES)
 
 
 class Publisher(models.Model):
