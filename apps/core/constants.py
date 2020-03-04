@@ -38,3 +38,23 @@ class Bank:
         (TEJARAT, "Tejarat"),
         (SAMAN, "Saman"),
     )
+
+
+class Platform:
+    PC = "PC"
+    MOBILE = "Mobile"
+
+    PLATFORM_CHOICES = (
+        (PC, "PC"),
+        (MOBILE, "Mobile")
+    )
+
+
+class ServiceProvider:
+    MTN = "MTN"
+    IRANCELL = "Irancell"
+
+    SERVICE_PROVIDER_CHOICES = (
+        (MTN, "MTN"),
+        (IRANCELL, "Irancell"),
+    )
