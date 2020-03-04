@@ -33,8 +33,8 @@ class OSVersion(models.Model):
     version = models.CharField(max_length=10)
 
 
-class Location(models.Model):
-    pass
+class Province(models.Model):
+    name = models.CharField(max_length=50)
 
 
 class Publisher(models.Model):
