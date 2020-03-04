@@ -33,6 +33,10 @@ class OSVersion(models.Model):
     version = models.CharField(max_length=10)
 
 
+class Location(models.Model):
+    pass
+
+
 class Publisher(models.Model):
     ACTIVE = "Active"
     SUSPEND = "Suspend"
