@@ -33,6 +33,18 @@ class OSVersion(models.Model):
 
 
 class Publisher(models.Model):
+    ACTIVE = "Active"
+    SUSPEND = "Suspend"
+    PAUSED = "PAUSED"
+    VERIFIED = "Verified"
+
+    STATUS_CHOICES = (
+        (ACTIVE, "Active"),
+        (SUSPEND, "Suspend"),
+        (PAUSED, "PAUSED"),
+        (VERIFIED, "Verified"),
+    )
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     medium_type = models.CharField(max_length=20, choices=MediumType.MEDIUM_TYPE_CHOICES)
     name = models.CharField(max_length=50)
