@@ -1,11 +1,11 @@
-class MediumType:
+class Medium:
     TELEGRAM = "Telegram"
     INSTAGRAM = "Instagram"
     PUSH_NOTIF = "PushNotif"
     BANNER = "Banner"
     NATIVE = "Native"
 
-    MEDIUM_TYPE_CHOICES = (
+    MEDIUM_CHOICES = (
         (TELEGRAM, "Telegram"),
         (INSTAGRAM, "Instagram"),
         (PUSH_NOTIF, "PushNotif"),
