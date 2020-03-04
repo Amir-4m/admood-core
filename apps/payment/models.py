@@ -15,3 +15,7 @@ class Invoice(models.Model):
     invoice_status = models.CharField(max_length=20)
     payment_type = models.CharField(max_length=20)
     created_time = models.DateTimeField(auto_now_add=True)
+
+
+class Payment(models.Model):
+    pass
