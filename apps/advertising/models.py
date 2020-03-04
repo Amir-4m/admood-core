@@ -18,6 +18,11 @@ class OS(models.Model):
     name = models.CharField(max_length=50)
 
 
+class Device(models.Model):
+    os = models.ForeignKey(OS, on_delete=models.CASCADE)
+    version = models.CharField(max_length=10)
+
+
 class Publisher(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     medium_type = models.CharField(max_length=20, choices=MediumType.MEDIUM_TYPE_CHOICES)
