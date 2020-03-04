@@ -40,6 +40,16 @@ class Bank:
     )
 
 
+class ServiceProvider:
+    MTN = "MTN"
+    IRANCELL = "Irancell"
+
+    SERVICE_PROVIDER_CHOICES = (
+        (MTN, "MTN"),
+        (IRANCELL, "Irancell"),
+    )
+
+
 class Platform:
     PC = "PC"
     MOBILE = "Mobile"
@@ -50,11 +60,17 @@ class Platform:
     )
 
 
-class ServiceProvider:
-    MTN = "MTN"
-    IRANCELL = "Irancell"
+class OS:
+    WIN = "Win"
+    LINUX = "Linux"
+    OSX = "OSX"
+    Android = "Android"
+    IOS = "IOS"
 
-    SERVICE_PROVIDER_CHOICES = (
-        (MTN, "MTN"),
-        (IRANCELL, "Irancell"),
+    OS_CHOICES = (
+        (WIN, "Win"),
+        (LINUX, "Linux"),
+        (OSX, "OSX"),
+        (Android, "Android"),
+        (IOS, "IOS"),
     )
