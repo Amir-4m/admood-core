@@ -38,7 +38,8 @@ class Campaign(models.Model):
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
     medium_type = models.CharField(max_length=20, choices=MediumType.MEDIUM_TYPE_CHOICES)
     service_provider = models.CharField(max_length=10, choices=ServiceProvider.SERVICE_PROVIDER_CHOICES)
-    os = models.ForeignKey(OS, on_delete=models.CASCADE)
+    devices = models.ManyToManyField(Device, on_delete=models.CASCADE)
+
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
     start_date = models.DateTimeField()
