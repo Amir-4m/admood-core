@@ -34,14 +34,25 @@ class Publisher(models.Model):
 
 
 class Campaign(models.Model):
+
+    ACTIVE = "Active"
+    SUSPEND = "Suspend"
+    PAUSED = "PAUSED"
+    VERIFIED = "Verified"
+
+    STATUS_CHOICES = (
+        (ACTIVE, "Active"),
+        (SUSPEND, "Suspend"),
+        (PAUSED, "PAUSED"),
+        (VERIFIED, "Verified"),
+    )
+
     advertiser = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
     medium_type = models.CharField(max_length=20, choices=MediumType.MEDIUM_TYPE_CHOICES)
-    service_provider = models.CharField(max_length=10, choices=ServiceProvider.SERVICE_PROVIDER_CHOICES)
-    devices = models.ManyToManyField(Device, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=50)
-    status = models.CharField(max_length=20)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     description = models.TextField(null=True, blank=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
