@@ -30,6 +30,22 @@ class MediumInterface:
     )
 
 
+class MediumStatus:
+    ACTIVE = "Active"
+    SUSPEND = "Suspend"
+    PAUSED = "PAUSED"
+    VERIFIED = "VERIFIED"
+
+    MEDIUM_STATUS_CHOICES = (
+        (ACTIVE, "Active"),
+        (SUSPEND, "Suspend"),
+        (PAUSED, "PAUSED"),
+        (VERIFIED, "VERIFIED"),
+    )
+
+
+
+
 class Bank:
     TEJARAT = "Tejarat"
     SAMAN = "Saman"
@@ -59,18 +75,3 @@ class Platform:
         (MOBILE, "Mobile")
     )
 
-
-class OS:
-    WIN = "Win"
-    LINUX = "Linux"
-    OSX = "OSX"
-    Android = "Android"
-    IOS = "IOS"
-
-    OS_CHOICES = (
-        (WIN, "Win"),
-        (LINUX, "Linux"),
-        (OSX, "OSX"),
-        (Android, "Android"),
-        (IOS, "IOS"),
-    )
