@@ -20,7 +20,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     username = models.CharField(max_length=36, unique=True)
-    phone_number = models.CharField(max_length=11, unique=True)
+    phone_number = models.CharField(max_length=11, unique=True, null=True, blank=True)
     first_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(unique=True, blank=True, null=True)
@@ -34,7 +34,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "username"
 
     def __str__(self):
-        return self.phone_number
+        return self.username
 
 
 class Profile(models.Model):
