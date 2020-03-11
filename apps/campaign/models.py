@@ -1,64 +1,14 @@
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from admood_core import settings
-from apps.core.constants import Medium, ServiceProvider
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=50)
-
-
-class MediumCategoryDisplayText(models.Model):
-    medium = models.CharField(max_length=30, choices=Medium.MEDIUM_CHOICES)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    display_text = models.CharField(max_length=50)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['medium', 'category'], name="unique_medium_category")
-        ]
-
-
-class Platform(models.Model):
-    name = models.CharField(max_length=50)
-
-
-class OS(models.Model):
-    platform = models.ForeignKey(Platform, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
-
-
-class OSVersion(models.Model):
-    os = models.ForeignKey(OS, on_delete=models.CASCADE)
-    version = models.CharField(max_length=10)
+from apps.device.models import Platform, OS, OSVersion
+from apps.device.consts import ServiceProvider
+from apps.media.consts import Medium
+from apps.media.models import Publisher
 
 
 class Province(models.Model):
     name = models.CharField(max_length=50)
-
-
-class Publisher(models.Model):
-    ACTIVE = "Active"
-    SUSPEND = "Suspend"
-    PAUSED = "Paused"
-    VERIFIED = "Verified"
-
-    STATUS_CHOICES = (
-        (ACTIVE, "Active"),
-        (SUSPEND, "Suspend"),
-        (PAUSED, "PAUSED"),
-        (VERIFIED, "Verified"),
-    )
-
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    medium = models.CharField(max_length=20, choices=Medium.MEDIUM_CHOICES)
-    categories = models.ManyToManyField(Category)
-
-    name = models.CharField(max_length=50)
-    url = models.URLField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
-    description = models.TextField(null=True, blank=True)
-    updated_time = models.DateTimeField(auto_now=True)
 
 
 class Campaign(models.Model):
