@@ -7,6 +7,9 @@ from .consts import Medium
 class Category(models.Model):
     name = models.CharField(max_length=50)
 
+    class Meta:
+        verbose_name_plural = "Categories"
+
 
 class MediumCategoryDisplayText(models.Model):
     medium = models.CharField(max_length=30, choices=Medium.MEDIUM_CHOICES)
