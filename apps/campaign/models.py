@@ -3,8 +3,8 @@ from django.db import models
 from admood_core import settings
 from apps.device.models import Platform, OS, OSVersion
 from apps.device.consts import ServiceProvider
-from apps.media.consts import Medium
-from apps.media.models import Publisher
+from apps.medium.consts import Medium
+from apps.medium.models import Publisher
 
 
 class Province(models.Model):
@@ -24,6 +24,16 @@ class Campaign(models.Model):
         (VERIFIED, "Verified"),
     )
 
+    CPA = "cpa"
+    CPC = "cpc"
+    CPM = "cpm"
+
+    AD_MODEL_CHOICES = (
+        (CPA, "cpa"),
+        (CPC, "cpc"),
+        (CPM, "cpm"),
+    )
+
     advertiser = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
     medium = models.CharField(max_length=20, choices=Medium.MEDIUM_CHOICES)
@@ -40,9 +50,7 @@ class Campaign(models.Model):
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
     utm_content = models.CharField(max_length=50, null=True, blank=True)
 
-    cpm = models.CharField(max_length=50, null=True, blank=True)
-    cpc = models.CharField(max_length=50, null=True, blank=True)
-    cpa = models.CharField(max_length=50, null=True, blank=True)
+    cost_model = models.CharField(max_length=50, choices=AD_MODEL_CHOICES, null=True, blank=True)
 
     daily_cost = models.IntegerField()
     total_cost = models.IntegerField()
@@ -70,3 +78,4 @@ class CampaignContent(models.Model):
     landing_url = models.URLField()
     utm_term = models.CharField(max_length=100)
     image = models.ImageField()
+    cost_model_price = models.IntegerField()
