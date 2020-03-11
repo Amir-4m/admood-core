@@ -43,7 +43,9 @@ INSTALLED_APPS = [
 
     'apps.core',
     'apps.accounts',
-    'apps.advertising',
+    'apps.device',
+    'apps.media',
+    'apps.campaign',
 ]
 
 MIDDLEWARE = [
@@ -126,9 +128,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
+
