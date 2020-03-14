@@ -1,7 +1,7 @@
 from django.db import models
 
 from admood_core import settings
-from apps.core.constants import Bank
+from apps.core.consts import Bank
 
 
 class Invoice(models.Model):

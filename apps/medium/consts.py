@@ -43,32 +43,3 @@ class MediumStatus:
         (VERIFIED, "VERIFIED"),
     )
 
-
-class Bank:
-    TEJARAT = "Tejarat"
-    SAMAN = "Saman"
-
-    BANK_CHOICES = (
-        (TEJARAT, "Tejarat"),
-        (SAMAN, "Saman"),
-    )
-
-
-class ServiceProvider:
-    MTN = "MTN"
-    IRANCELL = "Irancell"
-
-    SERVICE_PROVIDER_CHOICES = (
-        (MTN, "MTN"),
-        (IRANCELL, "Irancell"),
-    )
-
-
-class Platform:
-    PC = "PC"
-    MOBILE = "Mobile"
-
-    PLATFORM_CHOICES = (
-        (PC, "PC"),
-        (MOBILE, "Mobile")
-    )
