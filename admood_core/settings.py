@@ -92,7 +92,6 @@ DATABASES = {
     }
 }
 
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -143,3 +142,6 @@ REST_FRAMEWORK = {
     ],
 }
 
+SENTRY_KEY = 'fb07463357484923b82777719106dc7d'
+SENTRY_HOST = 'sentry.yourblueapi.com'
+SENTRY_PROJECT_ID = '5'
