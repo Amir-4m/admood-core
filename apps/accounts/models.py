@@ -2,6 +2,7 @@ import random
 
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import PermissionsMixin, send_mail
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -104,7 +105,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ),
     )
     status = models.PositiveSmallIntegerField(_('user status'), choices=STATUS_CHOICES, default=STATUS_WAITING, db_index=True)
-    date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
     objects = UserManager()
     USERNAME_FIELD = "username"
