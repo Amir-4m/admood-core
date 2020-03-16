@@ -3,11 +3,10 @@ import random
 from django.db import models
 from django.conf import settings
 from django.core.validators import RegexValidator
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin, send_mail
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.base_user import BaseUserManager
 
 
 class UserManager(BaseUserManager):
@@ -55,16 +54,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     username_validator = ASCIIUsernameValidator()
 
-    ACTIVE = "Active"
-    VERIFIED = "Verified"
-    SUSPEND = "Suspend"
-    WAITING = "Waiting"
+    STATUS_WAITING = 0
+    STATUS_VERIFIED = 1
+    STATUS_SUSPEND = 2
 
     STATUS_CHOICES = (
-        (ACTIVE, _("Activated")),
-        (VERIFIED, _("Verified")),
-        (SUSPEND, _("Suspended")),
-        (WAITING, _("Waiting")),
+        (STATUS_VERIFIED, _("Verified")),
+        (STATUS_SUSPEND, _("Suspended")),
+        (STATUS_WAITING, _("Waiting")),
     )
 
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
@@ -106,17 +103,40 @@ class User(AbstractBaseUser, PermissionsMixin):
             'Unselect this instead of deleting accounts.'
         ),
     )
-    status = models.CharField(_('user status'), max_length=10, choices=STATUS_CHOICES, db_index=True)
+    status = models.PositiveSmallIntegerField(_('user status'), choices=STATUS_CHOICES, default=STATUS_WAITING, db_index=True)
     date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
 
     objects = UserManager()
     USERNAME_FIELD = "username"
 
+    class Meta:
+        # db_table = 'auth_users'
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
+
     def __str__(self):
         return self.username
 
+    def email_user(self, subject, message, from_email=None, **kwargs):
+        """
+        Sends an email to this User.
+        """
+        send_mail(subject, message, from_email, [self.email], **kwargs)
 
-class Profile(models.Model):
+    # @property
+    # def is_loggedin_user(self):
+    #     """
+    #     Returns True if user has actually logged in with valid credentials.
+    #     """
+    #     return self.phone_number is not None or self.email is not None
+
+    def save(self, *args, **kwargs):
+        if self.email is not None and self.email.strip() == '':
+            self.email = None
+        super().save(*args, **kwargs)
+
+
+class UserProfile(models.Model):
     REAL = "rl"
     LEGAL = "lg"
 
@@ -125,10 +145,11 @@ class Profile(models.Model):
         (LEGAL, _("legal")),
     )
 
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
     updated_time = models.DateTimeField(_('updated time'), auto_now=True)
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     type = models.CharField(max_length=2, choices=TYPE_CHOICES, default=REAL)
     first_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
@@ -142,5 +163,16 @@ class Profile(models.Model):
     eco_code = models.CharField(max_length=10)
     register_code = models.CharField(max_length=10)
 
+    class Meta:
+        db_table = 'accounts_profile'
+        verbose_name = _('profile')
+        verbose_name_plural = _('profiles')
+
     def __str__(self):
-        return self.user
+        return self.get_full_name()
+
+    def get_full_name(self):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        return f'{self.first_name} {self.last_name}'.strip()
