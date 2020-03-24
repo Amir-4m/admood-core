@@ -13,12 +13,12 @@ from django.utils.translation import ugettext_lazy as _
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, username, password, **extra_fields):
+    def _create_user(self, username=None, password=None, **extra_fields):
         """
         Create and save a user with the given username, email, and password.
         """
-        email = self.normalize_email(extra_fields.get('email', ''))
-        phone_number = self.normalize_email(extra_fields.get('phone_number', ''))
+        email = self.normalize_email(extra_fields.get('email', None))
+        phone_number = self.normalize_email(extra_fields.get('phone_number', None))
         username = self.model.normalize_username(username)
         try:
             assert username or email or phone_number, (
@@ -35,12 +35,16 @@ class UserManager(BaseUserManager):
             while User.objects.filter(username=username).exists():
                 username += str(random.randint(10, 99))
 
-        user = self.model(username=username, email=email, **extra_fields)
+        user = self.model(username=username, **extra_fields)
+
+        if password is None:
+            password = User.objects.make_random_password()
+
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, username, password=None, **extra_fields):
+    def create_user(self, username=None, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', False)
         extra_fields.setdefault('is_staff', False)
         return self._create_user(username, password, **extra_fields)
@@ -52,7 +56,6 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-
     username_validator = ASCIIUsernameValidator()
 
     STATUS_WAITING = 0
@@ -104,7 +107,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             'Unselect this instead of deleting accounts.'
         ),
     )
-    status = models.PositiveSmallIntegerField(_('user status'), choices=STATUS_CHOICES, default=STATUS_WAITING, db_index=True)
+    status = models.PositiveSmallIntegerField(_('user status'), choices=STATUS_CHOICES, default=STATUS_WAITING,
+                                              db_index=True)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
     objects = UserManager()
