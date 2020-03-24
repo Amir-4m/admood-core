@@ -133,6 +133,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'apps.accounts.backends.GoogleAuthBackend',
+]
+
 
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True
