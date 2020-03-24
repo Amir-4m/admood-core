@@ -20,7 +20,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 DEBUG = config("DEBUG", default=False, cast=bool)
 DEVEL = config("DEVEL", default=False, cast=bool)
 
-config('ALLOWED_HOSTS', default='localhost', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
 sentry_sdk.init(
     dsn=f"https://{config('SENTRY_KEY')}@{config('SENTRY_HOST')}/{config('SENTRY_PROJECT_ID')}",
@@ -139,12 +139,15 @@ REST_FRAMEWORK = {
     ],
 }
 
+SIMPLE_JWT = {
+    'ROTATE_REFRESH_TOKENS': True
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
-
 LANGUAGE_CODE = 'fa-ir'
 TIME_ZONE = 'Asia/Tehran'
-USE_I18N = True
+USE_I18N = False
 USE_L10N = False
 USE_TZ = False
 
