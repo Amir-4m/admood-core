@@ -7,7 +7,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         refresh = self.get_token(self.user)
-        data['lifetime'] = refresh.access_token.lifetime
+        data['lifetime'] = int(refresh.access_token.lifetime.total_seconds())
 
         return data
 
@@ -17,6 +17,6 @@ class MyTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         refresh = RefreshToken(attrs['refresh'])
-        data['lifetime'] = refresh.access_token.lifetime
+        data['lifetime'] = int(refresh.access_token.lifetime.total_seconds())
 
         return data
