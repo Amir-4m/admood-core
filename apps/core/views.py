@@ -1,6 +1,6 @@
-from rest_framework.generics import GenericAPIView
+from rest_framework.viewsets import ViewSet
 
 
 # Create your views here.
-class BaseAPIView(GenericAPIView):
+class BaseViewSet(ViewSet):
     pass
