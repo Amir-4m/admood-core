@@ -1,45 +1,45 @@
 class Medium:
-    WEB = "Web"
-    IN_APP = "InAPP"
-    TELEGRAM = "Telegram"
-    INSTAGRAM = "Instagram"
+    WEB = "web"
+    IN_APP = "in_app"
+    TELEGRAM = "telegram"
+    INSTAGRAM = "instagram"
 
     MEDIUM_CHOICES = (
-        (WEB, "Web"),
-        (IN_APP, "InAPP"),
-        (TELEGRAM, "Telegram"),
-        (INSTAGRAM, "Instagram"),
+        (WEB, "web"),
+        (IN_APP, "in_app"),
+        (TELEGRAM, "telegram"),
+        (INSTAGRAM, "instagram"),
     )
 
 
 class MediumInterface:
-    CHANNEL = "Channel"
-    POST = "Post"
-    STORY = "Story"
-    PUSH_NOTIF = "PushNotif"
-    BANNER = "Banner"
-    NATIVE = "Native"
+    CHANNEL = "channel"
+    POST = "post"
+    STORY = "story"
+    PUSH_NOTIFICATION = "push_notification"
+    BANNER = "banner"
+    NATIVE = "native"
 
     MEDIUM_INTERFACE_CHOICES = (
-        (CHANNEL, "Channel"),
-        (POST, "Post"),
-        (STORY, "Story"),
-        (PUSH_NOTIF, "PushNotif"),
-        (BANNER, "Banner"),
-        (NATIVE, "Native"),
+        (CHANNEL, "channel"),
+        (POST, "post"),
+        (STORY, "story"),
+        (PUSH_NOTIFICATION, "push_notification"),
+        (BANNER, "banner"),
+        (NATIVE, "native"),
     )
 
 
 class MediumStatus:
-    ACTIVE = "Active"
-    SUSPEND = "Suspend"
-    PAUSED = "PAUSED"
-    VERIFIED = "VERIFIED"
+    ACTIVE = "active"
+    SUSPEND = "suspend"
+    PAUSED = "paused"
+    VERIFIED = "verified"
 
     MEDIUM_STATUS_CHOICES = (
-        (ACTIVE, "Active"),
-        (SUSPEND, "Suspend"),
-        (PAUSED, "PAUSED"),
-        (VERIFIED, "VERIFIED"),
+        (ACTIVE, "active"),
+        (SUSPEND, "suspend"),
+        (PAUSED, "paused"),
+        (VERIFIED, "verified"),
     )
 
