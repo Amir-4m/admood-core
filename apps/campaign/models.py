@@ -8,20 +8,23 @@ from apps.medium.models import Publisher
 
 
 class Province(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Campaign(models.Model):
-    ACTIVE = "Active"
-    SUSPEND = "Suspend"
-    PAUSED = "PAUSED"
-    VERIFIED = "Verified"
+    ACTIVE = "active"
+    SUSPEND = "suspend"
+    PAUSED = "paused"
+    VERIFIED = "verified"
 
     STATUS_CHOICES = (
-        (ACTIVE, "Active"),
-        (SUSPEND, "Suspend"),
-        (PAUSED, "PAUSED"),
-        (VERIFIED, "Verified"),
+        (ACTIVE, "active"),
+        (SUSPEND, "suspend"),
+        (PAUSED, "paused"),
+        (VERIFIED, "verified"),
     )
 
     CPA = "cpa"
@@ -59,6 +62,9 @@ class Campaign(models.Model):
     is_enabled = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
 
 class CampaignTargetDevice(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
@@ -68,14 +74,29 @@ class CampaignTargetDevice(models.Model):
     service_provider = models.CharField(max_length=10, choices=ServiceProvider.SERVICE_PROVIDER_CHOICES,
                                         null=True, blank=True)
 
+    def __str__(self):
+        value = self.campaign
+        if self.platform:
+            value = f'{value}, {self.platform}'
+        if self.os:
+            value = f'{value}, {self.os}'
+        if self.os_version:
+            value = f'{value}, {self.os_version}'
+        if self.service_provider:
+            value = f'{value}, {self.service_provider}'
+        return value
+
 
 class CampaignContent(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     title = models.CharField(max_length=250)
     subtitle = models.CharField(max_length=250)
     data = JSONField()
-    description = models.TextField()
-    landing_url = models.URLField()
-    utm_term = models.CharField(max_length=100)
-    image = models.ImageField()
+    description = models.TextField(blank=True, null=True)
+    landing_url = models.URLField(blank=True, null=True)
+    utm_term = models.CharField(max_length=100, blank=True, null=True)
+    image = models.ImageField(blank=True, null=True)
     cost_model_price = models.IntegerField()
+
+    def __str__(self):
+        return self.title
