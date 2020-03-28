@@ -10,6 +10,9 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = "Categories"
 
+    def __str__(self):
+        return self.name
+
 
 class MediumCategoryDisplayText(models.Model):
     medium = models.CharField(max_length=30, choices=Medium.MEDIUM_CHOICES)
@@ -44,3 +47,6 @@ class Publisher(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     description = models.TextField(null=True, blank=True)
     updated_time = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
