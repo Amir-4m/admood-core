@@ -32,7 +32,7 @@ sentry_sdk.init(
     send_default_pii=True,
 
     # Custom settings
-    debug=DEBUG,
+    debug=not DEVEL,
     environment='development' if DEVEL else 'production'
 )
 
