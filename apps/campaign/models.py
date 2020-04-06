@@ -15,16 +15,14 @@ class Province(models.Model):
 
 
 class Campaign(models.Model):
-    ACTIVE = "active"
+    VERIFIED = "verified"
     SUSPEND = "suspend"
     PAUSED = "paused"
-    VERIFIED = "verified"
 
     STATUS_CHOICES = (
-        (ACTIVE, "active"),
+        (VERIFIED, "verified"),
         (SUSPEND, "suspend"),
         (PAUSED, "paused"),
-        (VERIFIED, "verified"),
     )
 
     CPA = "cpa"
