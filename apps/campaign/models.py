@@ -25,16 +25,6 @@ class Campaign(models.Model):
         (PAUSED, "paused"),
     )
 
-    CPA = "cpa"
-    CPC = "cpc"
-    CPM = "cpm"
-
-    AD_MODEL_CHOICES = (
-        (CPA, "cpa"),
-        (CPC, "cpc"),
-        (CPM, "cpm"),
-    )
-
     advertiser = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
     medium = models.CharField(max_length=20, choices=Medium.MEDIUM_CHOICES)
@@ -51,7 +41,6 @@ class Campaign(models.Model):
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
     utm_content = models.CharField(max_length=50, null=True, blank=True)
 
-    cost_model = models.CharField(max_length=50, choices=AD_MODEL_CHOICES, null=True, blank=True)
 
     daily_cost = models.IntegerField()
     total_cost = models.IntegerField()
@@ -86,6 +75,17 @@ class CampaignTargetDevice(models.Model):
 
 
 class CampaignContent(models.Model):
+
+    CPA = "cpa"
+    CPC = "cpc"
+    CPM = "cpm"
+
+    COST_MODEL_CHOICES = (
+        (CPA, "cpa"),
+        (CPC, "cpc"),
+        (CPM, "cpm"),
+    )
+
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     title = models.CharField(max_length=250)
     subtitle = models.CharField(max_length=250)
@@ -94,6 +94,7 @@ class CampaignContent(models.Model):
     landing_url = models.URLField(blank=True, null=True)
     utm_term = models.CharField(max_length=100, blank=True, null=True)
     image = models.ImageField(blank=True, null=True)
+    cost_model = models.CharField(max_length=50, choices=COST_MODEL_CHOICES, null=True, blank=True)
     cost_model_price = models.IntegerField()
 
     def __str__(self):
