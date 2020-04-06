@@ -41,7 +41,6 @@ class Campaign(models.Model):
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
     utm_content = models.CharField(max_length=50, null=True, blank=True)
 
-
     daily_cost = models.IntegerField()
     total_cost = models.IntegerField()
     finish_balance = models.IntegerField(null=True, blank=True)
@@ -75,7 +74,6 @@ class CampaignTargetDevice(models.Model):
 
 
 class CampaignContent(models.Model):
-
     CPA = "cpa"
     CPC = "cpc"
     CPM = "cpm"
