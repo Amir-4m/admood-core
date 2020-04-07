@@ -1,8 +1,10 @@
 class ServiceProvider:
-    HAMRAH = "Hamrah"
-    IRANCELL = "Irancell"
+    MTN = 1
+    MCI = 2
+    RTL = 3
 
     SERVICE_PROVIDER_CHOICES = (
-        (HAMRAH, "Hamrah"),
-        (IRANCELL, "Irancell"),
+        (MTN, "MTN"),
+        (MCI, "MCI"),
+        (RTL, "RTL"),
     )

@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import (
     Province,
     Campaign,
-    CampaignTargetDevice,
-    CampaignContent,
+    TargetDevice,
+    Content,
 )
 
 
@@ -17,5 +17,5 @@ class ContentAdmin(admin.ModelAdmin):
 
 admin.site.register(Province)
 admin.site.register(Campaign)
-admin.site.register(CampaignTargetDevice, TargetDeviceAdmin)
-admin.site.register(CampaignContent, ContentAdmin)
+admin.site.register(TargetDevice, TargetDeviceAdmin)
+admin.site.register(Content, ContentAdmin)
