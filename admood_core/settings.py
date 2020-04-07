@@ -23,19 +23,6 @@ DEVEL = config("DEVEL", default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
-sentry_sdk.init(
-    dsn=f"https://{config('SENTRY_KEY')}@{config('SENTRY_HOST')}/{config('SENTRY_PROJECT_ID')}",
-    integrations=[DjangoIntegration()],
-
-    # If you wish to associate users to errors (assuming you are using
-    # django.contrib.auth) you may enable sending PII data.
-    send_default_pii=True,
-
-    # Custom settings
-    debug=not DEVEL,
-    environment='development' if DEVEL else 'production'
-)
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -139,7 +126,6 @@ AUTHENTICATION_BACKENDS = [
     'apps.accounts.backends.GoogleAuthBackend',
 ]
 
-
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('ACCESS_TOKEN_LIFETIME_MINUTES', default=30, cast=int)),
@@ -217,3 +203,24 @@ LOGGING = ({
         # },
     },
 })
+
+if DEVEL is False:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    # from sentry_sdk.integrations.celery import CeleryIntegration
+
+    sentry_sdk.init(
+        dsn=f"https://{config('SENTRY_KEY')}@{config('SENTRY_HOST')}/{config('SENTRY_PROJECT_ID')}",
+        integrations=[
+            DjangoIntegration(),
+            # CeleryIntegration()
+        ],
+
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=True,
+
+        # Custom settings
+        debug=DEBUG,
+        environment=config('SENTRY_ENV', default='development')  # 'production'
+    )
