@@ -16,6 +16,22 @@ class Province(models.Model):
         return self.name
 
 
+class Device(models.Model):
+    TYPE_PLATFORM = 1
+    TYPE_OS = 2
+    TYPE_VERSION = 3
+
+    TYPE_CHOICES = (
+        (TYPE_PLATFORM, "platform"),
+        (TYPE_OS, "os"),
+        (TYPE_VERSION, "version"),
+    )
+
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
+    type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES)
+    title = models.CharField(max_length=20)
+
+
 class Campaign(models.Model):
     STATUS_WAITING = 1
     STATUS_VERIFIED = 2
@@ -43,47 +59,34 @@ class Campaign(models.Model):
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
     utm_content = models.CharField(max_length=50, null=True, blank=True)
 
-    daily_cost = models.IntegerField()
-    total_cost = models.IntegerField()
+    daily_cost = models.PositiveIntegerField()
+    total_cost = models.PositiveIntegerField()
     finish_balance = models.IntegerField(null=True, blank=True)
 
     is_enabled = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    target_devices = models.ManyToManyField(Device, through="CampaignTargetDevice")
+
     def __str__(self):
         return self.name
 
 
-class TargetDevice(models.Model):
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
-    platform = models.ForeignKey(Platform, on_delete=models.CASCADE, null=True, blank=True)
-    os = models.ForeignKey(OS, on_delete=models.CASCADE, null=True, blank=True)
-    os_version = models.ForeignKey(OSVersion, on_delete=models.CASCADE, null=True, blank=True)
+class CampaignTargetDevice(models.Model):
+    SERVICE_PROVIDER_MTN = 1
+    SERVICE_PROVIDER_MCI = 2
+    SERVICE_PROVIDER_RTL = 3
+
+    SERVICE_PROVIDER_CHOICES = (
+        (SERVICE_PROVIDER_MTN, "MTN"),
+        (SERVICE_PROVIDER_MCI, "MCI"),
+        (SERVICE_PROVIDER_RTL, "RTL"),
+    )
+
+    campaign = models.ForeignKey(Device, on_delete=models.CASCADE)
+    device = models.ForeignKey(Campaign, on_delete=models.SET_NULL)
     service_provider = models.PositiveSmallIntegerField(choices=ServiceProvider.SERVICE_PROVIDER_CHOICES,
                                                         null=True, blank=True)
-
-    def __str__(self):
-        value = self.campaign
-        if self.platform:
-            value = f'{value}, {self.platform}'
-        if self.os:
-            value = f'{value}, {self.os}'
-        if self.os_version:
-            value = f'{value}, {self.os_version}'
-        if self.service_provider:
-            value = f'{value}, {self.service_provider}'
-        return value
-
-    def clean(self):
-        if self.os_version:
-            self.platform = self.os = None
-        if self.os:
-            self.platform = None
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.full_clean()
-        return super().save()
 
 
 class Content(models.Model):
