@@ -12,7 +12,7 @@ from .serializers import (
     OSVersionSerializer,
     ProviderSerializer
 )
-from ..models import Platform, OS, OSVersion
+from ..models import Platform, OS, Version
 
 
 class PlatformViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -32,7 +32,7 @@ class OSViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 class OSVersionViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = OSVersion.objects.all()
+    queryset = Version.objects.all()
     serializer_class = OSVersionSerializer
 
 

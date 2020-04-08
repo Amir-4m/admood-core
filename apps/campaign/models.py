@@ -3,7 +3,7 @@ from datetime import datetime
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from admood_core import settings
-from apps.device.models import Platform, OS, OSVersion
+from apps.device.models import Device
 from apps.device.consts import ServiceProvider
 from apps.medium.consts import Medium
 from apps.medium.models import Publisher
@@ -14,22 +14,6 @@ class Province(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Device(models.Model):
-    TYPE_PLATFORM = 1
-    TYPE_OS = 2
-    TYPE_VERSION = 3
-
-    TYPE_CHOICES = (
-        (TYPE_PLATFORM, "platform"),
-        (TYPE_OS, "os"),
-        (TYPE_VERSION, "version"),
-    )
-
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
-    type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES)
-    title = models.CharField(max_length=20)
 
 
 class Campaign(models.Model):
@@ -66,13 +50,11 @@ class Campaign(models.Model):
     is_enabled = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
-    target_devices = models.ManyToManyField(Device, through="CampaignTargetDevice")
-
     def __str__(self):
         return self.name
 
 
-class CampaignTargetDevice(models.Model):
+class TargetDevice(models.Model):
     SERVICE_PROVIDER_MTN = 1
     SERVICE_PROVIDER_MCI = 2
     SERVICE_PROVIDER_RTL = 3
@@ -83,8 +65,8 @@ class CampaignTargetDevice(models.Model):
         (SERVICE_PROVIDER_RTL, "RTL"),
     )
 
-    campaign = models.ForeignKey(Device, on_delete=models.CASCADE)
-    device = models.ForeignKey(Campaign, on_delete=models.SET_NULL)
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE)
     service_provider = models.PositiveSmallIntegerField(choices=ServiceProvider.SERVICE_PROVIDER_CHOICES,
                                                         null=True, blank=True)
 

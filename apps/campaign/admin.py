@@ -2,13 +2,18 @@ from django.contrib import admin
 from .models import (
     Province,
     Campaign,
-    TargetDevice,
     Content,
+    TargetDevice,
 )
 
 
-class TargetDeviceAdmin(admin.ModelAdmin):
-    list_display = ("campaign", "platform", "os", "os_version", "service_provider")
+class TargetDeviceInline(admin.TabularInline):
+    model = TargetDevice
+    extra = 1
+
+
+class CampaignAdmin(admin.ModelAdmin):
+    inlines = [TargetDeviceInline]
 
 
 class ContentAdmin(admin.ModelAdmin):
@@ -16,6 +21,6 @@ class ContentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Province)
-admin.site.register(Campaign)
-admin.site.register(TargetDevice, TargetDeviceAdmin)
+admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Content, ContentAdmin)
+admin.site.register(TargetDevice)

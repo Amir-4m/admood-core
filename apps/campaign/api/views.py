@@ -6,10 +6,10 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
-    TargetDeviceSerializer,
+    DeviceSerializer,
     ContentSerializer
 )
-from apps.campaign.models import Province, Campaign, TargetDevice, Content
+from apps.campaign.models import Province, Campaign, Device, Content
 from apps.core.views import BaseViewSet
 
 
@@ -44,11 +44,11 @@ class TargetDeviceViewSet(BaseViewSet,
                           viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = TargetDeviceSerializer
+    serializer_class = DeviceSerializer
 
     def get_queryset(self):
         campaign_id = self.kwargs['campaign_id']
-        return TargetDevice.objects.filter(campaign__owner=self.request.user, campaign__id=campaign_id)
+        return Device.objects.filter(campaign__owner=self.request.user, campaign__id=campaign_id)
 
 
 class ContentViewSet(BaseViewSet,

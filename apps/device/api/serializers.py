@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Platform, OS, OSVersion
+from ..models import Platform, OS, Version
 
 
 class PlatformSerializer(serializers.ModelSerializer):
@@ -16,7 +16,7 @@ class OSSerializer(serializers.ModelSerializer):
 
 class OSVersionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OSVersion
+        model = Version
         fields = '__all__'
 
 
