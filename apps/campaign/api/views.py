@@ -1,5 +1,6 @@
 from rest_framework import mixins
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -8,8 +9,8 @@ from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
     DeviceSerializer,
-    ContentSerializer
-)
+    ContentSerializer,
+    CampaignStatusSerializer)
 from apps.campaign.models import Province, Campaign, Device, Content
 from apps.core.views import BaseViewSet
 
@@ -39,9 +40,14 @@ class CampaignViewSet(BaseViewSet,
     def update(self, request, *args, **kwargs):
         campaign = self.get_object()
 
-        if campaign.status == Campaign.STATUS_APPROVED and 'is_active' not in request.data:
-            return Response("Approved campaigns cannot be updated!")
+        if campaign.status == Campaign.STATUS_APPROVED:
+            return Response("Approved campaigns cannot be edited!")
 
+        return super().update(request, *args, **kwargs)
+
+    @action(detail=True, methods=["patch"], url_path="status")
+    def status(self, request, *args, **kwargs):
+        self.serializer_class = CampaignStatusSerializer
         return super().update(request, *args, **kwargs)
 
 
