@@ -4,9 +4,8 @@ from .views import ProvinceViewSet, CampaignViewSet, TargetDeviceViewSet, Conten
 
 router = DefaultRouter()
 router.register('provinces', ProvinceViewSet)
-router.register('campaigns', CampaignViewSet, basename='Campaign')
-router.register(prefix=r'(?P<campaign_id>\d+)/target_devices', viewset=TargetDeviceViewSet,
-                basename='CampaignTargetDevice')
-router.register(prefix=r'(?P<campaign_id>\d+)/contents', viewset=ContentViewSet, basename='CampaignContent')
+router.register('campaigns', CampaignViewSet)
+router.register(r'(?P<campaign_id>\d+)/target_devices', TargetDeviceViewSet)
+router.register(r'(?P<campaign_id>\d+)/contents', ContentViewSet)
 
 urlpatterns = router.urls

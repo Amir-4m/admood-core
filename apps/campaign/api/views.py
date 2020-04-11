@@ -32,10 +32,11 @@ class CampaignViewSet(BaseViewSet,
                       viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
+    queryset = Campaign.objects.all()
     serializer_class = CampaignSerializer
 
     def get_queryset(self):
-        return Campaign.objects.filter(owner=self.request.user)
+        return self.queryset.filter(owner=self.request.user)
 
     def update(self, request, *args, **kwargs):
         campaign = self.get_object()
@@ -59,11 +60,12 @@ class TargetDeviceViewSet(BaseViewSet,
                           viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
+    queryset = Device.objects.all()
     serializer_class = DeviceSerializer
 
     def get_queryset(self):
         campaign_id = self.kwargs['campaign_id']
-        return Device.objects.filter(campaign__owner=self.request.user, campaign__id=campaign_id)
+        return self.queryset.filter(campaign__owner=self.request.user, campaign__id=campaign_id)
 
 
 class ContentViewSet(BaseViewSet,
@@ -73,8 +75,9 @@ class ContentViewSet(BaseViewSet,
                      viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
+    queryset = Content.objects.all()
     serializer_class = ContentSerializer
 
     def get_queryset(self):
         campaign_id = self.kwargs['campaign_id']
-        return Content.objects.filter(campaign__owner=self.request.user, campaign__id=campaign_id)
+        return self.queryset.filter(campaign__owner=self.request.user, campaign__id=campaign_id)
