@@ -18,12 +18,12 @@ class Province(models.Model):
 
 class Campaign(models.Model):
     STATUS_WAITING = 1
-    STATUS_VERIFIED = 2
+    STATUS_APPROVED = 2
     STATUS_SUSPEND = 3
 
     STATUS_CHOICES = (
         (STATUS_WAITING, "waiting"),
-        (STATUS_VERIFIED, "verified"),
+        (STATUS_APPROVED, "approved"),
         (STATUS_SUSPEND, "suspend"),
     )
 
