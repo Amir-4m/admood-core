@@ -1,6 +1,7 @@
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.campaign.api.serializers import (
@@ -34,6 +35,14 @@ class CampaignViewSet(BaseViewSet,
 
     def get_queryset(self):
         return Campaign.objects.filter(owner=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        campaign = self.get_object()
+
+        if campaign.status == Campaign.STATUS_APPROVED and 'is_active' not in request.data:
+            return Response("Approved campaigns cannot be updated!")
+
+        return super().update(request, *args, **kwargs)
 
 
 class TargetDeviceViewSet(BaseViewSet,
