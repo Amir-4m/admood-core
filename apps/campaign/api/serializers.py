@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.campaign.models import Province, Campaign, Device, Content, Schedule, TargetDevice
+from apps.campaign.models import Province, Campaign, Device, CampaignContent, CampaignSchedule, TargetDevice
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class CampaignScheduleSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
 
     class Meta:
-        model = Schedule
+        model = CampaignSchedule
         fields = ('id', 'day', 'start_time', 'end_time')
 
 
@@ -49,7 +49,7 @@ class CampaignSerializer(serializers.ModelSerializer):
             TargetDevice.objects.create(campaign=campaign, **targetdevice_data)
 
         for schedule_data in schedule_set:
-            Schedule.objects.create(campaign=campaign, **schedule_data)
+            CampaignSchedule.objects.create(campaign=campaign, **schedule_data)
 
         return campaign
 
@@ -63,7 +63,7 @@ class CampaignSerializer(serializers.ModelSerializer):
         TargetDevice.objects.filter(campaign=instance).exclude(id__in=targetdevice_id_list).delete()
 
         schedule_id_list = [i.get("id") for i in schedule_set if i.get("id")]
-        Schedule.objects.filter(campaign=instance).exclude(id__in=schedule_id_list).delete()
+        CampaignSchedule.objects.filter(campaign=instance).exclude(id__in=schedule_id_list).delete()
 
         for targetdevice_data in targetdevice_set:
             targetdevice_id = targetdevice_data.get('id', None)
@@ -78,13 +78,13 @@ class CampaignSerializer(serializers.ModelSerializer):
         for schedule_data in schedule_set:
             schedule_id = schedule_data.get('id', None)
             if schedule_id:
-                schedule = Schedule.objects.get(id=schedule_id, campaign=instance)
+                schedule = CampaignSchedule.objects.get(id=schedule_id, campaign=instance)
                 schedule.day = schedule_data.get('day', schedule.day)
                 schedule.start_time = schedule_data.get('start_time', schedule.start_time)
                 schedule.end_time = schedule_data.get('end_time', schedule.end_time)
                 schedule.save()
             else:
-                Schedule.objects.create(campaign=instance, **schedule_data)
+                CampaignSchedule.objects.create(campaign=instance, **schedule_data)
 
         return instance
 
@@ -99,5 +99,5 @@ class CampaignEnableSerializer(serializers.ModelSerializer):
 
 class CampaignContentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Content
+        model = CampaignContent
         fields = '__all__'

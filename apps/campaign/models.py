@@ -71,7 +71,7 @@ class TargetDevice(models.Model):
                                                         null=True, blank=True)
 
 
-class Content(models.Model):
+class CampaignContent(models.Model):
     COST_MODEL_CPA = 1
     COST_MODEL_CPC = 2
     COST_MODEL_CPM = 3
@@ -97,7 +97,7 @@ class Content(models.Model):
         return self.title
 
 
-class Schedule(models.Model):
+class CampaignSchedule(models.Model):
     SATURDAY = 0
     SUNDAY = 1
     MONDAY = 2
