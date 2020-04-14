@@ -7,7 +7,6 @@ from .models import (
 )
 
 
-@admin.register(TargetDevice)
 class TargetDeviceInline(admin.TabularInline):
     model = TargetDevice
     extra = 1

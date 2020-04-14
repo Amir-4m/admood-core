@@ -33,7 +33,7 @@ class TargetDeviceSerializer(serializers.ModelSerializer):
 
 class CampaignSerializer(serializers.ModelSerializer):
     targetdevice_set = TargetDeviceSerializer(many=True)
-    schedule_set = CampaignScheduleSerializer(many=True)
+    campaignschedule_set = CampaignScheduleSerializer(many=True)
 
     class Meta:
         model = Campaign
@@ -42,7 +42,7 @@ class CampaignSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         targetdevice_set = validated_data.pop("targetdevice_set")
-        schedule_set = validated_data.pop("schedule_set")
+        schedule_set = validated_data.pop("campaignschedule_set")
         campaign = super().create(validated_data)
 
         for targetdevice_data in targetdevice_set:
@@ -55,7 +55,7 @@ class CampaignSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         targetdevice_set = validated_data.pop("targetdevice_set")
-        schedule_set = validated_data.pop("schedule_set")
+        schedule_set = validated_data.pop("campaignschedule_set")
 
         instance = super().update(instance, validated_data)
 

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
+import os
 from datetime import timedelta
 
 from pathlib import Path
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'drf_yasg',
 
     'apps.core',
     'apps.accounts',
@@ -65,7 +67,8 @@ APPEND_SLASH = False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
+        # 'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -93,9 +96,20 @@ DATABASES = {
     }
 }
 
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'JWT': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+}
+
 CACHES = {
     'default': {
-        'BACKEND': config("CACHE_BACKEND"),
+        'BACKEND': config("CACHE_BACKEND", default='django.core.cache.backends.locmem.LocMemCache'),
         'LOCATION': config("CACHE_HOST"),
         'KEY_PREFIX': 'ADMOODCORE',
     },
@@ -203,6 +217,7 @@ LOGGING = ({
 if DEVEL is False:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
+
     # from sentry_sdk.integrations.celery import CeleryIntegration
 
     sentry_sdk.init(

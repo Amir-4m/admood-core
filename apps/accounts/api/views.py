@@ -19,7 +19,7 @@ class HelloView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, version):
+    def get(self, request):
         content = {'message': 'Hello, World!'}
         return Response(content)
 
