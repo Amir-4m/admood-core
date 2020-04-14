@@ -89,12 +89,12 @@ class CampaignSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CampaignStatusSerializer(serializers.ModelSerializer):
-    is_active = serializers.BooleanField(required=True)
+class CampaignEnableSerializer(serializers.ModelSerializer):
+    is_enable = serializers.BooleanField(required=True)
 
     class Meta:
         model = Campaign
-        fields = ["is_active"]
+        fields = ["is_enable"]
 
 
 class ContentSerializer(serializers.ModelSerializer):

@@ -46,9 +46,9 @@ class CampaignViewSet(BaseViewSet,
 
         return super().update(request, *args, **kwargs)
 
-    @action(detail=True, methods=["patch"], url_path="status")
-    def status(self, request, *args, **kwargs):
-        self.serializer_class = CampaignStatusSerializer
+    @action(detail=True, methods=["patch"], url_path="enable")
+    def enable(self, request, *args, **kwargs):
+        self.serializer_class = CampaignEnableSerializer
         return super().update(request, *args, **kwargs)
 
 

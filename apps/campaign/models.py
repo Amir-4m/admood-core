@@ -47,7 +47,7 @@ class Campaign(models.Model):
     total_cost = models.PositiveIntegerField()
     finish_balance = models.IntegerField(null=True, blank=True)
 
-    is_active = models.BooleanField(default=True)
+    is_enable = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
