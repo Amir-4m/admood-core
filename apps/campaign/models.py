@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.postgres.fields import JSONField
+from django.core.exceptions import ValidationError
 from django.db import models
 from admood_core import settings
 from apps.device.models import Device
@@ -119,3 +120,16 @@ class CampaignSchedule(models.Model):
     day = models.PositiveSmallIntegerField(choices=DAYS_OF_WEEK)
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
+
+    def clean(self, exclude=None):
+        cleaned_data = super().clean()
+        start_time = cleaned_data.get("start_time")
+        end_time = cleaned_data.get("end_time")
+        if start_time >= end_time:
+            raise ValidationError("End time should be greater than start time.")
+
+        campaign_schedules = self.campaign.campaignschedule_set.filter(day=self.day)
+        for schedule in campaign_schedules.all():
+            if not (self.start_time < schedule.start_time and self.end_time < schedule.start_time or
+                    self.start_time > schedule.end_time and self.end_time > schedule.end_time):
+                raise ValidationError("Invalid schedule value(s).")

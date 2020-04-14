@@ -22,6 +22,11 @@ class CampaignScheduleSerializer(serializers.ModelSerializer):
         model = CampaignSchedule
         fields = ('id', 'day', 'start_time', 'end_time')
 
+    def validate(self, attrs):
+        if attrs['start_time'] >= attrs['end_time']:
+            raise serializers.ValidationError("Invalid schedule value(s).")
+        return attrs
+
 
 class TargetDeviceSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -39,6 +44,18 @@ class CampaignSerializer(serializers.ModelSerializer):
         model = Campaign
         fields = '__all__'
         read_only_fields = ['status']
+
+    def validate(self, attrs):
+        schedules = attrs['campaignschedule_set'].copy()
+        while schedules:
+            schedule = schedules.pop()
+            for s in schedules:
+                if schedule['day'] == s['day']:
+                    if not (schedule['start_time'] < s['start_time'] and schedule['end_time'] < s['start_time'] or
+                            schedule['start_time'] > s['end_time'] and schedule['end_time'] > s['end_time']):
+                        raise serializers.ValidationError("invalid schedule start_time or end_time")
+
+        return attrs
 
     def create(self, validated_data):
         targetdevice_set = validated_data.pop("targetdevice_set")
