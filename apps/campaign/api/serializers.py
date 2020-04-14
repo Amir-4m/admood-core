@@ -97,7 +97,7 @@ class CampaignEnableSerializer(serializers.ModelSerializer):
         fields = ["is_enable"]
 
 
-class ContentSerializer(serializers.ModelSerializer):
+class CampaignContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
         fields = '__all__'
