@@ -11,11 +11,12 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 from datetime import timedelta
 
-import sentry_sdk
 from pathlib import Path
 from decouple import config, Csv
 
-from sentry_sdk.integrations.django import DjangoIntegration
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
@@ -26,16 +27,12 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY")
 
 AUTH_USER_MODEL = 'accounts.User'
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,6 +61,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'admood_core.urls'
+APPEND_SLASH = False
 
 TEMPLATES = [
     {
@@ -98,8 +96,8 @@ DATABASES = {
 
 CACHES = {
     'default': {
-        'BACKEND': config("CACHE_BACKEND", default='django.core.cache.backends.dummy.DummyCache'),
-        'LOCATION': config("CACHE_HOST", ''),
+        'BACKEND': config("CACHE_BACKEND"),
+        'LOCATION': config("CACHE_HOST"),
         'KEY_PREFIX': 'ADMOODCORE',
     },
 }
@@ -142,7 +140,6 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
-
 STATIC_ROOT = BASE_DIR / 'static'
 STATIC_URL = '/static/'
 
