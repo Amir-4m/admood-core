@@ -11,7 +11,7 @@ from apps.campaign.api.serializers import (
     DeviceSerializer,
     ContentSerializer,
     CampaignStatusSerializer)
-from apps.campaign.models import Province, Campaign, Device, Content
+from apps.campaign.models import Province, Campaign, Device, CampaignContent
 from apps.core.views import BaseViewSet
 
 
@@ -75,7 +75,7 @@ class ContentViewSet(BaseViewSet,
                      viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Content.objects.all()
+    queryset = CampaignContent.objects.all()
     serializer_class = ContentSerializer
 
     def get_queryset(self):
