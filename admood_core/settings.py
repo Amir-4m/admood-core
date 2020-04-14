@@ -24,6 +24,9 @@ DEVEL = config("DEVEL", default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
+CORS_ORIGIN_ALLOW_ALL = True
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -51,6 +54,11 @@ INSTALLED_APPS = [
     'apps.campaign',
 ]
 
+if DEVEL:
+    INSTALLED_APPS.append(
+        'corsheaders'
+    )
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -60,6 +68,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEVEL:
+    MIDDLEWARE.append(
+        'corsheaders.middleware.CorsMiddleware',
+    )
+
 
 ROOT_URLCONF = 'admood_core.urls'
 APPEND_SLASH = False
