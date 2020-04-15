@@ -41,5 +41,5 @@ class ProviderView(viewsets.ViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProviderSerializer
 
-    def list(self, request, version):
+    def list(self, request):
         return Response(dict(ServiceProvider.SERVICE_PROVIDER_CHOICES))
