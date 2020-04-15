@@ -51,8 +51,10 @@ class CampaignSerializer(serializers.ModelSerializer):
             schedule = schedules.pop()
             for s in schedules:
                 if schedule['day'] == s['day']:
-                    if not (schedule['start_time'] < s['start_time'] and schedule['end_time'] < s['start_time'] or
-                            schedule['start_time'] > s['end_time'] and schedule['end_time'] > s['end_time']):
+                    if not (
+                            (schedule['start_time'] < s['start_time'] and schedule['end_time'] < s['start_time']) or
+                            (schedule['start_time'] > s['end_time'] and schedule['end_time'] > s['end_time'])
+                    ):
                         raise serializers.ValidationError("invalid schedule start_time or end_time")
 
         return attrs
