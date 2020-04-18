@@ -42,4 +42,5 @@ class ProviderView(viewsets.ViewSet):
     serializer_class = ProviderSerializer
 
     def list(self, request):
-        return Response(dict(ServiceProvider.SERVICE_PROVIDER_CHOICES))
+        serializer = self.serializer_class(ServiceProvider.SERVICE_PROVIDER_CHOICES, many=True)
+        return Response(serializer.data)
