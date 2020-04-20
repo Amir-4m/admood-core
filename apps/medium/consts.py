@@ -11,6 +11,10 @@ class Medium:
         (INSTAGRAM, "instagram"),
     )
 
+    @classmethod
+    def to_dict(cls):
+        return [{'id': medium[0], 'title': medium[1]} for medium in cls.MEDIUM_CHOICES]
+
 
 class MediumInterface:
     CHANNEL = 1
@@ -42,4 +46,3 @@ class MediumStatus:
         (PAUSED, "paused"),
         (VERIFIED, "verified"),
     )
-

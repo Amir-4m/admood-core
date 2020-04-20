@@ -8,3 +8,7 @@ class ServiceProvider:
         (MCI, "MCI"),
         (RTL, "RTL"),
     )
+
+    @classmethod
+    def to_dict(cls):
+        return [{'id': provider[0], 'title': provider[1]} for provider in cls.SERVICE_PROVIDER_CHOICES]
