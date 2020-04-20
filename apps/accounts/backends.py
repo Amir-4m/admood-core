@@ -19,12 +19,12 @@ class GoogleAuthBackend(ModelBackend):
                 raise ValueError(data['error'])
 
             if data['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-                raise ValueError('Wrong issuer.')
+                raise ValueError('wrong issuer.')
 
             email = data['email']
 
             if username != email:
-                raise ValueError('Wrong email.')
+                raise ValueError('wrong email.')
 
             try:
                 user = User.objects.get(email=email)
@@ -36,7 +36,6 @@ class GoogleAuthBackend(ModelBackend):
                 )
             return user
 
-        except ValueError:
-            logger.error("Invalid google token.")
-            # Invalid token
+        except ValueError as e:
+            logger.error(e)
             pass
