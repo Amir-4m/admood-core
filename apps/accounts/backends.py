@@ -14,10 +14,14 @@ class GoogleAuthBackend(ModelBackend):
         try:
             response = requests.get("https://oauth2.googleapis.com/tokeninfo", params={"id_token": password})
             data = json.loads(response.text)
-            email = data['email']
+
+            if 'error' in data:
+                raise ValueError(data['error'])
 
             if data['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
                 raise ValueError('Wrong issuer.')
+
+            email = data['email']
 
             if username != email:
                 raise ValueError('Wrong email.')
