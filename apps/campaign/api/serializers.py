@@ -48,7 +48,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = '__all__'
-        read_only_fields = ['status']
+        read_only_fields = ['owner', 'status']
 
     def validate(self, attrs):
         schedules = attrs['campaignschedule_set'].copy()
