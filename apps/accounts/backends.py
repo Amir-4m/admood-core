@@ -33,4 +33,3 @@ class GoogleAuthBackend(ModelBackend):
 
         except Exception as e:
             logger.error(e)
-            pass
