@@ -1,10 +1,11 @@
+from rest_framework.mixins import RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenViewBase
 
-from apps.accounts.api.serializers import MyTokenObtainPairSerializer, MyTokenRefreshSerializer
+from apps.accounts.api.serializers import MyTokenObtainPairSerializer, MyTokenRefreshSerializer, UserProfileSerializer
+from apps.accounts.models import UserProfile
 
 
 class TokenObtainPairView(TokenViewBase):
