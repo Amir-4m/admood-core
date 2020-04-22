@@ -16,23 +16,11 @@ class TokenRefreshView(TokenViewBase):
     serializer_class = MyTokenRefreshSerializer
 
 
-class HelloView(APIView):
+class UserProfileRetrieveAPIView(RetrieveModelMixin, GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
 
-    def get(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
-
-
-class LoginAPIView(APIView):
-
-    def mobile_authenticate(self):
-        pass
-
-    def email_authenticate(self):
-        pass
-
-    def post(self, request):
-        pass
-
+    def get_object(self):
+        return UserProfile.objects.get(user=self.request.user)
