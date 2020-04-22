@@ -1,3 +1,5 @@
+import datetime
+
 from rest_framework import serializers
 
 from apps.campaign.models import Province, Campaign, Device, CampaignContent, CampaignSchedule, TargetDevice
@@ -39,6 +41,7 @@ class TargetDeviceSerializer(serializers.ModelSerializer):
 
 
 class CampaignSerializer(serializers.ModelSerializer):
+    start_date = serializers.DateField(allow_null=True)
     targetdevice_set = TargetDeviceSerializer(many=True)
     campaignschedule_set = CampaignScheduleSerializer(many=True)
 
@@ -65,6 +68,10 @@ class CampaignSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         targetdevice_set = validated_data.pop("targetdevice_set")
         schedule_set = validated_data.pop("campaignschedule_set")
+
+        if validated_data["start_date"] is None:
+            validated_data["start_date"] = datetime.date.today()
+
         campaign = super().create(validated_data)
 
         for targetdevice_data in targetdevice_set:
