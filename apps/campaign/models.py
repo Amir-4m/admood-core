@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
@@ -36,8 +36,8 @@ class Campaign(models.Model):
     locations = models.ManyToManyField(Province)
     description = models.TextField(null=True, blank=True)
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_WAITING)
-    start_date = models.DateTimeField(default=datetime.now, blank=True)
-    end_date = models.DateTimeField(null=True, blank=True)
+    start_date = models.DateField(default=datetime.date.today, blank=True)
+    end_date = models.DateField(null=True, blank=True)
 
     utm_source = models.CharField(max_length=50, null=True, blank=True)
     utm_medium = models.CharField(max_length=50, null=True, blank=True)
