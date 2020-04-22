@@ -15,20 +15,15 @@ class GoogleAuthBackend(ModelBackend):
             response = requests.get("https://oauth2.googleapis.com/tokeninfo", params={"id_token": password})
             data = json.loads(response.text)
 
-            if 'error' in data:
-                raise ValueError(data['error'])
-
             if data['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
                 raise ValueError('wrong issuer.')
 
             email = data['email']
-
             if username != email:
-                raise ValueError('wrong email.')
+                raise ValueError('email not match.')
 
             try:
                 user = User.objects.get(email=email)
-
             # Create user if not exist
             except User.DoesNotExist:
                 user = User.objects.create_user(
@@ -36,6 +31,6 @@ class GoogleAuthBackend(ModelBackend):
                 )
             return user
 
-        except ValueError as e:
+        except Exception as e:
             logger.error(e)
             pass
