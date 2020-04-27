@@ -7,12 +7,20 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.device.consts import ServiceProvider
 from .serializers import (
+    DeviceSerializer,
     PlatformSerializer,
     OSSerializer,
     OSVersionSerializer,
     ProviderSerializer
 )
-from ..models import Platform, OS, Version
+from ..models import Device, Platform, OS, Version
+
+
+class DeviceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Device.objects.all()
+    serializer_class = DeviceSerializer
 
 
 class PlatformViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):

@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from ..models import Platform, OS, Version
+from ..models import Device, Platform, OS, Version
+
+
+class DeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Device
+        fields = '__all__'
 
 
 class PlatformSerializer(serializers.ModelSerializer):
