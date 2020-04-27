@@ -1,10 +1,14 @@
-Django==3.0.4
-psycopg2-binary==2.8.4
-celery==4.3.0
-Pillow==7.0.0
-djangorestframework==3.11.0
+Django>=3.0,<3.1
+python-decouple # ==3.3
+celery>=4.3,<4.4
+
+psycopg2-binary
+
+djangorestframework>=3.11,<3.12
 djangorestframework-simplejwt==4.4.0
-python-decouple==3.3
 drf-yasg==1.17.1
-google-auth==1.14.0
+
+requests # ==2.23.0
+Pillow # ==7.0.0
 sentry-sdk
+google-auth==1.14.0
