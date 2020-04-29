@@ -4,7 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from admood_core import settings
-from apps.campaign.api.validators import validate_campaign_utm
+from apps.campaign.api.validators import validate_campaign_utm, validate_content_utm
 from apps.device.models import Device
 from apps.device.consts import ServiceProvider
 from apps.medium.consts import Medium
@@ -87,10 +87,10 @@ class CampaignContent(models.Model):
 
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     title = models.CharField(max_length=250)
-    subtitle = models.CharField(max_length=250)
-    data = JSONField()
-    description = models.TextField(blank=True, null=True)
     landing_url = models.URLField(blank=True, null=True)
+    data = JSONField()
+    utm = JSONField(validators=[validate_content_utm], null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
     utm_term = models.CharField(max_length=100, blank=True, null=True)
     utm_content = models.CharField(max_length=50, null=True, blank=True)
 

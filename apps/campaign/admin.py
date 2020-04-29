@@ -19,7 +19,7 @@ class CampaignAdmin(admin.ModelAdmin):
 
 @admin.register(CampaignContent)
 class CampaignContentAdmin(admin.ModelAdmin):
-    list_display = ("campaign", "title", "subtitle", "data")
+    list_display = ("campaign", "title", "data")
 
 
 admin.site.register(Province)
