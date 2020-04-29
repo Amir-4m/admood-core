@@ -22,3 +22,19 @@ def validate_campaign_utm(value):
         jsonschema.validate(value, schema)
     except jsonschema.ValidationError as e:
         raise ValidationError(e.message)
+
+
+def validate_content_utm(value):
+    schema = {
+        "type": "object",
+        "properties": {
+            "content": {"type": "string"},
+            "term": {"type": "string"}
+        },
+        "additionalProperties": False
+    }
+
+    try:
+        jsonschema.validate(value, schema)
+    except jsonschema.ValidationError as e:
+        raise ValidationError(e.message)

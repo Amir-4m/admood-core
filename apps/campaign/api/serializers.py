@@ -124,3 +124,4 @@ class CampaignContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignContent
         fields = '__all__'
+        read_only_fields = ['campaign']

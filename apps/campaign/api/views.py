@@ -1,6 +1,7 @@
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -10,7 +11,7 @@ from apps.campaign.api.serializers import (
     CampaignSerializer,
     CampaignContentSerializer,
     CampaignEnableSerializer)
-from apps.campaign.models import Province, Campaign, Device, CampaignContent
+from apps.campaign.models import Province, Campaign, CampaignContent
 from apps.core.views import BaseViewSet
 
 
@@ -63,6 +64,10 @@ class ContentViewSet(BaseViewSet,
     permission_classes = (IsAuthenticated,)
     serializer_class = CampaignContentSerializer
     queryset = CampaignContent.objects.all()
+
+    def perform_create(self, serializer):
+        campaign = get_object_or_404(Campaign, pk=self.kwargs['campaign_id'])
+        serializer.save(campaign=campaign)
 
     def get_queryset(self):
         campaign_id = self.kwargs['campaign_id']
