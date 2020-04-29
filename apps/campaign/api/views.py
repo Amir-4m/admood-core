@@ -8,7 +8,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
-    DeviceSerializer,
     CampaignContentSerializer,
     CampaignEnableSerializer)
 from apps.campaign.models import Province, Campaign, Device, CampaignContent
@@ -53,22 +52,6 @@ class CampaignViewSet(BaseViewSet,
     def enable(self, request, *args, **kwargs):
         self.serializer_class = CampaignEnableSerializer
         return super().update(request, *args, **kwargs)
-
-
-class TargetDeviceViewSet(BaseViewSet,
-                          mixins.ListModelMixin,
-                          mixins.RetrieveModelMixin,
-                          mixins.CreateModelMixin,
-                          mixins.UpdateModelMixin,
-                          viewsets.GenericViewSet):
-    authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    queryset = Device.objects.all()
-    serializer_class = DeviceSerializer
-
-    def get_queryset(self):
-        campaign_id = self.kwargs['campaign_id']
-        return self.queryset.filter(campaign__owner=self.request.user, campaign__id=campaign_id)
 
 
 class ContentViewSet(BaseViewSet,

@@ -25,7 +25,7 @@ schema_view = get_schema_view(
         default_version='v1',
         description="Admood API documentation",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="hami@hami.blue"),
+        contact=openapi.Contact(email="contact@snippets.local"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,
@@ -37,4 +37,5 @@ urlpatterns = [
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
     path('api/v1/', include('apps.urls_api')),
+
 ]

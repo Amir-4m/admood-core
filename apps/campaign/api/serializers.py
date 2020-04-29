@@ -2,19 +2,13 @@ import datetime
 
 from rest_framework import serializers
 
-from apps.campaign.models import Province, Campaign, Device, CampaignContent, CampaignSchedule, TargetDevice
+from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
         fields = '__all__'
-
-
-class DeviceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Device
-        fields = ('type', 'title', 'parent')
 
 
 class CampaignScheduleSerializer(serializers.ModelSerializer):
