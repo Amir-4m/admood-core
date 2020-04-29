@@ -49,6 +49,7 @@ coverage.xml
 local_*.py
 media/*
 static/*
+log/*
 db.sqlite3
 .idea
 **/migrations/0*.py
