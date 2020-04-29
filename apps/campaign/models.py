@@ -4,7 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from admood_core import settings
-from apps.campaign.api.validators import validate_utm
+from apps.campaign.api.validators import validate_campaign_utm
 from apps.device.models import Device
 from apps.device.consts import ServiceProvider
 from apps.medium.consts import Medium
@@ -44,7 +44,7 @@ class Campaign(models.Model):
     utm_medium = models.CharField(max_length=50, null=True, blank=True)
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
 
-    utm = JSONField(validators=[validate_utm], null=True, blank=True)
+    utm = JSONField(validators=[validate_campaign_utm], null=True, blank=True)
 
     daily_cost = models.PositiveIntegerField()
     total_cost = models.PositiveIntegerField()
