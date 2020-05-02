@@ -1,9 +1,10 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from apps.medium.api.serializers import MediumSerializer
+from apps.medium.api.serializers import MediumSerializer, PublisherSerializer
+from apps.medium.models import Publisher
 from ..consts import Medium
 
 
@@ -15,3 +16,17 @@ class MediumViewSet(viewsets.ViewSet):
     def list(self, request):
         serializer = self.serializer_class(Medium.MEDIUM_CHOICES, many=True)
         return Response(serializer.data)
+
+
+class PublisherViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PublisherSerializer
+    queryset = Publisher.objects.all()
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        medium = self.request.query_params.get('medium', None)
+        if medium is not None:
+            queryset = queryset.filter(medium=medium)
+        return queryset
