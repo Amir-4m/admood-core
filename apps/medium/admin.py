@@ -5,6 +5,11 @@ from .models import (
     Publisher,
 )
 
+
+class PublisherAdmin(admin.ModelAdmin):
+    search_fields = ["name"]
+
+
 admin.site.register(Category)
 admin.site.register(MediumCategoryDisplayText)
-admin.site.register(Publisher)
+admin.site.register(Publisher, PublisherAdmin)
