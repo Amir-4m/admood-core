@@ -8,7 +8,7 @@ from apps.campaign.api.validators import validate_campaign_utm, validate_content
 from apps.device.models import Device
 from apps.device.consts import ServiceProvider
 from apps.medium.consts import Medium
-from apps.medium.models import Publisher
+from apps.medium.models import Publisher, MediumCategory
 
 
 class Province(models.Model):
@@ -30,8 +30,9 @@ class Campaign(models.Model):
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
+    publishers = models.ManyToManyField(Publisher, blank=True)
+    categories = models.ManyToManyField(MediumCategory, blank=True)
 
     name = models.CharField(max_length=50)
     locations = models.ManyToManyField(Province)
@@ -123,16 +124,3 @@ class CampaignSchedule(models.Model):
     day = models.PositiveSmallIntegerField(choices=DAYS_OF_WEEK)
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
-
-    def clean(self, exclude=None):
-        cleaned_data = super().clean()
-        start_time = cleaned_data.get("start_time")
-        end_time = cleaned_data.get("end_time")
-        if start_time >= end_time:
-            raise ValidationError("End time should be greater than start time.")
-
-        campaign_schedules = self.campaign.campaignschedule_set.filter(day=self.day)
-        for schedule in campaign_schedules.all():
-            if not (self.start_time < schedule.start_time and self.end_time < schedule.start_time or
-                    self.start_time > schedule.end_time and self.end_time > schedule.end_time):
-                raise ValidationError("Invalid schedule value(s).")

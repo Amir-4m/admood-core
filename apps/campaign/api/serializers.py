@@ -45,14 +45,30 @@ class CampaignSerializer(serializers.ModelSerializer):
         read_only_fields = ['owner', 'status']
 
     def validate(self, attrs):
-        schedules = attrs['campaignschedule_set'].copy()
-        while schedules:
-            schedule = schedules.pop()
-            for s in schedules:
-                if schedule['day'] == s['day']:
+
+        medium = attrs.get('medium')
+        publishers = attrs.get('publishers', [])
+        categories = attrs.get('categories', [])
+
+        if publishers == categories is None:
+            raise serializers.ValidationError("Publishers and categories both can not be empty")
+
+        for category in categories:
+            if category.medium != medium:
+                raise serializers.ValidationError("Campaign's medium and category's medium must be the same.")
+
+        for publisher in publishers:
+            if publisher.medium != medium:
+                raise serializers.ValidationError("Campaign's medium and publisher's medium must be the same.")
+
+        schedule_set = attrs.get('campaignschedule_set', [])[:]
+        while schedule_set:
+            schedule = schedule_set.pop()
+            for i in schedule_set:
+                if schedule['day'] == i['day']:
                     if not (
-                            (schedule['start_time'] < s['start_time'] and schedule['end_time'] < s['start_time']) or
-                            (schedule['start_time'] > s['end_time'] and schedule['end_time'] > s['end_time'])
+                            (schedule['start_time'] < i['start_time'] and schedule['end_time'] < i['start_time']) or
+                            (schedule['start_time'] > i['end_time'] and schedule['end_time'] > i['end_time'])
                     ):
                         raise serializers.ValidationError(
                             {'campaignschedule_set': 'invalid schedule start_time or end_time'})
@@ -60,10 +76,10 @@ class CampaignSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        targetdevice_set = validated_data.pop("targetdevice_set")
-        schedule_set = validated_data.pop("campaignschedule_set")
+        targetdevice_set = validated_data.pop("targetdevice_set", [])
+        schedule_set = validated_data.pop("campaignschedule_set", [])
 
-        if validated_data["start_date"] is None:
+        if validated_data['start_date'] is None:
             validated_data["start_date"] = datetime.date.today()
 
         campaign = super().create(validated_data)

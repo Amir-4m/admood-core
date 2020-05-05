@@ -20,7 +20,7 @@ class TargetDeviceInline(admin.TabularInline):
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
     inlines = [TargetDeviceInline]
-    autocomplete_fields = ["owner", "publisher", "locations"]
+    autocomplete_fields = ["owner", "publishers", "locations"]
 
 
 @admin.register(CampaignContent)

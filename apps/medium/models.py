@@ -5,7 +5,7 @@ from .consts import Medium
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, db_index=True)
 
     class Meta:
         verbose_name_plural = "Categories"
@@ -14,7 +14,7 @@ class Category(models.Model):
         return self.name
 
 
-class MediumCategoryDisplayText(models.Model):
+class MediumCategory(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     display_text = models.CharField(max_length=50)

@@ -4,7 +4,8 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenViewBase
 
-from apps.accounts.api.serializers import MyTokenObtainPairSerializer, MyTokenRefreshSerializer, UserProfileSerializer
+from apps.accounts.api.serializers import MyTokenObtainPairSerializer, MyTokenRefreshSerializer, UserProfileSerializer, \
+    RegisterSerializer
 from apps.accounts.models import UserProfile
 
 
@@ -14,6 +15,18 @@ class TokenObtainPairView(TokenViewBase):
 
 class TokenRefreshView(TokenViewBase):
     serializer_class = MyTokenRefreshSerializer
+
+
+def register(request):
+    serializer = RegisterSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+
+    return
+
+
+def activate(request):
+    verification_code = request.data['verification_code']
 
 
 class UserProfileRetrieveAPIView(RetrieveModelMixin, GenericViewSet):

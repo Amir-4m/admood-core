@@ -1,4 +1,5 @@
 import random
+import datetime
 
 from django.db import models
 from django.conf import settings
@@ -8,6 +9,9 @@ from django.contrib.auth.models import PermissionsMixin, send_mail
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.utils.translation import ugettext_lazy as _
+
+from admood_core.settings import USER_VERIFICATION_CODE_MIN_VALUE, USER_VERIFICATION_CODE_MAX_VALUE, \
+    USER_VERIFICATION_CODE_LIFETIME
 
 
 class UserManager(BaseUserManager):
@@ -140,6 +144,18 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.email = None
         super().save(*args, **kwargs)
 
+    def create_verification_code(self):
+        return self.verification_codes.create()
+
+    def validate_verification_code(self, verification_code):
+        return VerificationCode.validate(self, verification_code)
+
+    def email_verification_code(self, verification_code):
+        self.email_user(
+            subject="admood verification",
+            message=f"your verification code: {verification_code}"
+        )
+
 
 class UserProfile(models.Model):
     REAL = "rl"
@@ -181,3 +197,28 @@ class UserProfile(models.Model):
         Returns the first_name plus the last_name, with a space in between.
         """
         return f'{self.first_name} {self.last_name}'.strip()
+
+
+class VerificationCodeManager(models.Manager):
+    def create(self, *args, **kwargs):
+        if 'verification_code' not in kwargs:
+            kwargs.setdefault(
+                'verification_code',
+                random.randint(USER_VERIFICATION_CODE_MIN_VALUE, USER_VERIFICATION_CODE_MAX_VALUE)
+            )
+        return super().create(*args, **kwargs)
+
+
+class VerificationCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_codes')
+    verification_code = models.PositiveIntegerField()
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    objects = VerificationCodeManager()
+
+    @staticmethod
+    def validate(user, verification_code):
+        return user.verification_codes.filter(
+            verification_code=verification_code,
+            created_time__gt=timezone.now() - datetime.timedelta(USER_VERIFICATION_CODE_LIFETIME)
+        ).exists()

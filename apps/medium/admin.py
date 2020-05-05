@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Category,
-    MediumCategoryDisplayText,
+    MediumCategory,
     Publisher,
 )
 
@@ -11,5 +11,5 @@ class PublisherAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Category)
-admin.site.register(MediumCategoryDisplayText)
+admin.site.register(MediumCategory)
 admin.site.register(Publisher, PublisherAdmin)

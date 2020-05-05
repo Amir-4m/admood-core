@@ -17,7 +17,7 @@ class Device(models.Model):
     title = models.CharField(max_length=20)
 
     def __str__(self):
-        return f'{self.type} - {self.title}'
+        return f'{self.get_type_display()} - {self.title}'
 
 
 class PlatformManager(models.Manager):
