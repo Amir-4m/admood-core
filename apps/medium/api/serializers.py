@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Publisher
+from ..models import Publisher, MediumCategory
 
 
 class MediumSerializer(serializers.Serializer):
@@ -14,3 +14,9 @@ class PublisherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Publisher
         fields = '__all__'
+
+
+class MediumCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediumCategory
+        fields = ['display_text', 'id']

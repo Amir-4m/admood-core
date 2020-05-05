@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from admood_core import settings
@@ -24,6 +25,9 @@ class MediumCategory(models.Model):
             models.UniqueConstraint(fields=['medium', 'category'], name="unique_medium_category")
         ]
 
+    def __str__(self):
+        return f'{self.get_medium_display()} - {self.display_text}'
+
 
 class Publisher(models.Model):
     STATUS_ACTIVE = 1
@@ -40,7 +44,7 @@ class Publisher(models.Model):
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
-    categories = models.ManyToManyField(Category)
+    categories = models.ManyToManyField(MediumCategory)
 
     name = models.CharField(max_length=50)
     url = models.URLField(null=True, blank=True)
@@ -50,3 +54,8 @@ class Publisher(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        for category in self.categories.all():
+            if category.medium != self.medium:
+                raise ValidationError({'categories': "category's medium doesn't match with publisher's medium."})
