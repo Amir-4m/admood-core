@@ -77,7 +77,7 @@ class CampaignSerializer(serializers.ModelSerializer):
             if publisher.medium != medium:
                 raise serializers.ValidationError("Campaign's medium and publisher's medium must be the same.")
 
-        schedule_set = attrs.get('campaignschedule_set')[:]
+        schedule_set = attrs.get('campaignschedule_set')
 
         for idx, schedule in enumerate(schedule_set):
             start_time = schedule.get('start_time', datetime.time.min)

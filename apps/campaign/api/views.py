@@ -1,6 +1,7 @@
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -42,6 +43,9 @@ class CampaignViewSet(BaseViewSet,
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def partial_update(self, request, *args, **kwargs):
+        raise MethodNotAllowed(request.method)
 
     def update(self, request, *args, **kwargs):
         campaign = self.get_object()
