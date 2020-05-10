@@ -78,15 +78,17 @@ class CampaignSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Campaign's medium and publisher's medium must be the same.")
 
         schedule_set = attrs.get('campaignschedule_set')[:]
-        while schedule_set:
-            schedule = schedule_set.pop()
-            for i in schedule_set:
+
+        for idx, schedule in enumerate(schedule_set):
+            start_time = schedule.get('start_time', datetime.time.min)
+            end_time = schedule.get('end_time', datetime.time.max)
+            for i in schedule_set[idx + 1:]:
                 if schedule['day'] == i['day']:
+                    i_start_time = i.get('start_time', datetime.time.min)
+                    i_end_time = i.get('end_time', datetime.time.max)
                     if not (
-                            (schedule.get('start_time', datetime.time.min) < i.get('start_time', datetime.time.min) and
-                             schedule.get('end_time', datetime.time.max) < i.get('start_time', datetime.time.max)) or
-                            (schedule.get('start_time', datetime.time.min) > i.get('end_time', datetime.time.max) and
-                             schedule.get('end_time', datetime.time.max) > i.get('end_time', datetime.time.max))
+                            (start_time < i_start_time and end_time < i_start_time) or
+                            (start_time > i_end_time and end_time > i_end_time)
                     ):
                         raise serializers.ValidationError(
                             {'campaignschedule_set': 'invalid schedule start_time or end_time'})
