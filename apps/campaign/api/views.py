@@ -34,6 +34,7 @@ class CampaignViewSet(BaseViewSet,
     permission_classes = (IsAuthenticated,)
     queryset = Campaign.objects.all()
     serializer_class = CampaignSerializer
+    http_method_names = ['get', 'post', 'head', 'put']
 
     def get_queryset(self):
         return self.queryset.filter(owner=self.request.user)
