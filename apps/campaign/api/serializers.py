@@ -19,10 +19,11 @@ class CampaignScheduleSerializer(serializers.ModelSerializer):
         fields = ('id', 'day', 'start_time', 'end_time')
 
     def validate(self, attrs):
-        if attrs['start_time'] >= attrs['end_time']:
-            raise serializers.ValidationError(
-                {'end_time': 'end_time should be greater than start_time'},
-            )
+        if 'start_time' in attrs and 'end_time' in attrs:
+            if attrs['start_time'] >= attrs['end_time']:
+                raise serializers.ValidationError(
+                    {'end_time': 'end_time should be greater than start_time'},
+                )
         return attrs
 
 
@@ -82,8 +83,10 @@ class CampaignSerializer(serializers.ModelSerializer):
             for i in schedule_set:
                 if schedule['day'] == i['day']:
                     if not (
-                            (schedule['start_time'] < i['start_time'] and schedule['end_time'] < i['start_time']) or
-                            (schedule['start_time'] > i['end_time'] and schedule['end_time'] > i['end_time'])
+                            (schedule.get('start_time', datetime.time.min) < i.get('start_time', datetime.time.min) and
+                             schedule.get('end_time', datetime.time.max) < i.get('start_time', datetime.time.max)) or
+                            (schedule.get('start_time', datetime.time.min) > i.get('end_time', datetime.time.max) and
+                             schedule.get('end_time', datetime.time.max) > i.get('end_time', datetime.time.max))
                     ):
                         raise serializers.ValidationError(
                             {'campaignschedule_set': 'invalid schedule start_time or end_time'})

@@ -34,7 +34,8 @@ class CampaignViewSet(BaseViewSet,
     permission_classes = (IsAuthenticated,)
     queryset = Campaign.objects.all()
     serializer_class = CampaignSerializer
-    http_method_names = ['get', 'post', 'head', 'put']
+
+    # http_method_names = ['get', 'post', 'head', 'put']
 
     def get_queryset(self):
         return self.queryset.filter(owner=self.request.user)
@@ -65,6 +66,7 @@ class ContentViewSet(BaseViewSet,
     permission_classes = (IsAuthenticated,)
     serializer_class = CampaignContentSerializer
     queryset = CampaignContent.objects.all()
+    http_method_names = ['get', 'post', 'head', 'put']
 
     def perform_create(self, serializer):
         campaign = get_object_or_404(Campaign, pk=self.kwargs['campaign_id'])
