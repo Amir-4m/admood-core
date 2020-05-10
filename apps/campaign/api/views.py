@@ -36,8 +36,6 @@ class CampaignViewSet(BaseViewSet,
     queryset = Campaign.objects.all()
     serializer_class = CampaignSerializer
 
-    # http_method_names = ['get', 'post', 'head', 'put']
-
     def get_queryset(self):
         return self.queryset.filter(owner=self.request.user)
 
@@ -55,7 +53,7 @@ class CampaignViewSet(BaseViewSet,
 
         return super().update(request, *args, **kwargs)
 
-    @action(detail=True, methods=["patch"], url_path="enable")
+    @action(detail=True, methods=["patch"], name="enable", )
     def enable(self, request, *args, **kwargs):
         self.serializer_class = CampaignEnableSerializer
         return super().update(request, *args, **kwargs)
