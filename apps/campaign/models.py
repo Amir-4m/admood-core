@@ -122,5 +122,5 @@ class CampaignSchedule(models.Model):
     )
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     day = models.PositiveSmallIntegerField(choices=DAYS_OF_WEEK)
-    start_time = models.TimeField(null=True, blank=True)
-    end_time = models.TimeField(null=True, blank=True)
+    start_time = models.TimeField(default=datetime.time.min, null=True, blank=True)
+    end_time = models.TimeField(default=datetime.time.max, null=True, blank=True)

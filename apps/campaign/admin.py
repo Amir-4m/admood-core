@@ -4,6 +4,7 @@ from .models import (
     Campaign,
     CampaignContent,
     TargetDevice,
+    CampaignSchedule,
 )
 
 
@@ -27,3 +28,7 @@ class CampaignAdmin(admin.ModelAdmin):
 class CampaignContentAdmin(admin.ModelAdmin):
     list_display = ("campaign", "title", "data")
 
+
+@admin.register(CampaignSchedule)
+class CampaignScheduleAdmin(admin.ModelAdmin):
+    list_display = ("campaign", "day", "start_time", "end_time")

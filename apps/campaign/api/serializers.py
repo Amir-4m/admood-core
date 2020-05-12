@@ -13,17 +13,20 @@ class ProvinceSerializer(serializers.ModelSerializer):
 
 class CampaignScheduleSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
+    start_time = serializers.TimeField(default=datetime.time.min, allow_null=True)
+    end_time = serializers.TimeField(default=datetime.time.max, allow_null=True)
 
     class Meta:
         model = CampaignSchedule
         fields = ('id', 'day', 'start_time', 'end_time')
 
     def validate(self, attrs):
-        if 'start_time' in attrs and 'end_time' in attrs:
-            if attrs['start_time'] >= attrs['end_time']:
-                raise serializers.ValidationError(
-                    {'end_time': 'end_time should be greater than start_time'},
-                )
+        attrs['start_time'] = attrs.get('start_time') or datetime.time.min
+        attrs['end_time'] = attrs.get('end_time') or datetime.time.max
+        if attrs['start_time'] >= attrs['end_time']:
+            raise serializers.ValidationError(
+                {'end_time': 'end_time should be greater than start_time'},
+            )
         return attrs
 
 
