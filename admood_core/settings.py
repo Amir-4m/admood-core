@@ -26,7 +26,6 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,7 +37,6 @@ AUTH_USER_MODEL = 'accounts.User'
 USER_VERIFICATION_CODE_MIN_VALUE = config("USER_VERIFICATION_CODE_MIN_VALUE", default=100000)
 USER_VERIFICATION_CODE_MAX_VALUE = config("USER_VERIFICATION_CODE_MAX_VALUE", default=999999)
 USER_VERIFICATION_CODE_LIFETIME = config("USER_VERIFICATION_CODE_LIFETIME", default=5)
-
 
 # Application definition
 INSTALLED_APPS = [
@@ -78,7 +76,6 @@ if DEVEL:
     MIDDLEWARE.append(
         'corsheaders.middleware.CorsMiddleware',
     )
-
 
 ROOT_URLCONF = 'admood_core.urls'
 APPEND_SLASH = False
@@ -149,6 +146,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M',
+    'TIME_FORMAT': '%H:%M'
+}
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
