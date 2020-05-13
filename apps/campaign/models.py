@@ -1,12 +1,12 @@
 import datetime
 
 from django.contrib.postgres.fields import JSONField
-from django.core.exceptions import ValidationError
 from django.db import models
+
 from admood_core import settings
 from apps.campaign.api.validators import validate_campaign_utm, validate_content_utm
-from apps.device.models import Device
 from apps.device.consts import ServiceProvider
+from apps.device.models import Device
 from apps.medium.consts import Medium
 from apps.medium.models import Publisher, MediumCategory
 
