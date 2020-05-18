@@ -32,9 +32,9 @@ build:
 test:
   stage: test
   before_script:
-    - mkdir $CI_PROJECT_DIR/logs
     - cp /var/www/$PROJECT_DIR/project/.env $CI_PROJECT_DIR/
   script:
+    - mkdir $CI_PROJECT_DIR/logs
     - source $CI_PROJECT_DIR/venv/bin/activate
     - python manage.py check
   after_script:
@@ -55,7 +55,7 @@ staging:
   script:
     - git pull
     - pip install -r requirements.txt
-    - python manage.py migrate
+#    - python manage.py migrate
     - uwsgi --reload /tmp/$PROJECT_DIR-master.pid
   only:
     - develop
