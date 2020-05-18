@@ -39,21 +39,10 @@ class CampaignViewSet(BaseViewSet,
     def get_queryset(self):
         return self.queryset.filter(owner=self.request.user)
 
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-
     def partial_update(self, request, *args, **kwargs):
         raise MethodNotAllowed(request.method)
 
-    def update(self, request, *args, **kwargs):
-        campaign = self.get_object()
-
-        if campaign.status == Campaign.STATUS_APPROVED:
-            return Response("Approved campaigns cannot be edited!")
-
-        return super().update(request, *args, **kwargs)
-
-    @action(detail=True, methods=["patch"], name="enable", )
+    @action(detail=True, methods=["patch"])
     def enable(self, request, *args, **kwargs):
         self.serializer_class = CampaignEnableSerializer
         return super().update(request, *args, **kwargs)

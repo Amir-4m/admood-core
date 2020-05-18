@@ -21,12 +21,12 @@ class Province(models.Model):
 class Campaign(models.Model):
     STATUS_WAITING = 1
     STATUS_APPROVED = 2
-    STATUS_SUSPEND = 3
+    STATUS_REJECTED = 3
 
     STATUS_CHOICES = (
         (STATUS_WAITING, "waiting"),
         (STATUS_APPROVED, "approved"),
-        (STATUS_SUSPEND, "suspend"),
+        (STATUS_REJECTED, "rejected"),
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

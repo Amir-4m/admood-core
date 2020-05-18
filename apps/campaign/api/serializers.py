@@ -37,6 +37,7 @@ class TargetDeviceSerializer(serializers.ModelSerializer):
 
 
 class CampaignSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     start_date = serializers.DateField(allow_null=True)
     targetdevice_set = TargetDeviceSerializer(many=True)
     campaignschedule_set = CampaignScheduleSerializer(many=True)
@@ -44,7 +45,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = '__all__'
-        read_only_fields = ['owner', 'status']
+        read_only_fields = ['status']
 
     def get_extra_kwargs(self):
         extra_kwargs = super().get_extra_kwargs()
@@ -114,6 +115,10 @@ class CampaignSerializer(serializers.ModelSerializer):
         return campaign
 
     def update(self, instance, validated_data):
+
+        if instance.status == Campaign.STATUS_APPROVED:
+            raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable"]})
+
         targetdevice_set = validated_data.pop("targetdevice_set", None)
         schedule_set = validated_data.pop("campaignschedule_set", None)
 
