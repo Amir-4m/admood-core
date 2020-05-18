@@ -23,9 +23,9 @@ build:
     paths:
       - venv/
     policy: push
-  only:
-    changes:
-      - requirements.txt
+    #  only:
+    #changes:
+    #- requirements.txt
   tags:
     - python
 
