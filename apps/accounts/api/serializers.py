@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
-
 from rest_framework import serializers
-
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import UserProfile, VerificationCode
+from apps.accounts.models import UserProfile
 
 User = get_user_model()
 
@@ -28,12 +27,6 @@ class MyTokenRefreshSerializer(TokenRefreshSerializer):
         data['lifetime'] = int(refresh.access_token.lifetime.total_seconds())
 
         return data
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -64,3 +57,55 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.email_verification_code(verification_code.verification_code)
 
         return user
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = UserProfile
+        exclude = ['id', 'created_time', 'updated_time']
+        read_only_fields = ['status']
+
+    def update(self, instance, validated_data):
+        if instance.status == UserProfile.STATUS_APPROVED:
+            raise ValidationError({"non_field_errors": ["approved profiles are not editable"]})
+        return super().update(instance, validated_data)
+
+
+class RealProfileSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'first_name',
+            'last_name',
+            'type',
+            'status',
+            'national_id',
+            'image',
+            'bio',
+            'street_address',
+            'id_location'
+        ]
+        read_only_fields = ['status']
+
+
+class LegalProfileSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'company_name',
+            'type',
+            'status',
+            'image',
+            'bio',
+            'street_address',
+            'id_location',
+            'eco_code',
+            'register_code'
+        ]
+        read_only_fields = ['status']

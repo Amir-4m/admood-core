@@ -64,12 +64,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     STATUS_WAITING = 0
     STATUS_VERIFIED = 1
-    STATUS_SUSPEND = 2
+    STATUS_REJECTED = 3
 
     STATUS_CHOICES = (
-        (STATUS_VERIFIED, _("Verified")),
-        (STATUS_SUSPEND, _("Suspended")),
-        (STATUS_WAITING, _("Waiting")),
+        (STATUS_WAITING, _("waiting")),
+        (STATUS_VERIFIED, _("verified")),
+        (STATUS_REJECTED, _("rejected")),
     )
 
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
@@ -166,23 +166,35 @@ class UserProfile(models.Model):
         (LEGAL, _("legal")),
     )
 
+    STATUS_WAITING = 0
+    STATUS_REJECTED = 1
+    STATUS_APPROVED = 2
+
+    STATUS_CHOICES = (
+        (STATUS_WAITING, _("waiting")),
+        (STATUS_REJECTED, _("rejected")),
+        (STATUS_APPROVED, _("approved")),
+    )
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
     updated_time = models.DateTimeField(_('updated time'), auto_now=True)
 
     type = models.CharField(max_length=2, choices=TYPE_CHOICES, default=REAL)
-    first_name = models.CharField(max_length=50, blank=True, null=True)
-    last_name = models.CharField(max_length=50, blank=True, null=True)
+    status = models.PositiveSmallIntegerField(_('user status'), choices=STATUS_CHOICES, default=STATUS_WAITING,
+                                              db_index=True)
+    first_name = models.CharField(max_length=50, blank=True)
+    last_name = models.CharField(max_length=50, blank=True)
     image = models.ImageField(blank=True)
     bio = models.TextField(blank=True)
-    national_id = models.CharField(max_length=10)
-    street_address = models.CharField(max_length=10)
-    post_code = models.CharField(max_length=10)
-    id_location = models.CharField(max_length=10)
-    company_name = models.CharField(max_length=50)
-    eco_code = models.CharField(max_length=10)
-    register_code = models.CharField(max_length=10)
+    national_id = models.CharField(max_length=10, blank=True)
+    street_address = models.CharField(max_length=10, blank=True)
+    post_code = models.CharField(max_length=10, blank=True)
+    id_location = models.CharField(max_length=10, blank=True)
+    company_name = models.CharField(max_length=50, blank=True)
+    eco_code = models.CharField(max_length=10, blank=True)
+    register_code = models.CharField(max_length=10, blank=True)
 
     class Meta:
         db_table = 'accounts_profile'
