@@ -10,9 +10,6 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.utils.translation import ugettext_lazy as _
 
-from admood_core.settings import USER_VERIFICATION_CODE_MIN_VALUE, USER_VERIFICATION_CODE_MAX_VALUE, \
-    USER_VERIFICATION_CODE_LIFETIME
-
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -216,7 +213,7 @@ class VerificationCodeManager(models.Manager):
         if 'verification_code' not in kwargs:
             kwargs.setdefault(
                 'verification_code',
-                random.randint(USER_VERIFICATION_CODE_MIN_VALUE, USER_VERIFICATION_CODE_MAX_VALUE)
+                random.randint(settings.USER_VERIFICATION_CODE_MIN_VALUE, settings.USER_VERIFICATION_CODE_MAX_VALUE)
             )
         return super().create(*args, **kwargs)
 
@@ -232,5 +229,5 @@ class VerificationCode(models.Model):
     def validate(user, verification_code):
         return user.verification_codes.filter(
             verification_code=verification_code,
-            created_time__gt=timezone.now() - datetime.timedelta(USER_VERIFICATION_CODE_LIFETIME)
+            created_time__gt=timezone.now() - datetime.timedelta(settings.USER_VERIFICATION_CODE_LIFETIME)
         ).exists()

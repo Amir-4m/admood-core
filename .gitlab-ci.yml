@@ -1,0 +1,82 @@
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  PROJECT_DIR: "admood_core"
+
+build:
+  stage: build
+  script:
+    - virtualenv --prompt='($PROJECT_DIR)' -q venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - venv/
+    policy: push
+  only:
+    changes:
+      - requirements.txt
+  tags:
+    - python
+
+test:
+  stage: test
+  before_script:
+    - cp /var/www/$PROJECT_DIR/project/.env $CI_PROJECT_DIR/
+  script:
+    - mkdir $CI_PROJECT_DIR/logs
+    - source $CI_PROJECT_DIR/venv/bin/activate
+    - python manage.py check
+  after_script:
+    - rm $CI_PROJECT_DIR/.env
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - venv/
+    policy: pull
+  tags:
+    - django
+
+staging:
+  stage: deploy
+  before_script:
+    - cd /var/www/$PROJECT_DIR/project/
+    - source /var/www/$PROJECT_DIR/venv/bin/activate
+  script:
+    - git pull
+    - pip install -r requirements.txt
+    #    - python manage.py migrate
+    - uwsgi --reload /tmp/$PROJECT_DIR-master.pid
+  only:
+    - develop
+  tags:
+    - django
+    - staging
+
+production:
+  stage: deploy
+  before_script:
+    - cd /var/www/$PROJECT_DIR/project/
+    - source /var/www/$PROJECT_DIR/venv/bin/activate
+  script:
+    - git pull
+    - pip install -r requirements.txt
+    - python manage.py migrate
+    - uwsgi --reload /tmp/$PROJECT_DIR-master.pid
+  only:
+    - /^release-.*$/
+  except:
+    - branches
+  tags:
+    - django
+    - release
