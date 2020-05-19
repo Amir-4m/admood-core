@@ -72,6 +72,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
             raise ValidationError({"non_field_errors": ["approved profiles are not editable"]})
         return super().update(instance, validated_data)
 
+    def create(self, validated_data):
+        if UserProfile.objects.filter(user=validated_data['user']).exists():
+            raise ValidationError({"non_field_errors": ["user profile already exists"]})
+        return super().create(validated_data)
+
 
 class RealProfileSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
