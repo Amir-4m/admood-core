@@ -188,7 +188,6 @@ class UserProfile(models.Model):
     national_id = models.CharField(max_length=10, blank=True)
     street_address = models.CharField(max_length=10, blank=True)
     post_code = models.CharField(max_length=10, blank=True)
-    id_location = models.CharField(max_length=10, blank=True)
     company_name = models.CharField(max_length=50, blank=True)
     eco_code = models.CharField(max_length=10, blank=True)
     register_code = models.CharField(max_length=10, blank=True)
