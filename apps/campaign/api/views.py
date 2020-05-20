@@ -37,14 +37,12 @@ class CampaignViewSet(BaseViewSet,
     def get_queryset(self):
         return self.queryset.filter(owner=self.request.user)
 
-    def partial_update(self, request, *args, **kwargs):
-        raise MethodNotAllowed(request.method)
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
 
     @action(detail=True, methods=["patch"])
     def enable(self, request, *args, **kwargs):
-        # TODO: why change serializer?
-        self.serializer_class = CampaignEnableSerializer
-        return super().update(request, *args, **kwargs)
+        return super().partial_update(request, *args, **kwargs)
 
 
 class ContentViewSet(BaseViewSet,

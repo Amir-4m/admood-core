@@ -21,6 +21,8 @@ class CampaignScheduleSerializer(serializers.ModelSerializer):
         fields = ('id', 'day', 'start_time', 'end_time')
 
     def validate(self, attrs):
+        attrs['start_time'] = attrs.get('start_time', datetime.time.min)
+        attrs['end_time'] = attrs.get('end_time', datetime.time.max)
         if attrs['start_time'] >= attrs['end_time']:
             raise serializers.ValidationError(
                 {'end_time': 'end_time should be greater than start_time'},
@@ -51,49 +53,58 @@ class CampaignSerializer(serializers.ModelSerializer):
         extra_kwargs = super().get_extra_kwargs()
         action = self.context['view'].action
 
-        if action in ['update']:
+        if action in ['update', 'partial_update']:
             kwargs = extra_kwargs.get('medium', {})
             kwargs['read_only'] = True
             extra_kwargs['medium'] = kwargs
 
         return extra_kwargs
 
+    def validate_campaignschedule_set(self, value):
+        for idx, schedule in enumerate(value):
+            start_time = schedule.get('start_time')
+            end_time = schedule.get('end_time')
+            for i in value[idx + 1:]:
+                if schedule['day'] == i['day']:
+                    if not (
+                            (start_time < i.get('start_time') and end_time < i.get('start_time')) or
+                            (start_time > i.get('end_time') and end_time > i.get('end_time'))
+                    ):
+                        raise serializers.ValidationError(
+                            {'campaignschedule_set': 'invalid schedule set.'})
+
+        return value
+
     def validate(self, attrs):
 
         if self.instance:
+            action = self.context['view'].action
+            if action == 'enable':
+                attrs = {
+                    'is_enable': attrs.get('is_enable', self.instance.is_enable)
+                }
+                return attrs
+
+            if self.instance.status == Campaign.STATUS_APPROVED:
+                raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
             medium = self.instance.medium
+            publishers = attrs.get('publishers', self.instance.publishers.all())
+            categories = attrs.get('categories', self.instance.categories.all())
         else:
             medium = attrs.get('medium')
-
-        publishers = attrs.get('publishers', [])
-        categories = attrs.get('categories', [])
+            publishers = attrs.get('publishers', [])
+            categories = attrs.get('categories', [])
 
         if len(publishers) == 0 and len(categories) == 0:
-            raise serializers.ValidationError("Publishers and categories both can not be empty")
+            raise serializers.ValidationError("publishers and categories both can not be empty.")
 
         for category in categories:
             if category.medium != medium:
-                raise serializers.ValidationError("Campaign's medium and category's medium must be the same.")
+                raise serializers.ValidationError("campaign's medium and category's medium must be the same.")
 
         for publisher in publishers:
             if publisher.medium != medium:
-                raise serializers.ValidationError("Campaign's medium and publisher's medium must be the same.")
-
-        schedule_set = attrs.get('campaignschedule_set')
-
-        for idx, schedule in enumerate(schedule_set):
-            start_time = schedule.get('start_time', datetime.time.min)
-            end_time = schedule.get('end_time', datetime.time.max)
-            for i in schedule_set[idx + 1:]:
-                if schedule['day'] == i['day']:
-                    i_start_time = i.get('start_time', datetime.time.min)
-                    i_end_time = i.get('end_time', datetime.time.max)
-                    if not (
-                            (start_time < i_start_time and end_time < i_start_time) or
-                            (start_time > i_end_time and end_time > i_end_time)
-                    ):
-                        raise serializers.ValidationError(
-                            {'campaignschedule_set': 'invalid schedule start_time or end_time'})
+                raise serializers.ValidationError("campaign's medium and publisher's medium must be the same.")
 
         return attrs
 
@@ -115,9 +126,11 @@ class CampaignSerializer(serializers.ModelSerializer):
         return campaign
 
     def update(self, instance, validated_data):
-
-        if instance.status == Campaign.STATUS_APPROVED:
-            raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable"]})
+        action = self.context['view'].action
+        if action == 'enable':
+            instance.is_enable = validated_data.get('is_enable', instance.is_enable)
+            instance.save()
+            return instance
 
         targetdevice_set = validated_data.pop("targetdevice_set", None)
         schedule_set = validated_data.pop("campaignschedule_set", None)
@@ -129,16 +142,11 @@ class CampaignSerializer(serializers.ModelSerializer):
             TargetDevice.objects.filter(campaign=instance).exclude(id__in=targetdevice_id_list).delete()
 
             for targetdevice_data in targetdevice_set:
-                targetdevice_id = targetdevice_data.get('id', None)
+                targetdevice_id = targetdevice_data.pop('id', None)
                 if targetdevice_id:
-                    try:
-                        targetdevice = TargetDevice.objects.get(id=targetdevice_id, campaign=instance)
-                    except TargetDevice.DoesNotExist:
-                        raise exceptions.ParseError
-                    targetdevice.device = targetdevice_data.get('device', targetdevice.device)
-                    targetdevice.service_provider = targetdevice_data.get('service_provider',
-                                                                          targetdevice.service_provider)
-                    targetdevice.save()
+                    TargetDevice.objects.filter(
+                        id=targetdevice_id, campaign=instance
+                    ).update(**targetdevice_data)
                 else:
                     TargetDevice.objects.create(campaign=instance, **targetdevice_data)
 
@@ -146,13 +154,11 @@ class CampaignSerializer(serializers.ModelSerializer):
             schedule_id_list = [i.get("id") for i in schedule_set if i.get("id")]
             CampaignSchedule.objects.filter(campaign=instance).exclude(id__in=schedule_id_list).delete()
             for schedule_data in schedule_set:
-                schedule_id = schedule_data.get('id', None)
+                schedule_id = schedule_data.pop('id', None)
                 if schedule_id:
-                    schedule = CampaignSchedule.objects.get(id=schedule_id, campaign=instance)
-                    schedule.day = schedule_data.get('day', schedule.day)
-                    schedule.start_time = schedule_data.get('start_time', schedule.start_time)
-                    schedule.end_time = schedule_data.get('end_time', schedule.end_time)
-                    schedule.save()
+                    CampaignSchedule.objects.filter(
+                        id=schedule_id, campaign=instance
+                    ).update(**schedule_data)
                 else:
                     CampaignSchedule.objects.create(campaign=instance, **schedule_data)
 
