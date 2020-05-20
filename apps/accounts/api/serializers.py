@@ -67,6 +67,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
         exclude = ['id', 'created_time', 'updated_time']
         read_only_fields = ['status']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data.update(
+            {
+                'username': instance.user.username,
+                'phone_number': instance.user.phone_number,
+                'email': instance.user.email
+            }
+        )
+        return data
+
     def update(self, instance, validated_data):
         if instance.status == UserProfile.STATUS_APPROVED:
             raise ValidationError({"non_field_errors": ["approved profiles are not editable"]})
@@ -91,8 +102,7 @@ class RealProfileSerializer(serializers.ModelSerializer):
             'national_id',
             'image',
             'bio',
-            'street_address',
-            'id_location'
+            'address',
         ]
         read_only_fields = ['status']
 
@@ -108,8 +118,7 @@ class LegalProfileSerializer(serializers.ModelSerializer):
             'status',
             'image',
             'bio',
-            'street_address',
-            'id_location',
+            'address',
             'eco_code',
             'register_code'
         ]

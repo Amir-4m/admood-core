@@ -1,10 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
-from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin, ListModelMixin, CreateModelMixin
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ModelViewSet, ViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenViewBase
 
@@ -46,7 +45,10 @@ class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
     serializer_class = UserProfileSerializer
 
     def get_object(self):
-        return get_object_or_404(self.queryset, user=self.request.user)
+        try:
+            return self.get_queryset().get(user=self.request.user)
+        except UserProfile.DoesNotExist:
+            return None
 
     @action(detail=False, methods=['get'])
     def has_profile(self, request):
@@ -54,3 +56,14 @@ class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
             'has_profile': self.queryset.filter(user=request.user).exists()
         }
         return Response(data=data)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance:
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        return Response({
+            'username': request.user.username,
+            'phone_number': request.user.phone_number,
+            'email': request.user.email
+        })
