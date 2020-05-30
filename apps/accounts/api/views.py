@@ -49,7 +49,7 @@ class VerifyUserAPIView(GenericAPIView):
         valid_time = datetime.datetime.now() - datetime.timedelta(days=90)
 
         if not (email or code):
-            return redirect(f'{SITE_URL}/')
+            return redirect(f'{SITE_URL}/error/not-verified')
         try:
             verification = Verification.objects.get(
                 user__email=email,
@@ -58,7 +58,7 @@ class VerifyUserAPIView(GenericAPIView):
                 created_time__gte=valid_time
             )
         except Verification.DoesNotExist:
-            return redirect(f'{SITE_URL}/')
+            return redirect(f'{SITE_URL}/error/not-verified')
 
         verification.verified_time = datetime.datetime.now()
         verification.user.is_active = True
