@@ -24,6 +24,11 @@ DEVEL = config("DEVEL", default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
+SITE_URL = config("SITE_URL")
+EMAIL_VERIFICATION_URI = config("EMAIL_VERIFICATION_URI")
+LOGIN_URI = config("LOGIN_URI")
+
+
 CORS_ORIGIN_ALLOW_ALL = True
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
