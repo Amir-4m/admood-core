@@ -255,3 +255,13 @@ if DEVEL is False:
         debug=DEBUG,
         environment=config('SENTRY_ENV', default='development')  # 'production'
     )
+
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+CELERY_BROKER_USER = config("CELERY_BROKER_USER")
+CELERY_BROKER_PASSWORD = config("CELERY_BROKER_PASSWORD")
