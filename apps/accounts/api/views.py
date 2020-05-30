@@ -1,5 +1,9 @@
+import datetime
+
 from django.contrib.auth import get_user_model
+from django.shortcuts import redirect
 from rest_framework.decorators import action
+from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -7,13 +11,13 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenViewBase
 
+from admood_core.settings import SITE_URL, LOGIN_URI
 from apps.accounts.api.serializers import (
     MyTokenObtainPairSerializer,
     MyTokenRefreshSerializer,
     UserProfileSerializer,
-    RegisterSerializer
-)
-from apps.accounts.models import UserProfile
+    RegisterSerializer)
+from apps.accounts.models import UserProfile, Verification
 
 User = get_user_model()
 
@@ -26,16 +30,42 @@ class TokenRefreshView(TokenViewBase):
     serializer_class = MyTokenRefreshSerializer
 
 
-def register(request):
-    serializer = RegisterSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        serializer.save()
+class RegisterUserAPIView(GenericAPIView):
+    serializer_class = RegisterSerializer
 
-    return
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+
+        return Response(serializer.data)
 
 
-def activate(request):
-    verification_code = request.data['verification_code']
+class VerifyUserAPIView(GenericAPIView):
+    def get(self, request):
+
+        email = request.query_params.get('email')
+        code = request.query_params.get('code')
+        valid_time = datetime.datetime.now() - datetime.timedelta(days=90)
+
+        if not (email or code):
+            return redirect(f'{SITE_URL}/')
+        try:
+            verification = Verification.objects.get(
+                user__email=email,
+                code=code,
+                verified_time__isnull=True,
+                created_time__gte=valid_time
+            )
+        except Verification.DoesNotExist:
+            return redirect(f'{SITE_URL}/')
+
+        verification.verified_time = datetime.datetime.now()
+        verification.user.is_active = True
+        verification.user.save()
+        verification.save()
+
+        return redirect(f'{SITE_URL}/{LOGIN_URI}')
 
 
 class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):

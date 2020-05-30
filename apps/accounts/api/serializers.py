@@ -1,10 +1,12 @@
+import datetime
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import UserProfile
+from apps.accounts.models import UserProfile, Verification
 
 User = get_user_model()
 
@@ -30,11 +32,14 @@ class MyTokenRefreshSerializer(TokenRefreshSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    confirm_password = serializers.CharField(max_length=100, write_only=True)
+
     class Meta:
         model = User
         fields = [
             "email",
             "password",
+            "confirm_password"
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
@@ -53,10 +58,52 @@ class RegisterSerializer(serializers.ModelSerializer):
             is_active=False
         )
 
-        verification_code = user.create_verification_code()
-        user.email_verification_code(verification_code.verification_code)
+        user.email_verification_code()
 
         return user
+
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('confirm_password'):
+            raise serializers.ValidationError(
+                {"password": "password mismatch."}
+            )
+        return attrs
+
+
+class UserRelatedField(serializers.RelatedField):
+    def display_value(self, instance):
+        return instance
+
+    def to_representation(self, value):
+        return str(value)
+
+    def to_internal_value(self, data):
+        return User.objects.get(email=data)
+
+
+class VerifyUserSerializer(serializers.ModelSerializer):
+    user = UserRelatedField(queryset=User.objects.all())
+    code = serializers.IntegerField()
+
+    class Meta:
+        model = Verification
+        fields = ['user', 'code']
+
+    def validate(self, attrs):
+        user = attrs.get['user']
+        code = attrs.get['code']
+
+        valid_time = datetime.datetime.now() - datetime.timedelta(minutes=5)
+        if Verification.objects.filter(user=user,
+                                       code=code,
+                                       verified_time__isnull=True,
+                                       created_time__gte=valid_time
+                                       ).exists():
+            return attrs
+
+        raise serializers.ValidationError(
+            "invalid verification."
+        )
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -71,7 +118,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data.update(
             {
-                'username': instance.user.username,
                 'phone_number': instance.user.phone_number,
                 'email': instance.user.email
             }

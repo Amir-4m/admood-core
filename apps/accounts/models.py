@@ -1,14 +1,16 @@
-import random
 import datetime
+import random
 
-from django.db import models
 from django.conf import settings
-from django.utils import timezone
-from django.core.validators import RegexValidator
-from django.contrib.auth.models import PermissionsMixin, send_mail
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin, send_mail
 from django.contrib.auth.validators import ASCIIUsernameValidator
+from django.core.validators import RegexValidator
+from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+
+from .tasks import send_verification_email
 
 
 class UserManager(BaseUserManager):
@@ -141,17 +143,9 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.email = None
         super().save(*args, **kwargs)
 
-    def create_verification_code(self):
-        return self.verification_codes.create()
-
-    def validate_verification_code(self, verification_code):
-        return VerificationCode.validate(self, verification_code)
-
-    def email_verification_code(self, verification_code):
-        self.email_user(
-            subject="admood verification",
-            message=f"your verification code: {verification_code}"
-        )
+    def email_verification_code(self):
+        verification = self.verifications.create()
+        send_verification_email.delay(self.email, verification.code)
 
 
 class UserProfile(models.Model):
@@ -183,7 +177,7 @@ class UserProfile(models.Model):
                                               db_index=True)
     first_name = models.CharField(max_length=50, blank=True)
     last_name = models.CharField(max_length=50, blank=True)
-    image = models.ImageField(blank=True)
+    image = models.ImageField(null=True, blank=True)
     bio = models.TextField(blank=True)
     national_id = models.CharField(max_length=10, blank=True)
     address = models.TextField(max_length=10, blank=True)
@@ -207,22 +201,23 @@ class UserProfile(models.Model):
         return f'{self.first_name} {self.last_name}'.strip()
 
 
-class VerificationCodeManager(models.Manager):
+class VerificationManager(models.Manager):
     def create(self, *args, **kwargs):
-        if 'verification_code' not in kwargs:
+        if 'code' not in kwargs:
             kwargs.setdefault(
-                'verification_code',
+                'code',
                 random.randint(settings.USER_VERIFICATION_CODE_MIN_VALUE, settings.USER_VERIFICATION_CODE_MAX_VALUE)
             )
         return super().create(*args, **kwargs)
 
 
-class VerificationCode(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_codes')
-    verification_code = models.PositiveIntegerField()
+class Verification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifications')
+    code = models.PositiveIntegerField()
     created_time = models.DateTimeField(auto_now_add=True)
+    verified_time = models.DateTimeField(null=True, blank=True)
 
-    objects = VerificationCodeManager()
+    objects = VerificationManager()
 
     @staticmethod
     def validate(user, verification_code):
