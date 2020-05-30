@@ -4,10 +4,6 @@
         style="font-family: Helvetica, arial, sans-serif;font-size: 13px; color: #555555; line-height: 24px;"
         st-content="rightimage-paragraph">
         <p><span>{% if lang == "fa" %}کاربر گرامی{% else %}Dear user{% endif %}</span> <b>{{ username }}</b></p>
-        <p><span>{% if lang == "fa" %}کد فعالسازی{% else %}Verification Code{% endif %}</span>
-            <b>{{ verification_code }}</b></p>
-        xxxxxxxxxxx
-        {#        {% if has_password  %}#}
         <p>
             {% if lang == "fa" %}برای تایید ثبت نام خود روی لینک زیر کلیک کنید.{% else %}Please click on link below to
                 activate your account.{% endif %}
@@ -20,10 +16,7 @@
                             account.{% endif %}</a>
                 </b></span>
             </p>
-
-
         </div>
-        {#        {% endif %}#}
     </td>
 {% endblock %}
 
