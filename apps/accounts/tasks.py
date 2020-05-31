@@ -11,7 +11,7 @@ logger = logging.getLogger('admood_core.accounts')
 
 @shared_task
 def send_verification_email(email_address, code):
-    verify_url = '{SITE_URL}/{EMAIL_VERIFICATION_URI}/?code={CODE}&email={EMAIL}' \
+    verify_url = '{SITE_URL}/{EMAIL_VERIFICATION_URI}/?code={CODE}&user={EMAIL}' \
         .format(SITE_URL=SITE_URL,
                 EMAIL_VERIFICATION_URI=EMAIL_VERIFICATION_URI,
                 CODE=code,
