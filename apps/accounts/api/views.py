@@ -36,7 +36,21 @@ class RegisterUserAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+
+            user = User.get_by_email(email)
+            if not user:
+                user = User.objects.create_user(
+                    email=email,
+                    password=password,
+                    is_active=False
+                )
+            else:
+                user.set_password(password)
+
+            # create and email user verification code
+            user.email_verification_code()
 
         return Response(serializer.data)
 
