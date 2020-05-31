@@ -240,7 +240,7 @@ class Verification(models.Model):
                 user=user,
                 code=code,
                 verified_time__isnull=True,
-                created_time__gt=timezone.now() - datetime.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME)
+                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME)
             )
         except Verification.DoesNotExist:
             return False
