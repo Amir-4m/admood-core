@@ -31,42 +31,27 @@ class MyTokenRefreshSerializer(TokenRefreshSerializer):
         return data
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class RegisterSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(max_length=100, write_only=True)
     confirm_password = serializers.CharField(max_length=100, write_only=True)
 
     class Meta:
-        model = User
         fields = [
             "email",
             "password",
             "confirm_password"
         ]
-        extra_kwargs = {"password": {"write_only": True}}
-
-    def create(self, validated_data):
-        email = validated_data["email"]
-        password = validated_data["password"]
-
-        if email and User.objects.filter(email=email).exists():
-            raise serializers.ValidationError(
-                {"email": "Email address must be unique."}
-            )
-
-        user = User.objects.create_user(
-            email=email,
-            password=password,
-            is_active=False
-        )
-
-        user.email_verification_code()
-
-        return user
 
     def validate(self, attrs):
-        if attrs.get('password') != attrs.get('confirm_password'):
+        if attrs['password'] != attrs['confirm_password']:
             raise serializers.ValidationError(
                 {"password": "password mismatch."}
             )
+
+        if Verification.objects.filter(user__email=attrs['email'], verified_time__isnull=False).exists():
+            raise serializers.ValidationError({'email': 'user with this email already exists.'})
+
         return attrs
 
 
