@@ -48,7 +48,7 @@ class RegisterUserAPIView(GenericAPIView):
                 )
             else:
                 user.set_password(password)
-
+                user.save()
             # create and email user verification code
             user.email_verification_code()
 
