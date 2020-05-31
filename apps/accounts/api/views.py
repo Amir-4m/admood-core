@@ -16,7 +16,7 @@ from apps.accounts.api.serializers import (
     MyTokenObtainPairSerializer,
     MyTokenRefreshSerializer,
     UserProfileSerializer,
-    RegisterSerializer)
+    RegisterSerializer, VerifyUserSerializer)
 from apps.accounts.models import UserProfile, Verification
 
 User = get_user_model()
@@ -42,30 +42,18 @@ class RegisterUserAPIView(GenericAPIView):
 
 
 class VerifyUserAPIView(GenericAPIView):
+    serializer_class = VerifyUserSerializer
+
     def get(self, request):
 
-        email = request.query_params.get('email')
-        code = request.query_params.get('code')
-        valid_time = datetime.datetime.now() - datetime.timedelta(days=90)
+        serializer = self.serializer_class(data=request.query_params)
+        if serializer.is_valid():
+            user = serializer.validated_data.get('user')
+            code = serializer.validated_data.get('code')
+            if Verification.verify_user(user, code):
+                return redirect(f'{SITE_URL}/{LOGIN_URI}')
 
-        if not (email or code):
-            return redirect(f'{SITE_URL}/error/not-verified')
-        try:
-            verification = Verification.objects.get(
-                user__email=email,
-                code=code,
-                verified_time__isnull=True,
-                created_time__gte=valid_time
-            )
-        except Verification.DoesNotExist:
-            return redirect(f'{SITE_URL}/error/not-verified')
-
-        verification.verified_time = datetime.datetime.now()
-        verification.user.is_active = True
-        verification.user.save()
-        verification.save()
-
-        return redirect(f'{SITE_URL}/{LOGIN_URI}')
+        return redirect(f'{SITE_URL}/error/not-verified')
 
 
 class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
