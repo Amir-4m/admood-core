@@ -147,6 +147,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         verification = self.verifications.create()
         send_verification_email.delay(self.email, verification.code)
 
+    @staticmethod
+    def get_by_email(email):
+        try:
+            return User.objects.get(email=email)
+        except (User.DoesNotExist, User.MultipleObjectsReturned):
+            return None
+
 
 class UserProfile(models.Model):
     REAL = "rl"
