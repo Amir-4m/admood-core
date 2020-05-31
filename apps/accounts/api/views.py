@@ -56,6 +56,19 @@ class VerifyUserAPIView(GenericAPIView):
         return redirect(f'{SITE_URL}/error/not-verified')
 
 
+class ResetPasswordAPIView(GenericAPIView):
+    serializer_class = RegisterSerializer
+
+    def get(self, request):
+        pass
+        # todo: email user reset link
+
+    def patch(self, request):
+        user = User.get_by_email("email")
+        serializer = self.serializer_class(instance=user, data=request.data, partial=True)
+
+
+
 class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
