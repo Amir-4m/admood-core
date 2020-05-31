@@ -89,22 +89,6 @@ class VerifyUserSerializer(serializers.ModelSerializer):
         model = Verification
         fields = ['user', 'code']
 
-    def validate(self, attrs):
-        user = attrs.get['user']
-        code = attrs.get['code']
-
-        valid_time = datetime.datetime.now() - datetime.timedelta(minutes=5)
-        if Verification.objects.filter(user=user,
-                                       code=code,
-                                       verified_time__isnull=True,
-                                       created_time__gte=valid_time
-                                       ).exists():
-            return attrs
-
-        raise serializers.ValidationError(
-            "invalid verification."
-        )
-
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
