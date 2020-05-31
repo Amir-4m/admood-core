@@ -24,5 +24,9 @@ class MyUserAdmin(UserAdmin):
     search_fields = ('username', 'phone_number')
 
 
+@admin.register(Verification)
+class VerificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'code', 'created_time', 'verified_time',)
+
+
 admin.site.register(UserProfile)
-admin.site.register(Verification)
