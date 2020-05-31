@@ -160,6 +160,7 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'apps.accounts.backends.GoogleAuthBackend',
+    'apps.accounts.backends.EmailAuthBackend',
 ]
 
 SIMPLE_JWT = {
