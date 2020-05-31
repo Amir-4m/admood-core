@@ -232,3 +232,20 @@ class Verification(models.Model):
             verification_code=verification_code,
             created_time__gt=timezone.now() - datetime.timedelta(settings.USER_VERIFICATION_CODE_LIFETIME)
         ).exists()
+
+    @classmethod
+    def verify_user(cls, user, code):
+        try:
+            verification = cls.objects.get(
+                user=user,
+                code=code,
+                verified_time__isnull=True,
+                created_time__gt=timezone.now() - datetime.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME)
+            )
+        except Verification.DoesNotExist:
+            return False
+        verification.verified_time = timezone.now()
+        user.is_active = True
+        verification.save()
+        user.save()
+        return True
