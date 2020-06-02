@@ -25,8 +25,9 @@ DEVEL = config("DEVEL", default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
 SITE_URL = config("SITE_URL")
-EMAIL_VERIFICATION_URI = config("EMAIL_VERIFICATION_URI")
-LOGIN_URI = config("LOGIN_URI")
+USER_VERIFICATION_URL = config("USER_VERIFICATION_URL")
+USER_RESET_PASSWORD_URL = config("USER_RESET_PASSWORD_URL", default="auth/reset-pass")
+LOGIN_URL = config("LOGIN_URI")
 
 
 CORS_ORIGIN_ALLOW_ALL = True
