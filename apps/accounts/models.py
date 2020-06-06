@@ -1,5 +1,5 @@
-import datetime
 import random
+import uuid
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -208,44 +208,20 @@ class UserProfile(models.Model):
         return f'{self.first_name} {self.last_name}'.strip()
 
 
-class VerificationManager(models.Manager):
-    def create(self, *args, **kwargs):
-        if 'code' not in kwargs:
-            kwargs.setdefault(
-                'code',
-                random.randint(settings.USER_VERIFICATION_CODE_MIN_VALUE, settings.USER_VERIFICATION_CODE_MAX_VALUE)
-            )
-        return super().create(*args, **kwargs)
-
-
 class Verification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifications')
-    code = models.PositiveIntegerField()
+    uuid = models.UUIDField(default=uuid.uuid4)
     created_time = models.DateTimeField(auto_now_add=True)
     verified_time = models.DateTimeField(null=True, blank=True)
 
-    objects = VerificationManager()
-
-    @staticmethod
-    def validate(user, verification_code):
-        return user.verification_codes.filter(
-            verification_code=verification_code,
-            created_time__gt=timezone.now() - datetime.timedelta(settings.USER_VERIFICATION_CODE_LIFETIME)
-        ).exists()
-
     @classmethod
-    def verify_user(cls, user, code):
-        try:
-            verification = cls.objects.get(
-                user=user,
-                code=code,
-                verified_time__isnull=True,
-                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME)
-            )
-        except Verification.DoesNotExist:
-            return False
-        verification.verified_time = timezone.now()
-        user.is_active = True
-        verification.save()
-        user.save()
-        return True
+    def get(cls, uuid):
+        return cls.objects.get(
+            uuid=uuid,
+            verified_time__isnull=True,
+            created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
+        )
+
+    def verify(self):
+        self.verified_time = timezone.now()
+        self.save()
