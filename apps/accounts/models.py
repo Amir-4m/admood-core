@@ -62,12 +62,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     username_validator = ASCIIUsernameValidator()
 
     STATUS_WAITING = 0
-    STATUS_VERIFIED = 1
-    STATUS_REJECTED = 3
+    STATUS_APPROVED = 1
+    STATUS_REJECTED = 2
 
     STATUS_CHOICES = (
         (STATUS_WAITING, _("waiting")),
-        (STATUS_VERIFIED, _("verified")),
+        (STATUS_APPROVED, _("approved")),
         (STATUS_REJECTED, _("rejected")),
     )
 
@@ -110,6 +110,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             'Unselect this instead of deleting accounts.'
         ),
     )
+    is_verified = models.BooleanField(
+        _('verified'),
+        default=False
+    )
     status = models.PositiveSmallIntegerField(_('user status'), choices=STATUS_CHOICES, default=STATUS_WAITING,
                                               db_index=True)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
@@ -142,6 +146,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.email is not None and self.email.strip() == '':
             self.email = None
         super().save(*args, **kwargs)
+
+    def verify(self):
+        self.is_verified = True
+        self.save()
 
     def email_verification_code(self):
         verification = self.verifications.create()
