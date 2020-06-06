@@ -75,6 +75,39 @@ class VerifyUserSerializer(serializers.ModelSerializer):
         fields = ['user', 'code']
 
 
+class ForgetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                {'email': 'invalid email address.'})
+
+        return value
+
+    def save(self, **kwargs):
+        user = User.objects.get(email=self.validated_data['email'])
+        user.email_reset_password()
+
+
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    confirm_password = serializers.CharField(max_length=100, write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['password', 'confirm_password']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"password": "password mismatch."})
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
