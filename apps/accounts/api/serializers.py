@@ -45,14 +45,31 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
-            raise serializers.ValidationError(
-                {"password": "password mismatch."}
-            )
+            raise serializers.ValidationError({"password": "password mismatch."})
 
-        if Verification.objects.filter(user__email=attrs['email'], verified_time__isnull=False).exists():
+        if User.objects.filter(email=attrs['email'], is_verified=True).exists():
             raise serializers.ValidationError({'email': 'user with this email already exists.'})
 
         return attrs
+
+    def create(self, validated_data):
+        email = validated_data['email']
+        password = validated_data['password']
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+            )
+        else:
+            user.set_password(password)
+            user.save()
+
+        user.email_verification_code()
+
+        return user
 
 
 class UserRelatedField(serializers.RelatedField):
