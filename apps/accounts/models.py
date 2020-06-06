@@ -153,7 +153,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def email_verification_code(self):
         verification = self.verifications.create()
-        send_verification_email.delay(self.email, verification.code)
+        send_verification_email.delay(self.email, verification.uuid.hex)
 
     def email_reset_password(self):
         verification = self.verifications.create()
@@ -222,7 +222,7 @@ class UserProfile(models.Model):
 
 class Verification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifications')
-    uuid = models.UUIDField(default=uuid.uuid4)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     created_time = models.DateTimeField(auto_now_add=True)
     verified_time = models.DateTimeField(null=True, blank=True)
 

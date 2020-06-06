@@ -13,8 +13,8 @@ logger = logging.getLogger('admood_core.accounts')
 
 
 @shared_task
-def send_verification_email(email_address, code):
-    verify_url = f'{SITE_URL}/{USER_VERIFICATION_URL}/?code={code}&user={email_address}'
+def send_verification_email(email_address, uuid):
+    verify_url = f'{SITE_URL}/{USER_VERIFICATION_URL}/{uuid}/'
 
     context = {
         'lang': 'fa',  # if settings.LANGUAGE_CODE.lower() == 'fa-ir' else 'en',
@@ -24,7 +24,7 @@ def send_verification_email(email_address, code):
 
         'username': email_address,
         'verify_url': verify_url,
-        'verification_code': code,
+        'verification_code': uuid,
         'has_password': True,
     }
 
