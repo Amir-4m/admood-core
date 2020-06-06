@@ -48,11 +48,11 @@ class VerifyUserAPIView(GenericAPIView):
     queryset = Verification.objects.all()
 
     def get_object(self):
-        code = self.request.query_params.get('code')
+        uuid = self.request.query_params.get('uuid')
         try:
-            return Verification.objects.get(code=code)
+            return Verification.objects.get(uuid=uuid)
         except:
-            raise redirect(f'{SITE_URL}/error/not-verified')
+            raise Http404
 
     def get(self, request):
         verification = self.get_object()
