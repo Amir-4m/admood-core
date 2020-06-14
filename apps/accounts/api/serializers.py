@@ -43,14 +43,15 @@ class RegisterSerializer(serializers.Serializer):
             "confirm_password"
         ]
 
-    def validate(self, attrs):
-        if attrs['password'] != attrs['confirm_password']:
-            raise serializers.ValidationError({"password": "password mismatch."})
+    def validate_password(self, password):
+        if password != self.initial_data['confirm_password']:
+            raise serializers.ValidationError("password mismatch.")
+        return password
 
-        if User.objects.filter(email=attrs['email'], is_verified=True).exists():
-            raise serializers.ValidationError({'email': 'user with this email already exists.'})
-
-        return attrs
+    def validate_email(self, email):
+        if User.objects.filter(email=email, is_verified=True).exists():
+            raise serializers.ValidationError('user with this email already exists.')
+        return email
 
     def create(self, validated_data):
         email = validated_data['email']
@@ -84,22 +85,32 @@ class UserRelatedField(serializers.RelatedField):
 
 
 class VerifyUserSerializer(serializers.ModelSerializer):
-    user = UserRelatedField(queryset=User.objects.all())
-    code = serializers.IntegerField()
-
     class Meta:
         model = Verification
-        fields = ['user', 'code']
+        fields = ['uuid']
+
+    def validate_uuid(self, attrs):
+        try:
+            verification = Verification.objects.get(uuid=attrs['uuid'])
+            if verification.is_valid():
+                return attrs
+        except:
+            return False
+
+    def save(self, **kwargs):
+        uuid = self.validated_data['uuid']
+
+        if self.instance.is_valid():
+            self.instance.verify()
 
 
-class ForgetPasswordSerializer(serializers.Serializer):
+class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
-        if not User.objects.filter(email=value).exists():
+        if not User.objects.filter(email=value, is_active=True, is_verified=True).exists():
             raise serializers.ValidationError(
                 {'email': 'invalid email address.'})
-
         return value
 
     def save(self, **kwargs):
@@ -107,17 +118,17 @@ class ForgetPasswordSerializer(serializers.Serializer):
         user.email_reset_password()
 
 
-class ResetPasswordSerializer(serializers.ModelSerializer):
+class PasswordResetConfirmSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(max_length=100, write_only=True)
 
     class Meta:
         model = User
         fields = ['password', 'confirm_password']
 
-    def validate(self, attrs):
-        if attrs['password'] != attrs['confirm_password']:
+    def validate_password(self, password):
+        if password != self.initial_data['confirm_password']:
             raise serializers.ValidationError({"password": "password mismatch."})
-        return attrs
+        return password
 
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
