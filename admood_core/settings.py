@@ -9,28 +9,42 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-
 import os
-from decouple import config
+from datetime import timedelta
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+from decouple import config, Csv
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = config("DEBUG", default=False, cast=bool)
+DEVEL = config("DEVEL", default=False, cast=bool)
+
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
+
+SITE_URL = config("SITE_URL")
+USER_VERIFICATION_URL = config("USER_VERIFICATION_URL", default='auth/verify')
+USER_RESET_PASSWORD_URL = config("USER_RESET_PASSWORD_URL", default="auth/reset-pass")
+LOGIN_URL = config("LOGIN_URI")
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG")
-
-ALLOWED_HOSTS = []
-
 AUTH_USER_MODEL = 'accounts.User'
 
-# Application definition
+USER_VERIFICATION_CODE_MIN_VALUE = config("USER_VERIFICATION_CODE_MIN_VALUE", default=100000)
+USER_VERIFICATION_CODE_MAX_VALUE = config("USER_VERIFICATION_CODE_MAX_VALUE", default=999999)
+USER_VERIFICATION_LIFETIME = config("USER_VERIFICATION_CODE_LIFETIME", default=120)
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'drf_yasg',
 
     'apps.core',
     'apps.accounts',
@@ -47,6 +62,11 @@ INSTALLED_APPS = [
     'apps.medium',
     'apps.campaign',
 ]
+
+if DEVEL:
+    INSTALLED_APPS.append(
+        'corsheaders'
+    )
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,12 +78,18 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+if DEVEL:
+    MIDDLEWARE.append(
+        'corsheaders.middleware.CorsMiddleware',
+    )
+
 ROOT_URLCONF = 'admood_core.urls'
+APPEND_SLASH = False
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,30 +106,38 @@ WSGI_APPLICATION = 'admood_core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config("DB_NAME"),
-        'USER': config("DB_USER"),
-        'PASSWORD': config("DB_PASS"),
-        'HOST': config("DB_HOST"),
-        'PORT': config("DB_PORT"),
+        'USER': config("DB_USER", default=''),
+        'PASSWORD': config("DB_PASS", default=''),
+        'HOST': config("DB_HOST", default='localhost'),
+        'PORT': config("DB_PORT", default=''),
     }
 }
 
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'JWT': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+}
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': 'sqlite3.db',
-#     }
-# }
-
+CACHES = {
+    'default': {
+        'BACKEND': config("CACHE_BACKEND", default='django.core.cache.backends.locmem.LocMemCache'),
+        'LOCATION': config("CACHE_HOST"),
+        'KEY_PREFIX': 'ADMOODCORE',
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -119,27 +153,122 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M',
+    'TIME_FORMAT': '%H:%M'
+}
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'apps.accounts.backends.GoogleAuthBackend',
+    'apps.accounts.backends.EmailAuthBackend',
+]
+
+SIMPLE_JWT = {
+    'ROTATE_REFRESH_TOKENS': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('ACCESS_TOKEN_LIFETIME_MINUTES', default=30, cast=int)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('ACCESS_TOKEN_LIFETIME_DAYS', default=90, cast=int)),
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
+LANGUAGE_CODE = 'fa-ir'
+TIME_ZONE = 'Asia/Tehran'
+USE_I18N = False
+USE_L10N = False
+USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
-
+STATIC_ROOT = BASE_DIR / 'static'
 STATIC_URL = '/static/'
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
-}
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
 
+LOG_DIR = BASE_DIR / 'logs'
+LOGGING = ({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s] %(levelname)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'file': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose' if DEBUG else 'simple',
+            'filename': LOG_DIR / 'django.log',
+        },
+        'db_queries': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'db_queries.log',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['db_queries']
+        },
+        # 'apps.campaign.tasks': {
+        #     'level': 'DEBUG',
+        #     'handlers': ['file', 'console'],
+        #     'propagate': False,
+        # },
+    },
+})
+
+if DEVEL is False:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    # from sentry_sdk.integrations.celery import CeleryIntegration
+
+    sentry_sdk.init(
+        dsn=f"https://{config('SENTRY_KEY')}@{config('SENTRY_HOST')}/{config('SENTRY_PROJECT_ID')}",
+        integrations=[
+            DjangoIntegration(),
+            # CeleryIntegration()
+        ],
+
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=True,
+
+        # Custom settings
+        debug=DEBUG,
+        environment=config('SENTRY_ENV', default='development')  # 'production'
+    )
+
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+CELERY_BROKER_USER = config("CELERY_BROKER_USER")
+CELERY_BROKER_PASSWORD = config("CELERY_BROKER_PASSWORD")

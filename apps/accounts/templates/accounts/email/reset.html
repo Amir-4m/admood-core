@@ -1,0 +1,28 @@
+{% extends 'accounts/email/base.html' %}
+{% block content %}
+    <td dir="{% if lang == "fa" %}rtl{% else %}ltr{% endif %}"
+        style="font-family: Helvetica, arial, sans-serif;font-size: 13px; color: #555555; line-height: 24px;"
+        st-content="rightimage-paragraph">
+        <p><span>{% if lang == "fa" %}کاربر گرامی{% else %}Dear user{% endif %}</span> <b>{{ username }}</b></p>
+        <p>
+            {% if lang == "fa" %}شما درخواستی مبنی بر تغییر رمز عبور حساب خود داشتید.{% else %}You have a request for
+                password change.{% endif %}
+        </p><br>
+        <div>
+            <p>
+
+                <span><b>
+                        <a href="{{ url }}">{% if lang == "fa" %}برای تغییر کلمه عبور کلیک کنید.{% else %}click to
+                            change your password.{% endif %}</a>
+                </b></span>
+            </p>
+
+
+        </div>
+
+    </td>
+{% endblock %}
+
+
+
+

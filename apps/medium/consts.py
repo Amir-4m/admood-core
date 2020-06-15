@@ -1,45 +1,48 @@
 class Medium:
-    WEB = "Web"
-    IN_APP = "InAPP"
-    TELEGRAM = "Telegram"
-    INSTAGRAM = "Instagram"
+    WEB = 1
+    IN_APP = 2
+    TELEGRAM = 3
+    INSTAGRAM = 4
 
     MEDIUM_CHOICES = (
-        (WEB, "Web"),
-        (IN_APP, "InAPP"),
-        (TELEGRAM, "Telegram"),
-        (INSTAGRAM, "Instagram"),
+        (WEB, "web"),
+        (IN_APP, "in_app"),
+        (TELEGRAM, "telegram"),
+        (INSTAGRAM, "instagram"),
     )
+
+    @classmethod
+    def to_dict(cls):
+        return [{'id': medium[0], 'title': medium[1]} for medium in cls.MEDIUM_CHOICES]
 
 
 class MediumInterface:
-    CHANNEL = "Channel"
-    POST = "Post"
-    STORY = "Story"
-    PUSH_NOTIF = "PushNotif"
-    BANNER = "Banner"
-    NATIVE = "Native"
+    CHANNEL = 1
+    POST = 2
+    STORY = 3
+    PUSH_NOTIFICATION = 4
+    BANNER = 5
+    NATIVE = 6
 
     MEDIUM_INTERFACE_CHOICES = (
-        (CHANNEL, "Channel"),
-        (POST, "Post"),
-        (STORY, "Story"),
-        (PUSH_NOTIF, "PushNotif"),
-        (BANNER, "Banner"),
-        (NATIVE, "Native"),
+        (CHANNEL, "channel"),
+        (POST, "post"),
+        (STORY, "story"),
+        (PUSH_NOTIFICATION, "push_notification"),
+        (BANNER, "banner"),
+        (NATIVE, "native"),
     )
 
 
 class MediumStatus:
-    ACTIVE = "Active"
-    SUSPEND = "Suspend"
-    PAUSED = "PAUSED"
-    VERIFIED = "VERIFIED"
+    ACTIVE = 1
+    SUSPEND = 2
+    PAUSED = 3
+    VERIFIED = 4
 
     MEDIUM_STATUS_CHOICES = (
-        (ACTIVE, "Active"),
-        (SUSPEND, "Suspend"),
-        (PAUSED, "PAUSED"),
-        (VERIFIED, "VERIFIED"),
+        (ACTIVE, "active"),
+        (SUSPEND, "suspend"),
+        (PAUSED, "paused"),
+        (VERIFIED, "verified"),
     )
-

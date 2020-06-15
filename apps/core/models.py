@@ -6,3 +6,10 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class File(models.Model):
+    file = models.FileField()
+
+    def __str__(self):
+        return self.file
