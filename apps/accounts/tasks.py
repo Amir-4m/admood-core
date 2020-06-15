@@ -13,8 +13,8 @@ logger = logging.getLogger('admood_core.accounts')
 
 
 @shared_task
-def send_verification_email(email_address, uuid):
-    verify_url = f'{SITE_URL}/{USER_VERIFICATION_URL}/{uuid}/'
+def send_verification_email(email_address, code):
+    verify_url = f'{SITE_URL}/{USER_VERIFICATION_URL}/?rc={code}'
 
     context = {
         'lang': 'fa',  # if settings.LANGUAGE_CODE.lower() == 'fa-ir' else 'en',
@@ -24,7 +24,7 @@ def send_verification_email(email_address, uuid):
 
         'username': email_address,
         'verify_url': verify_url,
-        'verification_code': uuid,
+        'verification_code': code,
         'has_password': True,
     }
 
@@ -37,7 +37,7 @@ def send_verification_email(email_address, uuid):
 
 @shared_task
 def send_reset_password(email_address, code):
-    url = f'{SITE_URL}/{USER_VERIFICATION_URL}/{USER_RESET_PASSWORD_URL}/{code}'
+    url = f'{SITE_URL}/{USER_VERIFICATION_URL}/{USER_RESET_PASSWORD_URL}/?rc={code}'
     message = EmailMessage('reset password', url, to=[email_address], from_email=settings.EMAIL_HOST_USER)
     connection = mail.get_connection()
     connection.open()

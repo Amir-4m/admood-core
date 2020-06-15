@@ -58,6 +58,11 @@ class UserManager(BaseUserManager):
         return self._create_user(username, password, **extra_fields)
 
 
+class ActiveUserManager(UserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_verified=True, is_active=True)
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     username_validator = ASCIIUsernameValidator()
 
@@ -119,6 +124,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
     objects = UserManager()
+
     USERNAME_FIELD = "username"
 
     class Meta:
@@ -233,6 +239,13 @@ class Verification(models.Model):
             verified_time__isnull=True,
             created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
         )
+
+    def is_valid(self):
+        if self.verified_time:
+            return False
+        if self.created_time < timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME):
+            return False
+        return True
 
     def verify(self):
         self.verified_time = timezone.now()

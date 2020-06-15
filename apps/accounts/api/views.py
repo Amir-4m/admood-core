@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.http import Http404
-from django.shortcuts import redirect
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
@@ -10,15 +9,13 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenViewBase
 
-from admood_core.settings import SITE_URL, LOGIN_URL
 from apps.accounts.api.serializers import (
     MyTokenObtainPairSerializer,
     MyTokenRefreshSerializer,
     UserProfileSerializer,
     RegisterSerializer,
-    VerifyUserSerializer,
-    ResetPasswordSerializer,
-    ForgetPasswordSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -44,27 +41,22 @@ class RegisterUserAPIView(GenericAPIView):
 
 
 class VerifyUserAPIView(GenericAPIView):
-    serializer_class = VerifyUserSerializer
+    # serializer_class = VerifyUserSerializer
     queryset = Verification.objects.all()
+    lookup_field = 'uuid'
 
-    def get_object(self):
-        uuid = self.request.query_params.get('uuid')
-        try:
-            return Verification.objects.get(uuid=uuid)
-        except:
-            raise Http404
-
-    def get(self, request):
+    def post(self, request):
+        self.kwargs['uuid'] = request.query_params.get('rc')
         verification = self.get_object()
-        if not verification.validate():
-            return redirect(f'{SITE_URL}/error/not-verified')
+        if not verification.is_valid():
+            return Response({'verify': False})
         verification.verify()
         verification.user.verify()
-        return redirect(f'{SITE_URL}/{LOGIN_URL}')
+        return Response({'verify': True})
 
 
-class ForgetPasswordAPIView(GenericAPIView):
-    serializer_class = ForgetPasswordSerializer
+class PasswordResetAPIView(GenericAPIView):
+    serializer_class = PasswordResetSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -73,25 +65,29 @@ class ForgetPasswordAPIView(GenericAPIView):
         return Response(serializer.data)
 
 
-class ResetPasswordAPIView(GenericAPIView):
-    serializer_class = ResetPasswordSerializer
+class PasswordResetConfirmAPIView(GenericAPIView):
+    serializer_class = PasswordResetConfirmSerializer
+    queryset = User.objects.all()
 
-    def get_object(self):
-        uuid = self.request.query_params.get('uuid')
+    def get_verification(self):
         try:
-            return Verification.get(uuid).user
+            verification = Verification.objects.get(uuid=self.request.query_params.get('rc'))
+            if verification.is_valid:
+                return verification
         except:
             raise Http404
 
     def get(self, request):
-        user = self.get_object()
-        return Response({'email': user.email})
+        if self.get_verification():
+            return Response()
 
     def put(self, request):
-        user = self.get_object()
+        verification = self.get_verification()
+        user = verification.user
         serializer = self.serializer_class(instance=user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        verification.verify()
         return Response({'email': user.email})
 
 

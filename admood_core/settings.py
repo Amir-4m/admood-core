@@ -25,8 +25,8 @@ DEVEL = config("DEVEL", default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
 SITE_URL = config("SITE_URL")
-USER_VERIFICATION_URL = config("USER_VERIFICATION_URL", default='auth/verify')
-USER_RESET_PASSWORD_URL = config("USER_RESET_PASSWORD_URL", default="auth/reset-pass")
+USER_VERIFICATION_URL = config("USER_VERIFICATION_URL", default='auth/register/verify')
+USER_RESET_PASSWORD_URL = config("USER_RESET_PASSWORD_URL", default='/auth/forget/reset')
 LOGIN_URL = config("LOGIN_URI")
 
 
@@ -167,7 +167,7 @@ AUTHENTICATION_BACKENDS = [
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('ACCESS_TOKEN_LIFETIME_MINUTES', default=30, cast=int)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('ACCESS_TOKEN_LIFETIME_DAYS', default=90, cast=int)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=config('REFRESH_TOKEN_LIFETIME_DAYS', default=90, cast=int)),
 }
 
 # Internationalization
