@@ -37,7 +37,7 @@ def send_verification_email(email_address, code):
 
 @shared_task
 def send_reset_password(email_address, code):
-    url = f'{SITE_URL}/{USER_VERIFICATION_URL}/{USER_RESET_PASSWORD_URL}/?rc={code}'
+    url = f'{SITE_URL}/{USER_RESET_PASSWORD_URL}/?rc={code}'
     message = EmailMessage('reset password', url, to=[email_address], from_email=settings.EMAIL_HOST_USER)
     connection = mail.get_connection()
     connection.open()
