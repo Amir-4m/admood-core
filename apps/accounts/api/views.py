@@ -43,19 +43,12 @@ class RegisterUserAPIView(GenericAPIView):
 class VerifyUserAPIView(GenericAPIView):
     serializer_class = VerifyUserSerializer
     queryset = Verification.objects.all()
-    lookup_field = 'uuid'
 
     def post(self, request):
-        self.kwargs['uuid'] = request.query_params.get('rc')
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        verification = self.get_object()
-        if not verification.is_valid():
-            return Response({'verify': False})
-        verification.verify()
-        verification.user.verify()
-        return Response({'verify': True})
+        return Response(serializer.data)
 
 
 class PasswordResetAPIView(GenericAPIView):
