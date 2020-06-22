@@ -1,5 +1,3 @@
-import datetime
-
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -85,7 +83,7 @@ class UserRelatedField(serializers.RelatedField):
 
 
 class VerifyUserSerializer(serializers.Serializer):
-    rc = serializers.URLField()
+    rc = serializers.UUIDField()
 
     def validate_rc(self, rc):
         try:
