@@ -47,6 +47,9 @@ class VerifyUserAPIView(GenericAPIView):
 
     def post(self, request):
         self.kwargs['uuid'] = request.query_params.get('rc')
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         verification = self.get_object()
         if not verification.is_valid():
             return Response({'verify': False})

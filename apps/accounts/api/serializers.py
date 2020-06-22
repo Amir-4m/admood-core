@@ -84,24 +84,28 @@ class UserRelatedField(serializers.RelatedField):
         return User.objects.get(email=data)
 
 
-class VerifyUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Verification
-        fields = ['uuid']
+class VerifyUserSerializer(serializers.Serializer):
+    rc = serializers.URLField()
 
-    def validate_uuid(self, attrs):
+    def validate_rc(self, rc):
         try:
-            verification = Verification.objects.get(uuid=attrs['uuid'])
-            if verification.is_valid():
-                return attrs
+            verification = Verification.objects.get(uuid=rc)
         except:
-            return False
+            raise serializers.ValidationError(
+                {'rc': 'invalid rc'}
+            )
+        else:
+            if verification.is_valid():
+                return rc
+            raise serializers.ValidationError(
+                {'rc': 'invalid rc'}
+            )
 
     def save(self, **kwargs):
-        uuid = self.validated_data['uuid']
-
-        if self.instance.is_valid():
-            self.instance.verify()
+        rc = self.validated_data['rc']
+        verification = Verification.objects.get(uuid=rc)
+        verification.verify()
+        verification.user.verify()
 
 
 class PasswordResetSerializer(serializers.Serializer):
