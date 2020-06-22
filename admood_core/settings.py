@@ -26,7 +26,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
 SITE_URL = config("SITE_URL")
 USER_VERIFICATION_URL = config("USER_VERIFICATION_URL", default='auth/register/verify')
-USER_RESET_PASSWORD_URL = config("USER_RESET_PASSWORD_URL", default='/auth/forget/reset')
+USER_RESET_PASSWORD_URL = config("USER_RESET_PASSWORD_URL", default='/auth/forget/verify')
 LOGIN_URL = config("LOGIN_URI")
 
 CORS_ORIGIN_ALLOW_ALL = True
