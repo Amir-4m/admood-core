@@ -15,7 +15,7 @@ from apps.accounts.api.serializers import (
     UserProfileSerializer,
     RegisterSerializer,
     PasswordResetConfirmSerializer,
-    PasswordResetSerializer,
+    PasswordResetSerializer, VerifyUserSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -41,7 +41,7 @@ class RegisterUserAPIView(GenericAPIView):
 
 
 class VerifyUserAPIView(GenericAPIView):
-    # serializer_class = VerifyUserSerializer
+    serializer_class = VerifyUserSerializer
     queryset = Verification.objects.all()
     lookup_field = 'uuid'
 

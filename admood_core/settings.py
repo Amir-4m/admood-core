@@ -29,7 +29,6 @@ USER_VERIFICATION_URL = config("USER_VERIFICATION_URL", default='auth/register/v
 USER_RESET_PASSWORD_URL = config("USER_RESET_PASSWORD_URL", default='/auth/forget/reset')
 LOGIN_URL = config("LOGIN_URI")
 
-
 CORS_ORIGIN_ALLOW_ALL = True
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -154,6 +153,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DATETIME_FORMAT': '%Y-%m-%d %H:%M',
     'TIME_FORMAT': '%H:%M'
 }
