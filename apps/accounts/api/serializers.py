@@ -83,27 +83,20 @@ class UserRelatedField(serializers.RelatedField):
 
 
 class VerifyUserSerializer(serializers.Serializer):
-    rc = serializers.UUIDField()
+    rc = serializers.SlugRelatedField(queryset=Verification.objects.all(), slug_field='uuid')
 
     def validate_rc(self, rc):
-        try:
-            verification = Verification.objects.get(uuid=rc)
-        except:
-            raise serializers.ValidationError(
-                {'rc': 'invalid rc'}
-            )
+        if rc.is_valid():
+            return rc
         else:
-            if verification.is_valid():
-                return rc
             raise serializers.ValidationError(
                 {'rc': 'invalid rc'}
             )
 
     def save(self, **kwargs):
         rc = self.validated_data['rc']
-        verification = Verification.objects.get(uuid=rc)
-        verification.verify()
-        verification.user.verify()
+        rc.verify()
+        rc.user.verify()
 
 
 class PasswordResetSerializer(serializers.Serializer):
