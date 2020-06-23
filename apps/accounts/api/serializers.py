@@ -128,7 +128,6 @@ class PasswordResetConfirmSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
-        instance.verify()
         instance.save()
         return instance
 
