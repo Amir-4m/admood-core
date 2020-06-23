@@ -96,8 +96,9 @@ class VerifyUserSerializer(serializers.Serializer):
     def save(self, **kwargs):
         rc = self.validated_data['rc']
         rc.verify()
+        rc.save()
         rc.user.verify()
-
+        rc.user.save()
 
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -127,6 +128,7 @@ class PasswordResetConfirmSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
+        instance.verify()
         instance.save()
         return instance
 
