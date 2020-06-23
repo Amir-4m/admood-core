@@ -155,7 +155,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def verify(self):
         self.is_verified = True
-        self.save()
 
     def email_verification_code(self):
         verification = self.verifications.create()
@@ -249,4 +248,3 @@ class Verification(models.Model):
 
     def verify(self):
         self.verified_time = timezone.now()
-        self.save()
