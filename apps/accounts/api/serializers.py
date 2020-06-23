@@ -120,10 +120,10 @@ class PasswordResetConfirmSerializer(serializers.ModelSerializer):
         model = User
         fields = ['password', 'confirm_password']
 
-    def validate_password(self, password):
-        if password != self.initial_data['confirm_password']:
+    def validate(self, attrs):
+        if attrs['password'] != attrs['confirm_password']:
             raise serializers.ValidationError({"password": "password mismatch."})
-        return password
+        return attrs
 
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
