@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from .tasks import send_verification_email, send_reset_password
+from .validators import national_id_validator
 
 
 class UserManager(BaseUserManager):
@@ -203,7 +204,7 @@ class UserProfile(models.Model):
     last_name = models.CharField(max_length=50, blank=True)
     image = models.ImageField(null=True, blank=True)
     bio = models.TextField(blank=True)
-    national_id = models.CharField(max_length=10, blank=True)
+    national_id = models.CharField(max_length=10, blank=True, validators=[national_id_validator])
     address = models.TextField(max_length=10, blank=True)
     post_code = models.CharField(max_length=10, blank=True)
     company_name = models.CharField(max_length=50, blank=True)
