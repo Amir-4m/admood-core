@@ -1,15 +1,14 @@
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
-    CampaignContentSerializer,
-    CampaignEnableSerializer)
+    CampaignContentSerializer)
 from apps.campaign.models import Province, Campaign, CampaignContent
 from apps.core.views import BaseViewSet
 
@@ -43,6 +42,12 @@ class CampaignViewSet(BaseViewSet,
     @action(detail=True, methods=["patch"])
     def enable(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post"])
+    def clone(self, request, *args, **kwargs):
+        campaign = self.get_object()
+        serializer = self.get_serializer(campaign.clone())
+        return Response(serializer.data)
 
 
 class ContentViewSet(BaseViewSet,

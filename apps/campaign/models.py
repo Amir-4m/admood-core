@@ -57,6 +57,42 @@ class Campaign(models.Model):
     def __str__(self):
         return self.name
 
+    def clone(self):
+        publishers = self.publishers.all()
+        locations = self.locations.all()
+        categories = self.categories.all()
+        contents = self.contents.all()
+        target_devices = self.targetdevice_set.all()
+        schedules = self.campaignschedule_set.all()
+
+        new_campaign = self
+        new_campaign.pk = None
+        new_campaign.status = Campaign.STATUS_WAITING
+        new_campaign.save()
+        new_campaign.publishers.set(publishers)
+        new_campaign.locations.set(locations)
+        new_campaign.categories.set(categories)
+
+        for content in contents:
+            new_content = content
+            new_content.pk = None
+            new_content.campaign = new_campaign
+            new_content.save()
+
+        for target_device in target_devices:
+            new_target_device = target_device
+            new_target_device.pk = None
+            new_target_device.campaign = new_campaign
+            new_target_device.save()
+
+        for schedule in schedules:
+            new_schedule = schedule
+            new_schedule.pk = None
+            new_schedule.campaign = new_campaign
+            new_schedule.save()
+
+        return new_campaign
+
 
 class TargetDevice(models.Model):
     SERVICE_PROVIDER_MTN = 1
@@ -86,7 +122,7 @@ class CampaignContent(models.Model):
         (COST_MODEL_CPM, "cpm"),
     )
 
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='contents')
     title = models.CharField(max_length=250)
     landing_url = models.URLField(blank=True, null=True)
     data = JSONField()
