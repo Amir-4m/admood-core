@@ -8,7 +8,7 @@ from apps.campaign.api.validators import validate_campaign_utm, validate_content
 from apps.device.consts import ServiceProvider
 from apps.device.models import Device
 from apps.medium.consts import Medium
-from apps.medium.models import Publisher, MediumCategory
+from apps.medium.models import Publisher, Category
 
 
 class Province(models.Model):
@@ -32,7 +32,7 @@ class Campaign(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     publishers = models.ManyToManyField(Publisher, blank=True)
-    categories = models.ManyToManyField(MediumCategory, blank=True)
+    categories = models.ManyToManyField(Category, blank=True)
 
     name = models.CharField(max_length=50)
     locations = models.ManyToManyField(Province)

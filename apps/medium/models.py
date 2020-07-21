@@ -6,23 +6,14 @@ from .consts import Medium
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=50, db_index=True)
-
-    class Meta:
-        verbose_name_plural = "Categories"
-
-    def __str__(self):
-        return self.name
-
-
-class MediumCategory(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    reference_id = models.PositiveIntegerField()
+    title = models.CharField(max_length=50, db_index=True)
     display_text = models.CharField(max_length=50)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['medium', 'category'], name="unique_medium_category")
+            models.UniqueConstraint(fields=['medium', 'reference_id'], name="unique_medium_reference")
         ]
 
     def __str__(self):
@@ -44,7 +35,7 @@ class Publisher(models.Model):
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
-    categories = models.ManyToManyField(MediumCategory)
+    categories = models.ManyToManyField(Category)
 
     name = models.CharField(max_length=50)
     url = models.URLField(null=True, blank=True)

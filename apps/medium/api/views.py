@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from apps.medium.api.serializers import MediumSerializer, PublisherSerializer, MediumCategorySerializer
-from apps.medium.models import Publisher, MediumCategory
+from apps.medium.api.serializers import MediumSerializer, PublisherSerializer, CategorySerializer
+from apps.medium.models import Publisher, Category
 from ..consts import Medium
 
 
@@ -32,11 +32,11 @@ class PublisherViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return queryset
 
 
-class MediumCategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class CategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = MediumCategorySerializer
-    queryset = MediumCategory.objects.all()
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
 
     def get_queryset(self):
         queryset = super().get_queryset()
