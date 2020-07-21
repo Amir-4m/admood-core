@@ -62,8 +62,8 @@ class Campaign(models.Model):
         locations = self.locations.all()
         categories = self.categories.all()
         contents = self.contents.all()
-        target_devices = self.targetdevice_set.all()
-        schedules = self.campaignschedule_set.all()
+        target_devices = self.target_devices.all()
+        schedules = self.schedules.all()
 
         new_campaign = self
         new_campaign.pk = None
@@ -105,7 +105,7 @@ class TargetDevice(models.Model):
         (SERVICE_PROVIDER_RTL, "RTL"),
     )
 
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='target_devices')
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     service_provider = models.PositiveSmallIntegerField(choices=ServiceProvider.SERVICE_PROVIDER_CHOICES,
                                                         null=True, blank=True)
@@ -156,7 +156,7 @@ class CampaignSchedule(models.Model):
         (5, 'Thursday'),
         (6, 'Friday'),
     )
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='schedules')
     day = models.PositiveSmallIntegerField(choices=DAYS_OF_WEEK)
     start_time = models.TimeField(default=datetime.time.min)
     end_time = models.TimeField(default=datetime.time.max)

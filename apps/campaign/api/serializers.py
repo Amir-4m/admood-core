@@ -41,8 +41,8 @@ class TargetDeviceSerializer(serializers.ModelSerializer):
 class CampaignSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     start_date = serializers.DateField(allow_null=True)
-    targetdevice_set = TargetDeviceSerializer(many=True)
-    campaignschedule_set = CampaignScheduleSerializer(many=True)
+    target_devices = TargetDeviceSerializer(many=True)
+    schedules = CampaignScheduleSerializer(many=True)
 
     class Meta:
         model = Campaign
@@ -60,7 +60,7 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         return extra_kwargs
 
-    def validate_campaignschedule_set(self, value):
+    def validate_schedules(self, value):
         for idx, schedule in enumerate(value):
             start_time = schedule.get('start_time')
             end_time = schedule.get('end_time')
@@ -71,7 +71,7 @@ class CampaignSerializer(serializers.ModelSerializer):
                             (start_time > i.get('end_time') and end_time > i.get('end_time'))
                     ):
                         raise serializers.ValidationError(
-                            {'campaignschedule_set': 'invalid schedule set.'})
+                            {'schedules': 'invalid schedule set.'})
 
         return value
 
@@ -109,18 +109,18 @@ class CampaignSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        targetdevice_set = validated_data.pop("targetdevice_set")
-        schedule_set = validated_data.pop("campaignschedule_set")
+        target_devices = validated_data.pop("target_devices")
+        schedules = validated_data.pop("schedules")
 
         if validated_data['start_date'] is None:
             validated_data["start_date"] = datetime.date.today()
 
         campaign = super().create(validated_data)
 
-        for targetdevice_data in targetdevice_set:
-            TargetDevice.objects.create(campaign=campaign, **targetdevice_data)
+        for target_device_data in target_devices:
+            TargetDevice.objects.create(campaign=campaign, **target_device_data)
 
-        for schedule_data in schedule_set:
+        for schedule_data in schedules:
             CampaignSchedule.objects.create(campaign=campaign, **schedule_data)
 
         return campaign
@@ -132,28 +132,28 @@ class CampaignSerializer(serializers.ModelSerializer):
             instance.save()
             return instance
 
-        targetdevice_set = validated_data.pop("targetdevice_set", None)
-        schedule_set = validated_data.pop("campaignschedule_set", None)
+        target_devices = validated_data.pop("target_devices", None)
+        schedules = validated_data.pop("schedules", None)
 
         instance = super().update(instance, validated_data)
 
-        if targetdevice_set is not None:
-            targetdevice_id_list = [i.get("id") for i in targetdevice_set if i.get("id")]
-            TargetDevice.objects.filter(campaign=instance).exclude(id__in=targetdevice_id_list).delete()
+        if target_devices is not None:
+            target_device_id_list = [i.get("id") for i in target_devices if i.get("id")]
+            TargetDevice.objects.filter(campaign=instance).exclude(id__in=target_device_id_list).delete()
 
-            for targetdevice_data in targetdevice_set:
-                targetdevice_id = targetdevice_data.pop('id', None)
-                if targetdevice_id:
+            for target_device_data in target_devices:
+                target_device_id = target_device_data.pop('id', None)
+                if target_device_id:
                     TargetDevice.objects.filter(
-                        id=targetdevice_id, campaign=instance
-                    ).update(**targetdevice_data)
+                        id=target_device_id, campaign=instance
+                    ).update(**target_device_data)
                 else:
-                    TargetDevice.objects.create(campaign=instance, **targetdevice_data)
+                    TargetDevice.objects.create(campaign=instance, **target_device_data)
 
-        if schedule_set is not None:
-            schedule_id_list = [i.get("id") for i in schedule_set if i.get("id")]
+        if schedules is not None:
+            schedule_id_list = [i.get("id") for i in schedules if i.get("id")]
             CampaignSchedule.objects.filter(campaign=instance).exclude(id__in=schedule_id_list).delete()
-            for schedule_data in schedule_set:
+            for schedule_data in schedules:
                 schedule_id = schedule_data.pop('id', None)
                 if schedule_id:
                     CampaignSchedule.objects.filter(
