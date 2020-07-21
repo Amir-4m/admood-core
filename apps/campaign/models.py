@@ -2,6 +2,8 @@ import datetime
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from admood_core import settings
 from apps.campaign.api.validators import validate_campaign_utm, validate_content_utm
@@ -92,6 +94,59 @@ class Campaign(models.Model):
             new_schedule.save()
 
         return new_campaign
+
+@receiver(post_save, sender=Campaign)
+def create_campaign(sender, instance, created, **kwargs):
+    contents = instance.contents.all()
+
+    import requests
+    if created:
+        return
+    if instance.status != Campaign.STATUS_APPROVED:
+        return
+    url = 'http://192.168.2.152:8000/api/v1/campaign/'
+    headers = {'Authorization': 'Token b962325ce06c24c8d322cb5a97ea3f7dbfdbd8a7'}
+    data = dict(
+        title=instance.name,
+        status="approved",
+        view_duration=None,
+        is_enable=True,
+        owner=1,
+        categories=[
+            instance.categories.values_list('pk', flat=True)
+        ],
+        channels=[
+            instance.publishers.values_list('pk', flat=True)
+        ],
+        time_slicing=1
+    )
+
+    r = requests.post(url=url, headers=headers, data=data)
+    if r.status_code != 201:
+        return
+
+    response = r.json()
+    campaign_id = response['id']
+
+    url = 'http://192.168.2.152:8000/api/v1/content/'
+    headers = {'Authorization': 'Token b962325ce06c24c8d322cb5a97ea3f7dbfdbd8a7'}
+    c = CampaignContent()
+
+    for content in contents:
+        data = dict(
+            display_text=content.title,
+            content=content.data,
+            link="",
+            has_tracker=True,
+            tracker_bucket_size=10,
+            view_type="total",
+            message_id=None,
+            is_sticker=False,
+            campaign=1,
+            mother_channel=1,
+            tariff_publisher=None,
+            tariff_advertiser=None
+        )
 
 
 class TargetDevice(models.Model):
