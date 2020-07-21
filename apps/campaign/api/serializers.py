@@ -173,6 +173,16 @@ class CampaignEnableSerializer(serializers.ModelSerializer):
         fields = ["is_enable"]
 
 
+class CampaignRepeatSerializer(serializers.ModelSerializer):
+    start_date = serializers.DateField(allow_null=True)
+    target_devices = TargetDeviceSerializer(many=True)
+    schedules = CampaignScheduleSerializer(many=True)
+
+    class Meta:
+        model = Campaign
+        fields = ["start_date", 'end_date', 'daily_cost', 'total_cost', 'target_devices', 'schedules']
+
+
 class CampaignContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignContent
