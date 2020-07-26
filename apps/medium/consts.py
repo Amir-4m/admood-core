@@ -3,12 +3,16 @@ class Medium:
     IN_APP = 2
     TELEGRAM = 3
     INSTAGRAM = 4
+    PUSH_APP = 5
+    PUSH_WEB = 6
 
     MEDIUM_CHOICES = (
         (WEB, "web"),
         (IN_APP, "in_app"),
         (TELEGRAM, "telegram"),
         (INSTAGRAM, "instagram"),
+        (PUSH_APP, "push_app"),
+        (PUSH_WEB, "push_web"),
     )
 
     @classmethod
