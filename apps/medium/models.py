@@ -7,7 +7,7 @@ from .consts import Medium
 
 class Category(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
-    reference_id = models.PositiveIntegerField()
+    reference_id = models.PositiveIntegerField(null=True, blank=True)
     title = models.CharField(max_length=50, db_index=True)
     display_text = models.CharField(max_length=50)
 
@@ -27,10 +27,10 @@ class Publisher(models.Model):
     STATUS_VERIFIED = 4
 
     STATUS_CHOICES = (
-        (STATUS_ACTIVE, "Active"),
-        (STATUS_SUSPEND, "Suspend"),
-        (STATUS_PAUSED, "PAUSED"),
-        (STATUS_VERIFIED, "Verified"),
+        (STATUS_ACTIVE, "active"),
+        (STATUS_SUSPEND, "suspend"),
+        (STATUS_PAUSED, "paused"),
+        (STATUS_VERIFIED, "verified"),
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -45,8 +45,3 @@ class Publisher(models.Model):
 
     def __str__(self):
         return self.name
-
-    def clean(self):
-        for category in self.categories.all():
-            if category.medium != self.medium:
-                raise ValidationError({'categories': "category's medium doesn't match with publisher's medium."})

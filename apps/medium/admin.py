@@ -1,4 +1,6 @@
 from django.contrib import admin
+
+from .forms import PublisherForm
 from .models import (
     Category,
     Category,
@@ -8,7 +10,9 @@ from .models import (
 
 @admin.register(Publisher)
 class PublisherAdmin(admin.ModelAdmin):
-    search_fields = ["name"]
+    list_display = ['name', 'medium']
+    search_fields = ['name']
+    form = PublisherForm
 
 
 @admin.register(Category)
