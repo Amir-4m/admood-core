@@ -41,7 +41,7 @@ class TargetDeviceSerializer(serializers.ModelSerializer):
 class CampaignSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     start_date = serializers.DateField(allow_null=True)
-    target_devices = TargetDeviceSerializer(many=True)
+    target_devices = TargetDeviceSerializer(allow_null=True, many=True)
     schedules = CampaignScheduleSerializer(many=True)
 
     class Meta:
