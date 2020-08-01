@@ -38,7 +38,7 @@ class Campaign(models.Model):
     categories = models.ManyToManyField(Category, blank=True)
 
     name = models.CharField(max_length=50)
-    locations = models.ManyToManyField(Province)
+    locations = models.ManyToManyField(Province, blank=True)
     description = models.TextField(null=True, blank=True)
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_WAITING)
     start_date = models.DateField(default=datetime.date.today, blank=True)
