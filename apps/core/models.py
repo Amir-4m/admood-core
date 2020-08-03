@@ -12,4 +12,4 @@ class File(models.Model):
     file = models.FileField()
 
     def __str__(self):
-        return self.file
+        return self.file.name
