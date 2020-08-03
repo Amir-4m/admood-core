@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -7,6 +8,8 @@ from django.dispatch import receiver
 
 from admood_core import settings
 from apps.campaign.api.validators import validate_campaign_utm, validate_content_utm
+from apps.campaign.utils import file_type
+from apps.core.models import File
 from apps.device.consts import ServiceProvider
 from apps.device.models import Device
 from apps.medium.consts import Medium
@@ -98,30 +101,30 @@ class Campaign(models.Model):
 
 @receiver(post_save, sender=Campaign)
 def create_campaign(sender, instance, created, **kwargs):
-    contents = instance.contents.all()
-
     import requests
-    if created:
+
+    if instance.reference_id or instance.status != Campaign.STATUS_APPROVED:
         return
-    if instance.status != Campaign.STATUS_APPROVED:
-        return
-    url = 'http://192.168.2.152:8000/api/v1/campaign/'
-    headers = {'Authorization': 'Token b962325ce06c24c8d322cb5a97ea3f7dbfdbd8a7'}
+
+    headers = {'Authorization': 'Token 97f378477d8a3b2503a03c9037c1c7537aebb67f'}
+    # headers = {
+    #     'Content-type': 'application/json',
+    #     'Accept': 'application/json',
+    #     'Authorization': 'Token b962325ce06c24c8d322cb5a97ea3f7dbfdbd8a7'
+    # }
     data = dict(
         title=instance.name,
         status="approved",
         view_duration=None,
-        is_enable=True,
+        is_enable=False,
         owner=1,
-        categories=[
-            instance.categories.values_list('pk', flat=True)
-        ],
-        channels=[
-            instance.publishers.values_list('pk', flat=True)
-        ],
-        time_slicing=1
+        categories=list(instance.categories.values_list('re'
+                                                        'ference_id', flat=True)),
+        channels=list(instance.publishers.values_list('pk', flat=True)),
+        time_slicing=1,
     )
 
+    url = 'http://192.168.2.152:8000/api/v1/campaigns/'
     r = requests.post(url=url, headers=headers, data=data)
     if r.status_code != 201:
         return
@@ -129,25 +132,43 @@ def create_campaign(sender, instance, created, **kwargs):
     response = r.json()
     campaign_id = response['id']
 
-    url = 'http://192.168.2.152:8000/api/v1/content/'
-    headers = {'Authorization': 'Token b962325ce06c24c8d322cb5a97ea3f7dbfdbd8a7'}
-    c = CampaignContent()
-
-    for content in contents:
+    for content in instance.contents.all():
         data = dict(
+            campaign=campaign_id,
             display_text=content.title,
-            content=content.data,
-            link="",
-            has_tracker=True,
-            tracker_bucket_size=10,
-            view_type="total",
-            message_id=None,
-            is_sticker=False,
-            campaign=1,
-            mother_channel=1,
-            tariff_publisher=None,
-            tariff_advertiser=None
+            content=content.data.get('content'),
+            tariff_advertiser=content.cost_model_price,
+            links=content.data.get('link'),
+            inlines=content.data.get('inlineKeyboards'),
+            view_type=content.data.get('view_type'),
         )
+        url = 'http://192.168.2.152:8000/api/v1/contents/'
+        r = requests.post(url=url, headers=headers, data=data)
+        if r.status_code != 201:
+            return
+
+        response = r.json()
+        content_id = response['id']
+
+        try:
+            file = File.objects.get(pk=int(content.data.get('file'))).file
+        except:
+            return
+        else:
+            name, extension = os.path.splitext(file.name)
+            url = 'http://192.168.2.152:8000/api/v1/files/'
+            data = dict(
+                name=file.name,
+                file_type=file_type(extension),
+                campaign_content=content_id,
+            )
+            r = requests.post(url=url, headers=headers, data=data, files={'file': file})
+            if r.status_code != 201:
+                return
+
+    Campaign.objects.filter(pk=instance.pk).update(reference_id=campaign_id)
+    url = f'http://192.168.2.152:8000/api/v1/campaigns/{campaign_id}/'
+    requests.patch(url=url, headers=headers, data={'is_enable': True})
 
 
 class TargetDevice(models.Model):
