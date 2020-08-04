@@ -1,8 +1,11 @@
 import datetime
 
-from rest_framework import serializers, exceptions
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice
+from apps.core.models import File
+from apps.medium.consts import Medium
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -183,8 +186,65 @@ class CampaignRepeatSerializer(serializers.ModelSerializer):
         fields = ["start_date", 'end_date', 'daily_cost', 'total_cost', 'target_devices', 'schedules']
 
 
+class TelegramContentDataSerializer(serializers.Serializer):
+    content = serializers.CharField(required=False)
+    links = serializers.ListField(required=False)
+    inlines = serializers.ListField(required=False)
+    file = serializers.IntegerField(required=False)
+    file_type = serializers.CharField(required=False)
+    view_type = serializers.CharField(required=False)
+
+    def validate_file(self, value):
+        if File.objects.filter(pk=value).exists():
+            return value
+        else:
+            raise ValidationError({'data': 'invalid file id'})
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        try:
+            file = File.objects.get(pk=data['file']).file
+            file_path = file.path
+        except:
+            file_path = ''
+        data.update({'file': file_path})
+        return data
+
+
+class WebContentDataSerializer(serializers.Serializer):
+    subtitle = serializers.CharField(required=False)
+    imageId = serializers.IntegerField(required=False)
+    imgTitle = serializers.CharField(required=False)
+    imgDescription = serializers.CharField(required=False)
+
+    def validate_imageId(self, value):
+        if File.objects.filter(pk=value).exists():
+            return value
+        else:
+            raise ValidationError({'data': 'invalid imageId'})
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        try:
+            image = File.objects.get(pk=data['imageId']).file
+            image_path = image.path
+        except:
+            image_path = ''
+        data.update({'imageId': image_path})
+        return data
+
+
 class CampaignContentSerializer(serializers.ModelSerializer):
+    data = serializers.SerializerMethodField()
+
     class Meta:
         model = CampaignContent
         fields = '__all__'
         read_only_fields = ['campaign']
+
+    def get_data(self, instance):
+        if instance.campaign.medium == Medium.TELEGRAM:
+            serializer = TelegramContentDataSerializer
+        elif instance.campaign.medium == Medium.WEB:
+            serializer = WebContentDataSerializer
+        return serializer(instance.data).data
