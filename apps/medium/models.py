@@ -12,6 +12,7 @@ class Category(models.Model):
     display_text = models.CharField(max_length=50)
 
     class Meta:
+        verbose_name_plural = 'Categories'
         constraints = [
             models.UniqueConstraint(fields=['medium', 'reference_id'], name="unique_medium_reference")
         ]
