@@ -4,9 +4,9 @@ AUDIO = 'audio'
 DOCUMENT = 'document'
 
 FILE_TYPES = {
-    PHOTO: ['jpeg', 'jpg', 'png'],
-    VIDEO: ['mp4', 'gif', 'avi', 'wmv', 'mkv', 'flv', 'mov'],
-    AUDIO: ['mp3', 'wav', 'aac', 'ogg', 'wma'],
+    PHOTO: ['.jpeg', '.jpg', '.png'],
+    VIDEO: ['.mp4', '.gif', '.avi', '.wmv', '.mkv', '.flv', '.mov'],
+    AUDIO: ['.mp3', '.wav', '.aac', '.ogg', '.wma'],
 }
 
 
