@@ -145,6 +145,9 @@ class CampaignContent(models.Model):
     cost_model = models.PositiveSmallIntegerField(choices=COST_MODEL_CHOICES)
     cost_model_price = models.IntegerField()
 
+    class Meta:
+        verbose_name = 'Content'
+
     def __str__(self):
         return self.title
 
@@ -171,3 +174,6 @@ class CampaignSchedule(models.Model):
     day = models.PositiveSmallIntegerField(choices=DAYS_OF_WEEK)
     start_time = models.TimeField(default=datetime.time.min)
     end_time = models.TimeField(default=datetime.time.max)
+
+    class Meta:
+        verbose_name = 'Schedule'
