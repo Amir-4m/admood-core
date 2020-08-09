@@ -3,7 +3,7 @@ import os
 
 import requests
 
-from admood_core.settings import TELEGRAM_TOKEN
+from admood_core.settings import ADBOT_API_TOKEN
 from apps.campaign.telegram import file_type
 from apps.campaign.telegram.consts import CAMPAIGN_URL, JSON_HEADERS, HEADERS, CONTENT_URL, FILE_URL
 from apps.core.models import File

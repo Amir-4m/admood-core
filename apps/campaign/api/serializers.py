@@ -247,4 +247,7 @@ class CampaignContentSerializer(serializers.ModelSerializer):
             serializer = TelegramContentDataSerializer
         elif instance.campaign.medium == Medium.WEB:
             serializer = WebContentDataSerializer
+        # todo: add other mediums
+        else:
+            return None
         return serializer(instance.data).data
