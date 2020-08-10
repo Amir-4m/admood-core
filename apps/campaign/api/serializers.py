@@ -204,7 +204,7 @@ class TelegramContentDataSerializer(serializers.Serializer):
         data = super().to_representation(instance)
         try:
             file = File.objects.get(pk=data['file']).file
-            file_path = self.context['request'].build_absolute_uri(file.url)
+            file_path = self.context['view'].request.build_absolute_uri(file.url)
         except:
             file_path = ''
         data.update({'file': file_path})
@@ -227,7 +227,7 @@ class WebContentDataSerializer(serializers.Serializer):
         data = super().to_representation(instance)
         try:
             image = File.objects.get(pk=data['imageId']).file
-            image_path = self.context['request'].build_absolute_uri(image.url)
+            image_path = self.context['view'].request.build_absolute_uri(image.url)
         except:
             image_path = ''
         data.update({'imageId': image_path})
