@@ -21,7 +21,7 @@ class CampaignScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CampaignSchedule
-        fields = ('id', 'day', 'start_time', 'end_time')
+        fields = ('id', 'week_day', 'start_time', 'end_time')
 
     def validate(self, attrs):
         attrs['start_time'] = attrs.get('start_time', datetime.time.min)
@@ -68,7 +68,7 @@ class CampaignSerializer(serializers.ModelSerializer):
             start_time = schedule.get('start_time')
             end_time = schedule.get('end_time')
             for i in value[idx + 1:]:
-                if schedule['day'] == i['day']:
+                if schedule['week_day'] == i['week_day']:
                     if not (
                             (start_time < i.get('start_time') and end_time < i.get('start_time')) or
                             (start_time > i.get('end_time') and end_time > i.get('end_time'))
@@ -178,13 +178,26 @@ class CampaignEnableSerializer(serializers.ModelSerializer):
 
 class CampaignRepeatSerializer(serializers.ModelSerializer):
     start_date = serializers.DateField(allow_null=True)
-    target_devices = TargetDeviceSerializer(many=True)
     schedules = CampaignScheduleSerializer(many=True)
 
     class Meta:
         model = Campaign
-        fields = ["start_date", 'end_date', 'daily_cost', 'total_cost', 'target_devices', 'schedules']
+        fields = ['start_date', 'end_date', 'daily_cost', 'total_cost', 'schedules', 'categories', 'publishers']
 
+    def validate(self, attrs):
+        medium = attrs.get('medium')
+        publishers = attrs.get('publishers', [])
+        categories = attrs.get('categories', [])
+        if len(publishers) == 0 and len(categories) == 0:
+            raise serializers.ValidationError("publishers and categories both can not be empty.")
+
+        for category in categories:
+            if category.medium != medium:
+                raise serializers.ValidationError("campaign's medium and category's medium must be the same.")
+
+        for publisher in publishers:
+            if publisher.medium != medium:
+                raise serializers.ValidationError("campaign's medium and publisher's medium must be the same.")
 
 class TelegramContentDataSerializer(serializers.Serializer):
     content = serializers.CharField(required=False)
