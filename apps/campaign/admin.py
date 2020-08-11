@@ -31,4 +31,4 @@ class CampaignContentAdmin(admin.ModelAdmin):
 
 @admin.register(CampaignSchedule)
 class CampaignScheduleAdmin(admin.ModelAdmin):
-    list_display = ("campaign", "day", "start_time", "end_time")
+    list_display = ("campaign", "week_day", "start_time", "end_time")
