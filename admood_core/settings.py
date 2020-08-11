@@ -13,6 +13,8 @@ import os
 from datetime import timedelta
 
 from pathlib import Path
+
+from celery.schedules import crontab
 from decouple import config, Csv
 
 # Quick-start development settings - unsuitable for production
@@ -272,5 +274,12 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 CELERY_BROKER_USER = config("CELERY_BROKER_USER")
 CELERY_BROKER_PASSWORD = config("CELERY_BROKER_PASSWORD")
+
+CELERY_BEAT_SCHEDULE = {
+    "sample_task": {
+        "task": "apps.campaign.tasks.create_campaign",
+        "schedule": crontab(minute="*/1"),
+    },
+}
 
 ADBOT_API_TOKEN = config("ADBOT_API_TOKEN")
