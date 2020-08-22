@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
 from apps.campaign.api.validators import validate_campaign_utm, validate_content_utm
-from apps.campaign.telegram import create_campaign
 from apps.device.consts import ServiceProvider
 from apps.device.models import Device
 from apps.medium.consts import Medium
