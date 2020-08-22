@@ -256,6 +256,8 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         instance.pk = None
         super().update(instance, validated_data)
 
+        instance.locations.set(locations)
+
         if schedules is not None:
             schedule_id_list = [i.get("id") for i in schedules if i.get("id")]
             CampaignSchedule.objects.filter(campaign=instance).exclude(id__in=schedule_id_list).delete()
@@ -277,11 +279,6 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
             target_device.pk = None
             target_device.campaign = instance
             target_device.save()
-
-        for location in locations:
-            location.pk = None
-            location.campaign = instance
-            location.save()
 
         return instance
 
