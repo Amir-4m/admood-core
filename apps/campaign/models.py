@@ -163,17 +163,17 @@ class CampaignSchedule(models.Model):
     SATURDAY = 5
     SUNDAY = 6
 
-    WEEK_DAY = (
-        (SATURDAY, 'Saturday'),
-        (SUNDAY, 'Sunday'),
-        (MONDAY, 'Monday'),
-        (TUESDAY, 'Tuesday'),
-        (WEDNESDAY, 'Wednesday'),
-        (THURSDAY, 'Thursday'),
-        (FRIDAY, 'Friday'),
+    WEEKDAYS = (
+        (MONDAY, _('Monday')),
+        (TUESDAY, _('Tuesday')),
+        (WEDNESDAY, _('Wednesday')),
+        (THURSDAY, _('Thursday')),
+        (FRIDAY, _('Friday')),
+        (SATURDAY, _('Saturday')),
+        (SUNDAY, _('Sunday')),
     )
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='schedules')
-    week_day = models.PositiveSmallIntegerField(choices=WEEK_DAY)
+    week_day = models.PositiveSmallIntegerField(choices=WEEKDAYS)
     start_time = models.TimeField(default=datetime.time.min)
     end_time = models.TimeField(default=datetime.time.max)
 
