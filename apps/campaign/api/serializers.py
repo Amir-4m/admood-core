@@ -78,6 +78,11 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         return value
 
+    def validate_start_date(self, value):
+        if value is None:
+            value = timezone.now().date()
+        return value
+
     def validate(self, attrs):
 
         if self.instance:
@@ -114,9 +119,6 @@ class CampaignSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         target_devices = validated_data.pop("target_devices")
         schedules = validated_data.pop("schedules")
-
-        if validated_data['start_date'] is None:
-            validated_data["start_date"] = datetime.date.today()
 
         campaign = super().create(validated_data)
 
