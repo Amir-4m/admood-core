@@ -249,8 +249,11 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        instance.pk = None
+        contents = instance.contents.all()
+        locations = instance.locations.all()
+        target_devices = instance.target_devices.all()
         schedules = validated_data.pop("schedules", None)
+        instance.pk = None
         super().update(instance, validated_data)
 
         if schedules is not None:
@@ -264,6 +267,21 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
                     ).update(**schedule_data)
                 else:
                     CampaignSchedule.objects.create(campaign=instance, **schedule_data)
+
+        for content in contents:
+            content.pk = None
+            content.campaign = instance
+            content.save()
+
+        for target_device in target_devices:
+            target_device.pk = None
+            target_device.campaign = instance
+            target_device.save()
+
+        for location in locations:
+            location.pk = None
+            location.campaign = instance
+            location.save()
 
         return instance
 
