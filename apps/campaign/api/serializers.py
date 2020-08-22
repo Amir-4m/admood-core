@@ -209,7 +209,7 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['publishers', 'categories', 'schedules', 'name', 'start_date', 'end_date', 'total_cost', 'daily_cost']
+        fields = ['id', 'publishers', 'categories', 'schedules', 'name', 'start_date', 'end_date', 'total_cost', 'daily_cost']
 
     def validate(self, attrs):
         publishers = attrs.get('publishers', [])
