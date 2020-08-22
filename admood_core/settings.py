@@ -277,7 +277,7 @@ CELERY_BROKER_PASSWORD = config("CELERY_BROKER_PASSWORD")
 
 CELERY_BEAT_SCHEDULE = {
     "sample_task": {
-        "task": "apps.campaign.tasks.create_campaign",
+        "task": "apps.campaign.tasks.create_telegram_campaign",
         "schedule": crontab(minute="*/1"),
     },
 }

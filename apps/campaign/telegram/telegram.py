@@ -9,7 +9,7 @@ from apps.campaign.telegram.consts import CAMPAIGN_URL, JSON_HEADERS, HEADERS, C
 from apps.core.models import File
 
 
-def create_campaign(campaign):
+def create_campaign(campaign, start_time, end_time):
     data = dict(
         title=campaign.name,
         status="approved",
@@ -19,6 +19,8 @@ def create_campaign(campaign):
         categories=list(campaign.categories.values_list('reference_id', flat=True)),
         channels=list(campaign.publishers.values_list('pk', flat=True)),
         time_slicing=1,
+        start_time=start_time,
+        end_time=end_time
     )
     r = requests.post(url=CAMPAIGN_URL, headers=JSON_HEADERS, data=json.dumps(data))
     if not r.ok:
@@ -55,11 +57,14 @@ def create_content(content, campaign_id):
     response = r.json()
     content_id = response['id']
 
+    file = content.data.get('file')
+    if not file:
+        return True
+
     try:
-        file = File.objects.get(pk=int(content.data.get('file'))).file
+        file = File.objects.get(pk=int(file)).file
     except:
         return False
-
     name, extension = os.path.splitext(file.name)
     data = dict(
         name=file.name,
@@ -70,3 +75,10 @@ def create_content(content, campaign_id):
     if r.ok:
         return True
     return False
+
+
+def campaign_report(campaign_id):
+    r = requests.get(url=f'{CONTENT_URL}{campaign_id}/report', headers=HEADERS)
+    if not r.ok:
+        return {}
+    return r.json()
