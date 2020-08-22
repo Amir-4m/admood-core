@@ -8,7 +8,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
-    CampaignContentSerializer)
+    CampaignContentSerializer, CampaignDuplicateSerializer)
 from apps.campaign.models import Province, Campaign, CampaignContent
 from apps.core.views import BaseViewSet
 
@@ -43,10 +43,12 @@ class CampaignViewSet(BaseViewSet,
     def enable(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
-    @action(detail=True, methods=["post"])
-    def clone(self, request, *args, **kwargs):
-        campaign = self.get_object()
-        serializer = self.get_serializer(campaign.clone())
+    @action(detail=True, methods=['post'], serializer_class=CampaignDuplicateSerializer)
+    def duplicate(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
