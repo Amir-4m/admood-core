@@ -1,5 +1,6 @@
 import datetime
 
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -200,6 +201,72 @@ class CampaignRepeatSerializer(serializers.ModelSerializer):
         for publisher in publishers:
             if publisher.medium != medium:
                 raise serializers.ValidationError("campaign's medium and publisher's medium must be the same.")
+
+
+class CampaignDuplicateSerializer(serializers.ModelSerializer):
+    start_date = serializers.DateField(allow_null=True)
+    schedules = CampaignScheduleSerializer(many=True)
+
+    class Meta:
+        model = Campaign
+        fields = ['publishers', 'categories', 'schedules', 'name', 'start_date', 'end_date', 'total_cost', 'daily_cost']
+
+    def validate(self, attrs):
+        publishers = attrs.get('publishers', [])
+        categories = attrs.get('categories', [])
+
+        if len(publishers) == 0 and len(categories) == 0:
+            raise serializers.ValidationError("publishers and categories both can not be empty.")
+
+        for category in categories:
+            if category.medium != self.instance.medium:
+                raise serializers.ValidationError("campaign's medium and category's medium must be the same.")
+
+        for publisher in publishers:
+            if publisher.medium != self.instance.medium:
+                raise serializers.ValidationError("campaign's medium and publisher's medium must be the same.")
+
+        return attrs
+
+    def validate_schedules(self, value):
+        for idx, schedule in enumerate(value):
+            start_time = schedule.get('start_time')
+            end_time = schedule.get('end_time')
+            for i in value[idx + 1:]:
+                if schedule['week_day'] == i['week_day']:
+                    if not (
+                            (start_time < i.get('start_time') and end_time < i.get('start_time')) or
+                            (start_time > i.get('end_time') and end_time > i.get('end_time'))
+                    ):
+                        raise serializers.ValidationError(
+                            {'schedules': 'invalid schedule set.'})
+
+        return value
+
+    def validate_start_date(self, value):
+        if value is None:
+            value = timezone.now().date()
+        return value
+
+    def update(self, instance, validated_data):
+        instance.pk = None
+        schedules = validated_data.pop("schedules", None)
+        super().update(instance, validated_data)
+
+        if schedules is not None:
+            schedule_id_list = [i.get("id") for i in schedules if i.get("id")]
+            CampaignSchedule.objects.filter(campaign=instance).exclude(id__in=schedule_id_list).delete()
+            for schedule_data in schedules:
+                schedule_id = schedule_data.pop('id', None)
+                if schedule_id:
+                    CampaignSchedule.objects.filter(
+                        id=schedule_id, campaign=instance
+                    ).update(**schedule_data)
+                else:
+                    CampaignSchedule.objects.create(campaign=instance, **schedule_data)
+
+        return instance
+
 
 class TelegramContentDataSerializer(serializers.Serializer):
     content = serializers.CharField(required=False)
