@@ -67,33 +67,32 @@ class Campaign(models.Model):
         target_devices = self.target_devices.all()
         schedules = self.schedules.all()
 
-        new_campaign = self
-        new_campaign.pk = None
-        new_campaign.status = Campaign.STATUS_WAITING
-        new_campaign.save()
-        new_campaign.publishers.set(publishers)
-        new_campaign.locations.set(locations)
-        new_campaign.categories.set(categories)
+        self.pk = None
+        self.status = Campaign.STATUS_WAITING
+        self.save()
+        self.publishers.set(publishers)
+        self.locations.set(locations)
+        self.categories.set(categories)
 
         for content in contents:
-            new_content = content
-            new_content.pk = None
-            new_content.campaign = new_campaign
-            new_content.save()
+            content = content
+            content.pk = None
+            content.campaign = self
+            content.save()
 
         for target_device in target_devices:
-            new_target_device = target_device
-            new_target_device.pk = None
-            new_target_device.campaign = new_campaign
-            new_target_device.save()
+            target_device = target_device
+            target_device.pk = None
+            target_device.campaign = self
+            target_device.save()
 
         for schedule in schedules:
-            new_schedule = schedule
-            new_schedule.pk = None
-            new_schedule.campaign = new_campaign
-            new_schedule.save()
+            schedule = schedule
+            schedule.pk = None
+            schedule.campaign = self
+            schedule.save()
 
-        return new_campaign
+        return self
 
 
 class MediumCampaign(models.Model):
