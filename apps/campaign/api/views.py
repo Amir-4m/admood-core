@@ -51,11 +51,6 @@ class CampaignViewSet(BaseViewSet,
         serializer.save()
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'])
-    def repeat(self, request, *args, **kwargs):
-        campaign = self.get_object()
-        serializer = self.get_serializer(instance=campaign, data=request.data)
-
 
 class ContentViewSet(BaseViewSet,
                      mixins.ListModelMixin,
