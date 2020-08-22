@@ -135,13 +135,13 @@ class Campaign(models.Model):
 
     # def duplicate(self):
 
-
-@receiver(post_save, sender=Campaign)
-def import_to_telegram(sender, instance, created, **kwargs):
-    if not instance.reference_id and instance.status == Campaign.STATUS_APPROVED:
-        reference_id = create_campaign(instance)
-        if reference_id:
-            sender.objects.filter(pk=instance.pk).update(reference_id=reference_id)
+class MediumCampaign(models.Model):
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    reference_id = models.IntegerField(null=True, blank=True)
+    data = JSONField(null=True, blank=True)
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
 
 
 class TargetDevice(models.Model):
