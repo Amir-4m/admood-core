@@ -351,6 +351,7 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         return serializer(instance.data, context=self.context).data
 
     def validate(self, attrs):
-        if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:
-            raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
+        if self.instance:
+            if self.instance.campaign.status == Campaign.STATUS_APPROVED:
+                raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
         return attrs
