@@ -56,6 +56,7 @@ class ContentViewSet(BaseViewSet,
                      mixins.ListModelMixin,
                      mixins.CreateModelMixin,
                      mixins.RetrieveModelMixin,
+                     mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
