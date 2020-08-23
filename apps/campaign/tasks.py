@@ -19,9 +19,9 @@ def create_telegram_campaign():
         # schedules__week_day=today.weekday()
     )
 
-    # scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
+    scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
 
-    for campaign in campaigns:
+    for campaign in scheduled_campaigns:
         schedules = campaign.schedules.filter(week_day=today.weekday())
 
         for schedule in schedules:
@@ -43,5 +43,5 @@ def create_telegram_campaign():
                 cm.save()
 
     # todo create non schedule campaigns
-    if len(campaigns) < 5:
+    if len(scheduled_campaigns) < 5:
         pass
