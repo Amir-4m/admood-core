@@ -209,7 +209,8 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['id', 'publishers', 'categories', 'schedules', 'name', 'start_date', 'end_date', 'total_cost', 'daily_cost']
+        fields = ['id', 'publishers', 'categories', 'schedules', 'name', 'start_date', 'end_date', 'total_cost',
+                  'daily_cost']
 
     def validate(self, attrs):
         publishers = attrs.get('publishers', [])
@@ -348,3 +349,8 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         else:
             return None
         return serializer(instance.data, context=self.context).data
+
+    def validate(self, attrs):
+        if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:
+            raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
+        return attrs
