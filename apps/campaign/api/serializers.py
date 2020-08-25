@@ -285,7 +285,7 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
 
 
 class CampaignContentSerializer(serializers.ModelSerializer):
-    data = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = CampaignContent
@@ -307,3 +307,11 @@ class CampaignContentSerializer(serializers.ModelSerializer):
             if self.instance.campaign.status == Campaign.STATUS_APPROVED:
                 raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
         return attrs
+
+    def get_file_url(self, obj):
+        try:
+            file_id = obj.data.get('file') or obj.data.get('imageId')
+            file = File.objects.get(pk=file_id).file
+            return self.context['request'].build_absolute_uri(file.url)
+        except:
+            return None
