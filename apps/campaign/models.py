@@ -136,7 +136,6 @@ class CampaignContent(models.Model):
     title = models.CharField(max_length=250)
     landing_url = models.URLField(blank=True, null=True)
     data = JSONField()
-    utm = JSONField(validators=[validate_content_utm], null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     utm_term = models.CharField(max_length=100, blank=True, null=True)
     utm_content = models.CharField(max_length=50, null=True, blank=True)
