@@ -292,16 +292,6 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['campaign']
 
-    def get_data(self, instance):
-        if instance.campaign.medium == Medium.TELEGRAM:
-            serializer = TelegramContentDataSerializer
-        elif instance.campaign.medium == Medium.WEB:
-            serializer = WebContentDataSerializer
-        # todo: add other mediums
-        else:
-            return None
-        return serializer(instance.data, context=self.context).data
-
     def validate(self, attrs):
         if self.instance:
             if self.instance.campaign.status == Campaign.STATUS_APPROVED:
