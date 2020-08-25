@@ -284,54 +284,6 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         return instance
 
 
-class TelegramContentDataSerializer(serializers.Serializer):
-    content = serializers.CharField(required=False)
-    links = serializers.ListField(required=False)
-    inlines = serializers.ListField(required=False)
-    file = serializers.IntegerField(required=False)
-    file_type = serializers.CharField(required=False)
-    view_type = serializers.CharField(required=False)
-
-    def validate_file(self, value):
-        if File.objects.filter(pk=value).exists():
-            return value
-        else:
-            raise ValidationError({'data': 'invalid file id'})
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        try:
-            file = File.objects.get(pk=data['file']).file
-            file_url = self.context['request'].build_absolute_uri(file.url)
-        except:
-            file_url = ''
-        data.update({'file': file_url})
-        return data
-
-
-class WebContentDataSerializer(serializers.Serializer):
-    subtitle = serializers.CharField(required=False)
-    imageId = serializers.IntegerField(required=False)
-    imgTitle = serializers.CharField(required=False)
-    imgDescription = serializers.CharField(required=False)
-
-    def validate_imageId(self, value):
-        if File.objects.filter(pk=value).exists():
-            return value
-        else:
-            raise ValidationError({'data': 'invalid imageId'})
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        try:
-            image = File.objects.get(pk=data['imageId']).file
-            image_url = self.context['request'].build_absolute_uri(image.url)
-        except:
-            image_url = ''
-        data.update({'imageId': image_url})
-        return data
-
-
 class CampaignContentSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()
 
