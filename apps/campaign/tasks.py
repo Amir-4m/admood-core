@@ -45,3 +45,9 @@ def create_telegram_campaign():
     # todo create non schedule campaigns
     if len(scheduled_campaigns) < 5:
         pass
+
+
+@shared_task
+def disable_telegram_campaign():
+    # disable telegram campaign
+    pass
