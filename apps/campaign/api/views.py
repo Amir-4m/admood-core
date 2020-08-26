@@ -1,6 +1,7 @@
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -32,6 +33,7 @@ class CampaignViewSet(BaseViewSet,
     permission_classes = (IsAuthenticated,)
     queryset = Campaign.objects.all()
     serializer_class = CampaignSerializer
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         return self.queryset.filter(owner=self.request.user)
@@ -63,6 +65,7 @@ class ContentViewSet(BaseViewSet,
     serializer_class = CampaignContentSerializer
     queryset = CampaignContent.objects.all()
     http_method_names = ['get', 'post', 'head', 'put']
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         campaign_id = self.kwargs['campaign_id']

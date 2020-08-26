@@ -159,9 +159,6 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DATETIME_FORMAT': '%Y-%m-%d %H:%M',
     'TIME_FORMAT': '%H:%M',
-
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100,
 }
 
 AUTHENTICATION_BACKENDS = [
