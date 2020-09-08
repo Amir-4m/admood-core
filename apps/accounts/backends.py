@@ -40,8 +40,7 @@ class EmailAuthBackend(ModelBackend):
 
     def user_can_authenticate(self, user):
         """
-        Reject users with is_active=False. Custom user models that don't have
-        that attribute are allowed.
+        Reject users with is_verified=False and is_active=False.
         """
         is_active = getattr(user, 'is_active', None)
         is_verified = getattr(user, 'is_verified')
