@@ -28,6 +28,7 @@ class GoogleAuthBackend(ModelBackend):
             except UserModel.DoesNotExist:
                 user = UserModel.objects.create_user(
                     email=email,
+                    is_verified=True,
                 )
             return user
 
