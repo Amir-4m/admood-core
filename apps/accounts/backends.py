@@ -36,6 +36,16 @@ class GoogleAuthBackend(ModelBackend):
 
 
 class EmailAuthBackend(ModelBackend):
+
+    def user_can_authenticate(self, user):
+        """
+        Reject users with is_active=False. Custom user models that don't have
+        that attribute are allowed.
+        """
+        is_active = getattr(user, 'is_active', None)
+        is_verified = getattr(user, 'is_verified')
+        return is_verified and (is_active or is_active is None)
+
     def authenticate(self, request, username=None, password=None, **kwargs):
         if username is None:
             username = kwargs.get('email')
