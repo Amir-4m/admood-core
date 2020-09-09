@@ -53,6 +53,11 @@ class CampaignViewSet(BaseViewSet,
         serializer.save()
         return Response(serializer.data)
 
+    @action(detail=True, methods=['get'], url_path=r'cost_model/(?P<cost_model>[^/.]+)')
+    def cost_model(self, request, cost_model, pk=None):
+        # todo: calculate min of cost model price
+        return Response({'value': 300})
+
 
 class ContentViewSet(BaseViewSet,
                      mixins.ListModelMixin,
