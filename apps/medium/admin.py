@@ -3,8 +3,8 @@ from django.contrib import admin
 from .forms import PublisherForm
 from .models import (
     Category,
-    Category,
     Publisher,
+    CostModelPrice,
 )
 
 
@@ -18,3 +18,8 @@ class PublisherAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['title', 'medium', 'display_text', 'reference_id']
+
+
+@admin.register(CostModelPrice)
+class CostModelPriceAdmin(admin.ModelAdmin):
+    list_display = ['medium', 'grade']
