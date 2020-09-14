@@ -2,11 +2,9 @@ import datetime
 
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
-from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice
+from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignPublisher
 from apps.core.models import File
-from apps.medium.consts import Medium
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -129,6 +127,9 @@ class CampaignSerializer(serializers.ModelSerializer):
         for schedule_data in schedules:
             CampaignSchedule.objects.create(campaign=campaign, **schedule_data)
 
+        for count, publisher in enumerate(campaign.publishers):
+            CampaignPublisher.objects.create(campaign=campaign, publisher=publisher, order=count + 1)
+
         return campaign
 
     def update(self, instance, validated_data):
@@ -167,6 +168,10 @@ class CampaignSerializer(serializers.ModelSerializer):
                     ).update(**schedule_data)
                 else:
                     CampaignSchedule.objects.create(campaign=instance, **schedule_data)
+
+        CampaignPublisher.objects.filter(campaign=instance).delete()
+        for count, publisher in enumerate(instance.publishers):
+            CampaignPublisher.objects.create(campaign=instance, publisher=publisher, order=count + 1)
 
         return instance
 
