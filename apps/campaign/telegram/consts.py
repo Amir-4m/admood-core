@@ -1,4 +1,4 @@
-from admood_core.settings import ADBOT_API_TOKEN
+from admood_core.settings import ADBOT_API_TOKEN, ADBOT_API_URL
 
 JSON_HEADERS = {
     'Authorization': ADBOT_API_TOKEN,
@@ -8,6 +8,6 @@ HEADERS = {
     'Authorization': ADBOT_API_TOKEN,
 }
 
-CAMPAIGN_URL = 'http://192.168.2.152:8000/api/v1/campaigns/'
-CONTENT_URL = 'http://192.168.2.152:8000/api/v1/contents/'
-FILE_URL = 'http://192.168.2.152:8000/api/v1/files/'
+CAMPAIGN_URL = f'{ADBOT_API_URL}/api/v1/campaigns/'
+CONTENT_URL = f'{ADBOT_API_URL}/api/v1/contents/'
+FILE_URL = f'{ADBOT_API_URL}/api/v1/files/'
