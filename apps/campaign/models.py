@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
+from apps.core.consts import CostModel
 from apps.campaign.api.validators import validate_campaign_utm, validate_content_utm
 from apps.device.consts import ServiceProvider
 from apps.device.models import Device
@@ -122,16 +123,6 @@ class TargetDevice(models.Model):
 
 
 class CampaignContent(models.Model):
-    COST_MODEL_CPA = 1
-    COST_MODEL_CPC = 2
-    COST_MODEL_CPM = 3
-
-    COST_MODEL_CHOICES = (
-        (COST_MODEL_CPA, "cpa"),
-        (COST_MODEL_CPC, "cpc"),
-        (COST_MODEL_CPM, "cpm"),
-    )
-
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='contents')
     title = models.CharField(max_length=250)
     landing_url = models.URLField(blank=True, null=True)
@@ -140,7 +131,7 @@ class CampaignContent(models.Model):
     utm_term = models.CharField(max_length=100, blank=True, null=True)
     utm_content = models.CharField(max_length=50, null=True, blank=True)
 
-    cost_model = models.PositiveSmallIntegerField(choices=COST_MODEL_CHOICES)
+    cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
     cost_model_price = models.IntegerField()
 
     class Meta:
