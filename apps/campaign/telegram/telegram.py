@@ -3,13 +3,15 @@ import os
 
 import requests
 
-from admood_core.settings import ADBOT_API_TOKEN
+from apps.campaign.models import CampaignPublisher
 from apps.campaign.telegram import file_type
 from apps.campaign.telegram.consts import CAMPAIGN_URL, JSON_HEADERS, HEADERS, CONTENT_URL, FILE_URL
 from apps.core.models import File
 
 
 def create_campaign(campaign, start_time, end_time):
+    publishers = CampaignPublisher.objects.filter(campaign=campaign).values_list('pk', 'publisher_price')
+
     data = dict(
         title=campaign.name,
         status="approved",
@@ -17,7 +19,7 @@ def create_campaign(campaign, start_time, end_time):
         is_enable=False,
         owner=1,
         categories=list(campaign.categories.values_list('reference_id', flat=True)),
-        channels=list(campaign.publishers.values_list('pk', flat=True)),
+        channels=list(publishers),
         time_slicing=1,
         start_time=start_time,
         end_time=end_time
