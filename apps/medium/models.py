@@ -3,6 +3,7 @@ from django.db import models
 
 from admood_core import settings
 from .consts import Medium
+from ..core.consts import CostModel
 
 
 class Category(models.Model):
@@ -19,6 +20,20 @@ class Category(models.Model):
 
     def __str__(self):
         return f'{self.get_medium_display()} - {self.display_text}'
+
+
+class CostModelPrice(models.Model):
+    medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
+    cost_model = models.CharField(max_length=3, choices=CostModel.COST_MODEL_CHOICES)
+    grade = models.PositiveSmallIntegerField()
+    publisher_price = models.PositiveIntegerField()
+    advertiser_price = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('medium', 'cost_model', 'grade',)
+
+    def __str__(self):
+        return f'{self.grade}-{self.get_medium_display()}'
 
 
 class Publisher(models.Model):
