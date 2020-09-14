@@ -4,7 +4,9 @@ from .models import (
     Campaign,
     CampaignContent,
     TargetDevice,
-    CampaignSchedule, MediumCampaign,
+    CampaignSchedule,
+    MediumCampaign,
+    CampaignPublisher,
 )
 
 
@@ -18,9 +20,14 @@ class TargetDeviceInline(admin.TabularInline):
     extra = 1
 
 
+class CampaignPublisherInline(admin.TabularInline):
+    model = CampaignPublisher
+    extra = 1
+
+
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
-    inlines = [TargetDeviceInline]
+    inlines = [TargetDeviceInline, CampaignPublisherInline]
     autocomplete_fields = ["owner", "publishers", "locations"]
 
 
