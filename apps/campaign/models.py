@@ -175,3 +175,11 @@ class CampaignSchedule(models.Model):
 
     class Meta:
         verbose_name = 'Schedule'
+
+
+class CampaignPublisher(models.Model):
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField()
+    publisher_price = models.PositiveIntegerField()
+    advertiser_price = models.PositiveIntegerField()
