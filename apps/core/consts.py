@@ -9,12 +9,12 @@ class Bank:
 
 
 class CostModel:
-    CPA = "cpa"
-    CPC = "cpc"
-    CPM = "cpm"
+    CPA = 1
+    CPC = 2
+    CPV = 3
 
     COST_MODEL_CHOICES = (
         (CPA, "cpa"),
         (CPC, "cpc"),
-        (CPM, "cpm"),
+        (CPV, "cpv"),
     )
