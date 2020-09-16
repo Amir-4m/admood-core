@@ -127,7 +127,7 @@ class CampaignSerializer(serializers.ModelSerializer):
         for schedule_data in schedules:
             CampaignSchedule.objects.create(campaign=campaign, **schedule_data)
 
-        for count, publisher in enumerate(campaign.publishers):
+        for count, publisher in enumerate(campaign.publishers.all()):
             CampaignPublisher.objects.create(campaign=campaign, publisher=publisher, order=count + 1)
 
         return campaign
@@ -141,6 +141,7 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         target_devices = validated_data.pop("target_devices", None)
         schedules = validated_data.pop("schedules", None)
+        publishers = instance.publishers.all()
 
         instance = super().update(instance, validated_data)
 
@@ -170,7 +171,7 @@ class CampaignSerializer(serializers.ModelSerializer):
                     CampaignSchedule.objects.create(campaign=instance, **schedule_data)
 
         CampaignPublisher.objects.filter(campaign=instance).delete()
-        for count, publisher in enumerate(instance.publishers):
+        for count, publisher in enumerate(publishers):
             CampaignPublisher.objects.create(campaign=instance, publisher=publisher, order=count + 1)
 
         return instance
