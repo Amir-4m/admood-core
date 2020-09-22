@@ -1,9 +1,12 @@
 from celery import shared_task
+from django.db.models import Q
 from django.utils.timezone import now
 
-from apps.campaign.models import Campaign, MediumCampaign
-from apps.campaign.telegram import create_campaign
-from apps.campaign.telegram.telegram import campaign_report
+import datetime
+
+from apps.campaign.models import Campaign, CampaignReference
+from apps.core.utils.get_file import get_file
+from services.telegram import create_campaign, create_content, create_file, enable_campaign, campaign_report
 from apps.medium.consts import Medium
 
 
@@ -11,38 +14,49 @@ from apps.medium.consts import Medium
 def create_telegram_campaign():
     today = now().date()
     campaigns = Campaign.objects.filter(
-        is_enable=True,
-        status=Campaign.STATUS_APPROVED,
-        medium=Medium.TELEGRAM,
-        start_date__lte=today,
-        end_date__gte=today,
-        # schedules__week_day=today.weekday()
+        Q(is_enable=True),
+        Q(status=Campaign.STATUS_APPROVED),
+        Q(medium=Medium.TELEGRAM),
+        Q(start_date__lte=today),
+        Q(end_date__gte=today) | Q(end_date__isnull=True),
     )
 
+    # first try to create scheduled campaigns
+    # for telegram bot
     scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
-
     for campaign in scheduled_campaigns:
         schedules = campaign.schedules.filter(week_day=today.weekday())
 
         for schedule in schedules:
-            cm, created = MediumCampaign.objects.get_or_create(
+            cr, created = CampaignReference.objects.get_or_create(
                 campaign=campaign,
                 date=today,
                 start_time=schedule.start_time,
                 end_time=schedule.end_time
             )
-            if cm.reference_id:
-                # update report data
-                data = campaign_report(cm.reference_id)
-                if data:
-                    cm.data = data
-                    cm.save()
+
+            if cr.reference_id:
+                # update campaign report
+                report = campaign_report(cr.reference_id)
+                if report:
+                    cr.report = report
+                    cr.save()
             else:
                 # create telegram service campaign
-                cm.reference_id = create_campaign(campaign, str(schedule.start_time), str(schedule.end_time))
-                cm.save()
+                reference_id = create_campaign(
+                    campaign,
+                    datetime.datetime.combine(now().date(), schedule.start_time).__str__(),
+                    datetime.datetime.combine(now().date(), schedule.end_time).__str__(),
+                )
 
-    # todo create non schedule campaigns
-    if len(scheduled_campaigns) < 5:
-        pass
+                contents = campaign.contents.all()
+                for content in contents:
+                    content_id = create_content(content, reference_id)
+                    file = get_file(content.data.get('file', None))
+                    telegram_file_hash = content.data.get('telegram_file_hash', None)
+                    if file:
+                        create_file(file, content_id, telegram_file_hash)
 
+                if enable_campaign(reference_id):
+                    cr.reference_id = reference_id
+                    cr.save()
