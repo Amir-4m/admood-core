@@ -21,11 +21,13 @@ class Province(models.Model):
 
 
 class Campaign(models.Model):
+    STATUS_DRAFT = 0
     STATUS_WAITING = 1
     STATUS_APPROVED = 2
     STATUS_REJECTED = 3
 
     STATUS_CHOICES = (
+        (STATUS_DRAFT, "draft"),
         (STATUS_WAITING, "waiting"),
         (STATUS_APPROVED, "approved"),
         (STATUS_REJECTED, "rejected"),
@@ -40,7 +42,7 @@ class Campaign(models.Model):
     name = models.CharField(max_length=50)
     locations = models.ManyToManyField(Province, blank=True)
     description = models.TextField(null=True, blank=True)
-    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_WAITING)
+    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_DRAFT)
     start_date = models.DateField(default=datetime.date.today, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
