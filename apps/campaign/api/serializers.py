@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignPublisher
 from apps.core.models import File
+from services.telegram import get_contents
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -260,6 +261,17 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         locations = instance.locations.all()
         target_devices = instance.target_devices.all()
         schedules = validated_data.pop("schedules", None)
+        campaign_publishers = instance.campaignpublisher_set.all()
+
+        telegram_contents = get_contents(instance.campaignreference_set.first().reference_id)
+
+        for count, tc in enumerate(telegram_contents):
+            for file in tc.get("files", []):
+                telegram_file_hash = file["telegram_file_hash"]
+                telegram_content = instance.contents.all()[count]
+                telegram_content.data["telegram_file_hash"] = telegram_file_hash
+                telegram_content.save()
+
         instance.pk = None
         super().update(instance, validated_data)
 
