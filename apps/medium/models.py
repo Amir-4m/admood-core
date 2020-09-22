@@ -35,8 +35,8 @@ class CostModelPrice(models.Model):
 
 
 class Publisher(models.Model):
-    cost_models = models.ManyToManyField(CostModelPrice)
-    categories = models.ManyToManyField(Category)
+    cost_models = models.ManyToManyField(CostModelPrice, blank=True)
+    categories = models.ManyToManyField(Category, blank=True)
 
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     name = models.CharField(max_length=50)
