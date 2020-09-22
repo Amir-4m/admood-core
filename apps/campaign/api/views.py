@@ -50,6 +50,13 @@ class CampaignViewSet(BaseViewSet,
         self.perform_update(serializer)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['patch'])
+    def approve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data={'status': Campaign.STATUS_WAITING}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['post'], serializer_class=CampaignDuplicateSerializer)
     def duplicate(self, request, *args, **kwargs):

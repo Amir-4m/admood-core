@@ -61,6 +61,11 @@ class CampaignSerializer(serializers.ModelSerializer):
             kwargs['read_only'] = True
             extra_kwargs['medium'] = kwargs
 
+        if action in ['approve']:
+            kwargs = extra_kwargs.get('status', {})
+            kwargs['read_only'] = False
+            extra_kwargs['status'] = kwargs
+
         return extra_kwargs
 
     def validate_schedules(self, value):
@@ -83,16 +88,17 @@ class CampaignSerializer(serializers.ModelSerializer):
             value = timezone.now().date()
         return value
 
+    def validate_status(self, value):
+        if self.instance.status == Campaign.STATUS_DRAFT:
+            return value
+        return self.instance.status
+
     def validate(self, attrs):
+        action = self.context['view'].action
+        if action in ['enable', 'approve']:
+            return attrs
 
         if self.instance:
-            action = self.context['view'].action
-            if action == 'enable':
-                attrs = {
-                    'is_enable': attrs.get('is_enable', self.instance.is_enable)
-                }
-                return attrs
-
             if self.instance.status == Campaign.STATUS_APPROVED:
                 raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
             medium = self.instance.medium
