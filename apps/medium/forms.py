@@ -10,8 +10,8 @@ class PublisherForm(forms.ModelForm):
         fields = '__all__'
 
     def clean(self):
-        categories = self.cleaned_data.get('categories')
-        medium = self.cleaned_data.get('medium')
+        categories = self.cleaned_data.get('categories', [])
+        medium = self.cleaned_data.get('medium', None)
 
         for category in categories:
             if category.medium != medium:
