@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from admood_core import settings
 from apps.core.consts import CostModel
 from apps.campaign.api.validators import validate_campaign_utm, validate_content_utm
+from apps.core.models import File
 from apps.device.consts import ServiceProvider
 from apps.device.models import Device
 from apps.medium.consts import Medium
@@ -154,6 +155,13 @@ class CampaignContent(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def file(self):
+        try:
+            return File.objects.get(pk=self.data.get('file', None)).file
+        except File.DoesNotExist:
+            return None
 
 
 class CampaignSchedule(models.Model):
