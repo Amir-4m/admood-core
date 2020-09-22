@@ -43,7 +43,13 @@ class CampaignViewSet(BaseViewSet,
 
     @action(detail=True, methods=["patch"])
     def enable(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
+        instance = self.get_object()
+        is_enable = request.data.get('is_enable', instance.is_enable)
+        serializer = self.get_serializer(instance, data={'is_enable': is_enable}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
 
     @action(detail=True, methods=['post'], serializer_class=CampaignDuplicateSerializer)
     def duplicate(self, request, *args, **kwargs):
