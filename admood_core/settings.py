@@ -277,9 +277,13 @@ CELERY_BROKER_USER = config("CELERY_BROKER_USER")
 CELERY_BROKER_PASSWORD = config("CELERY_BROKER_PASSWORD")
 
 CELERY_BEAT_SCHEDULE = {
-    "sample_task": {
+    "create_telegram_campaign_task": {
         "task": "apps.campaign.tasks.create_telegram_campaign",
         "schedule": crontab(minute="*/1"),
+    },
+    "update_telegram_publishers_task": {
+        "task": "apps.medium.tasks.update_telegram_publishers",
+        "schedule": crontab(hour=0, minute=0)
     },
 }
 
