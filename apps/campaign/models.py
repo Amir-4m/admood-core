@@ -96,10 +96,11 @@ class Campaign(models.Model):
         return self
 
 
-class MediumCampaign(models.Model):
+
+class CampaignReference(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     reference_id = models.IntegerField(null=True, blank=True)
-    data = JSONField(null=True, blank=True)
+    report = JSONField(null=True, blank=True)
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()

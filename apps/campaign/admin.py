@@ -5,7 +5,7 @@ from .models import (
     CampaignContent,
     TargetDevice,
     CampaignSchedule,
-    MediumCampaign,
+    CampaignReference,
     CampaignPublisher,
 )
 
@@ -41,6 +41,6 @@ class CampaignScheduleAdmin(admin.ModelAdmin):
     list_display = ("campaign", "week_day", "start_time", "end_time")
 
 
-@admin.register(MediumCampaign)
+@admin.register(CampaignReference)
 class CampaignAdBotAdmin(admin.ModelAdmin):
     list_display = ("campaign", "reference_id", "date", "start_time", "end_time")
