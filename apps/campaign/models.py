@@ -2,6 +2,8 @@ import datetime
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models import Max
+from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
@@ -97,6 +99,15 @@ class Campaign(models.Model):
 
         return self
 
+    @property
+    def max_view(self):
+        max_cpv = self.contents.aggregate(
+            max_cost_model_price=Coalesce(Max('cost_model_price'), 0)
+        )['max_cost_model_price']
+        if max_cpv:
+            return int(self.total_cost / max_cpv)
+        else:
+            return 0
 
 
 class CampaignReference(models.Model):
