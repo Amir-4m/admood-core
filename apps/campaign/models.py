@@ -110,6 +110,16 @@ class Campaign(models.Model):
         else:
             return 0
 
+    def create_publisher_list(self):
+        for count, publisher in enumerate(self.publishers.all()):
+            CampaignPublisher.objects.create(
+                campaign=self,
+                publisher=publisher,
+                publisher_price=0,
+                advertiser_price=0,
+                order=count + 1
+            )
+
 
 class CampaignReference(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)

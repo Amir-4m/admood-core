@@ -135,17 +135,17 @@ class CampaignSerializer(serializers.ModelSerializer):
             CampaignSchedule.objects.create(campaign=campaign, **schedule_data)
 
         for count, publisher in enumerate(campaign.publishers.all()):
-            CampaignPublisher.objects.create(campaign=campaign, publisher=publisher, order=count + 1)
+            CampaignPublisher.objects.create(
+                campaign=campaign,
+                publisher=publisher,
+                publisher_price=0,
+                advertiser_price=0,
+                order=count + 1
+            )
 
         return campaign
 
     def update(self, instance, validated_data):
-        action = self.context['view'].action
-        if action == 'enable':
-            instance.is_enable = validated_data.get('is_enable', instance.is_enable)
-            instance.save()
-            return instance
-
         target_devices = validated_data.pop("target_devices", None)
         schedules = validated_data.pop("schedules", None)
         publishers = instance.publishers.all()
@@ -179,7 +179,13 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         CampaignPublisher.objects.filter(campaign=instance).delete()
         for count, publisher in enumerate(publishers):
-            CampaignPublisher.objects.create(campaign=instance, publisher=publisher, order=count + 1)
+            CampaignPublisher.objects.create(
+                campaign=instance,
+                publisher=publisher,
+                publisher_price=0,
+                advertiser_price=0,
+                order=count + 1
+            )
 
         return instance
 
@@ -304,6 +310,11 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
             target_device.pk = None
             target_device.campaign = instance
             target_device.save()
+
+        for campaign_publisher in campaign_publishers:
+            campaign_publisher.pk = None
+            campaign_publisher.campaign = instance
+            campaign_publisher.save()
 
         return instance
 
