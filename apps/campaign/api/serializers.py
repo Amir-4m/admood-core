@@ -228,25 +228,7 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['id', 'publishers', 'categories', 'schedules', 'name', 'start_date', 'end_date', 'total_cost',
-                  'daily_cost']
-
-    def validate(self, attrs):
-        publishers = attrs.get('publishers', [])
-        categories = attrs.get('categories', [])
-
-        if len(publishers) == 0 and len(categories) == 0:
-            raise serializers.ValidationError("publishers and categories both can not be empty.")
-
-        for category in categories:
-            if category.medium != self.instance.medium:
-                raise serializers.ValidationError("campaign's medium and category's medium must be the same.")
-
-        for publisher in publishers:
-            if publisher.medium != self.instance.medium:
-                raise serializers.ValidationError("campaign's medium and publisher's medium must be the same.")
-
-        return attrs
+        fields = ['id', 'schedules', 'name', 'start_date', 'end_date', 'total_cost', 'daily_cost']
 
     def validate_schedules(self, value):
         for idx, schedule in enumerate(value):
