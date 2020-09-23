@@ -250,6 +250,11 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
             value = timezone.now().date()
         return value
 
+    def validate(self, attrs):
+        if self.instance.status not in [Campaign.STATUS_APPROVED, Campaign.STATUS_DRAFT]:
+            raise serializers.ValidationError({"non_field_errors": ["draft and approved campaigns are just editable."]})
+        return attrs
+
     def update(self, instance, validated_data):
         contents = instance.contents.all()
         locations = instance.locations.all()
