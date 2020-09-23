@@ -99,8 +99,8 @@ class CampaignSerializer(serializers.ModelSerializer):
             return attrs
 
         if self.instance:
-            if self.instance.status == Campaign.STATUS_APPROVED:
-                raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
+            if self.instance.status != Campaign.STATUS_DRAFT:
+                raise serializers.ValidationError({"non_field_errors": ["only draft campaigns are editable."]})
             medium = self.instance.medium
             publishers = attrs.get('publishers', self.instance.publishers.all())
             categories = attrs.get('categories', self.instance.categories.all())
