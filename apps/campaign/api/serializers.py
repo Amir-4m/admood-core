@@ -309,6 +309,8 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
 
 class CampaignContentSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
+    campaign_status = serializers.ReadOnlyField()
+    campaign_medium = serializers.ReadOnlyField()
 
     class Meta:
         model = CampaignContent

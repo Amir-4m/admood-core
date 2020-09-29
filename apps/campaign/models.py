@@ -173,6 +173,14 @@ class CampaignContent(models.Model):
         except File.DoesNotExist:
             return None
 
+    @property
+    def campaign_medium(self):
+        return self.campaign.medium
+
+    @property
+    def campaign_status(self):
+        return self.campaign.status
+
 
 class CampaignSchedule(models.Model):
     MONDAY = 0
