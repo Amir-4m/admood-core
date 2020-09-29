@@ -13,3 +13,4 @@ Pillow # ==7.0.0
 sentry-sdk
 google-auth==1.14.0
 jsonschema
+celery==4.3.0
