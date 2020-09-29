@@ -252,7 +252,8 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if self.instance.status not in [Campaign.STATUS_APPROVED, Campaign.STATUS_DRAFT]:
-            raise serializers.ValidationError({"non_field_errors": ["draft and approved campaigns are just editable."]})
+            raise serializers.ValidationError({
+                "non_field_errors": ["draft and approved campaigns are just duplicable."]})
         return attrs
 
     def update(self, instance, validated_data):
