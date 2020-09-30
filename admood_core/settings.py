@@ -55,14 +55,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'drf_yasg',
 
     'apps.core',
     'apps.accounts',
     'apps.device',
     'apps.medium',
     'apps.campaign',
-    'apps.wallet',
+    'apps.payment',
 ]
 
 if DEVEL:
