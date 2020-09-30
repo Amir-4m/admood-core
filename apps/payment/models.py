@@ -32,21 +32,9 @@ from apps.core.consts import Bank
 
 
 class Transaction(models.Model):
-    PENDING = 0
-    SUCCESS = 1
-    FAILED = 2
-
-    STATUS_CHOICES = (
-        (PENDING, 'pending'),
-        (SUCCESS, 'success'),
-        (FAILED, 'failed')
-    )
-
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     value = models.IntegerField()
-    date_time = models.DateTimeField()
-    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES)
-    description = models.TextField(blank=True)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     @classmethod
     def balance(cls, user):

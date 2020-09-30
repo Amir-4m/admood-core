@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignPublisher
 from apps.core.models import File
+from apps.payment.models import Transaction
 from services.telegram import get_contents
 
 
@@ -61,11 +62,6 @@ class CampaignSerializer(serializers.ModelSerializer):
             kwargs['read_only'] = True
             extra_kwargs['medium'] = kwargs
 
-        if action in ['approve']:
-            kwargs = extra_kwargs.get('status', {})
-            kwargs['read_only'] = False
-            extra_kwargs['status'] = kwargs
-
         return extra_kwargs
 
     def validate_schedules(self, value):
@@ -88,14 +84,16 @@ class CampaignSerializer(serializers.ModelSerializer):
             value = timezone.now().date()
         return value
 
-    def validate_status(self, value):
-        if self.instance.status == Campaign.STATUS_DRAFT:
-            return value
-        return self.instance.status
+    def validate_total_cost(self, value):
+        user = self.context['request'].user
+        if value > Transaction.balance(user):
+            raise serializers.ValidationError(
+                {'total_cost': 'Ensure this value is less than or equal to your wallet balance.'})
+        return value
 
     def validate(self, attrs):
         action = self.context['view'].action
-        if action in ['enable', 'approve']:
+        if action in ['enable']:
             return attrs
 
         if self.instance:
@@ -196,6 +194,26 @@ class CampaignEnableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = ["is_enable"]
+
+
+class CampaignApproveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = ('status',)
+
+    def validate(self, attrs):
+        if self.instance.status != Campaign.STATUS_DRAFT:
+            raise serializers.ValidationError(
+                {'status': 'Ensure this campaign is a draft.'})
+        if self.instance.total_cost > Transaction.balance(self.instance.owner):
+            raise serializers.ValidationError(
+                {'total_cost': 'Ensure this value is less than or equal to your wallet balance.'})
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        Transaction.objects.create(user=instance.owner, value=-instance.total_cost)
+        return instance
 
 
 class CampaignRepeatSerializer(serializers.ModelSerializer):
