@@ -281,7 +281,8 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         schedules = validated_data.pop("schedules", None)
         campaign_publishers = instance.campaignpublisher_set.all()
 
-        telegram_contents = get_contents(instance.campaignreference_set.first().reference_id)
+        if instance.status == Campaign.STATUS_APPROVED:
+            telegram_contents = get_contents(instance.campaignreference_set.first().reference_id)
 
         for count, tc in enumerate(telegram_contents):
             for file in tc.get("files", []):
