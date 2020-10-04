@@ -283,13 +283,12 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
 
         if instance.status == Campaign.STATUS_APPROVED:
             telegram_contents = get_contents(instance.campaignreference_set.first().reference_id)
-
-        for count, tc in enumerate(telegram_contents):
-            for file in tc.get("files", []):
-                telegram_file_hash = file["telegram_file_hash"]
-                telegram_content = instance.contents.all()[count]
-                telegram_content.data["telegram_file_hash"] = telegram_file_hash
-                telegram_content.save()
+            for count, tc in enumerate(telegram_contents):
+                for file in tc.get("files", []):
+                    telegram_file_hash = file["telegram_file_hash"]
+                    telegram_content = instance.contents.all()[count]
+                    telegram_content.data["telegram_file_hash"] = telegram_file_hash
+                    telegram_content.save()
 
         instance.pk = None
         super().update(instance, validated_data)
