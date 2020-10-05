@@ -7,8 +7,8 @@ from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
+from apps.campaign.api.validators import validate_campaign_utm
 from apps.core.consts import CostModel
-from apps.campaign.api.validators import validate_campaign_utm, validate_content_utm
 from apps.core.models import File
 from apps.device.consts import ServiceProvider
 from apps.device.models import Device
@@ -106,9 +106,19 @@ class Campaign(models.Model):
             max_cost_model_price=Coalesce(Max('cost_model_price'), 0)
         )['max_cost_model_price']
         if max_cpv:
-            return int(self.total_cost / max_cpv)
+            return int(min(self.daily_cost, self.total_cost, self.total_cost - self.cost) / max_cpv) * 1000
         else:
             return 0
+
+    @property
+    def cost(self):
+        campaign_references = self.campaignreference_set.filter(reference_id__isnull=False)
+        cost = 0
+        for c in campaign_references:
+            for obj in c.report:
+                content = self.contents.filter(data__view_type="partial")[obj['content'] - 1]
+                cost += obj['views'] * content.cost_model_price
+        return cost
 
     def create_publisher_list(self):
         for count, publisher in enumerate(self.publishers.all()):
