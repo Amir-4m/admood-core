@@ -117,11 +117,10 @@ class Campaign(models.Model):
 
     @property
     def cost(self):
-        campaign_references = self.campaignreference_set.filter(reference_id__isnull=False)
         cost = 0
-        for c in campaign_references:
-            for obj in c.report:
-                content = self.contents.filter(data__view_type="partial")[obj['content'] - 1]
+        for campaign_reference in self.campaignreference_set.all():
+            for obj in campaign_reference.report:
+                content = self.contents.order_by('id')[obj['content']]
                 cost += obj['views'] * content.cost_model_price
         return cost
 
