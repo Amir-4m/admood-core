@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignPublisher
 from apps.core.models import File
+from apps.medium.models import CostModelPrice
 from apps.payment.models import Transaction
 from services.telegram import get_contents
 
@@ -133,11 +134,12 @@ class CampaignSerializer(serializers.ModelSerializer):
             CampaignSchedule.objects.create(campaign=campaign, **schedule_data)
 
         for count, publisher in enumerate(campaign.publishers.all()):
+            cost_model_price = CostModelPrice.objects.get(publisher=publisher)
             CampaignPublisher.objects.create(
                 campaign=campaign,
                 publisher=publisher,
-                publisher_price=0,
-                advertiser_price=0,
+                publisher_price=cost_model_price.publisher_price,
+                advertiser_price=cost_model_price.advertiser_price,
                 order=count + 1
             )
 
@@ -275,11 +277,13 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         return attrs
 
     def update(self, instance, validated_data):
-        contents = instance.contents.all()
         locations = instance.locations.all()
+        publishers = instance.publishers.all()
+        categories = instance.categories.all()
+        contents = instance.contents.all()
         target_devices = instance.target_devices.all()
-        schedules = validated_data.pop("schedules", None)
         campaign_publishers = instance.campaignpublisher_set.all()
+        schedules = validated_data.pop("schedules", None)
 
         if instance.status == Campaign.STATUS_APPROVED:
             telegram_contents = get_contents(instance.campaignreference_set.first().reference_id)
@@ -294,18 +298,16 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         super().update(instance, validated_data)
 
         instance.locations.set(locations)
+        instance.publishers.set(publishers)
+        instance.categories.set(categories)
 
-        if schedules is not None:
-            schedule_id_list = [i.get("id") for i in schedules if i.get("id")]
-            CampaignSchedule.objects.filter(campaign=instance).exclude(id__in=schedule_id_list).delete()
-            for schedule_data in schedules:
-                schedule_id = schedule_data.pop('id', None)
-                if schedule_id:
-                    CampaignSchedule.objects.filter(
-                        id=schedule_id, campaign=instance
-                    ).update(**schedule_data)
-                else:
-                    CampaignSchedule.objects.create(campaign=instance, **schedule_data)
+        for schedule_data in schedules:
+            CampaignSchedule.objects.create(
+                campaign=instance,
+                week_day=schedule_data['week_day'],
+                start_time=schedule_data['start_time'],
+                end_time=schedule_data['end_time'],
+            )
 
         for content in contents:
             content.pk = None
