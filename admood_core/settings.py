@@ -280,6 +280,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.campaign.tasks.create_telegram_campaign",
         "schedule": crontab(minute="*/1"),
     },
+    "update_telegram_view": {
+        "task": "apps.campaign.tasks.update_telegram_view",
+        "schedule": crontab(minute="*/1"),
+    },
     "update_telegram_publishers_task": {
         "task": "apps.medium.tasks.update_telegram_publishers",
         "schedule": crontab(hour=0, minute=0)

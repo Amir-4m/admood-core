@@ -60,3 +60,18 @@ def create_telegram_campaign():
                 if enable_campaign(reference_id):
                     cr.reference_id = reference_id
                     cr.save()
+
+
+@shared_task
+def update_telegram_view():
+    campaign_references = CampaignReference.objects.filter(
+        reference_id__isnull=False,
+        report__isnull=True,
+        end_time__gte=now().time(),
+    )
+    for campaign_reference in campaign_references:
+        report = campaign_report(campaign_reference.reference_id)
+        if report:
+            campaign_reference.report = report
+            campaign_reference.save()
+
