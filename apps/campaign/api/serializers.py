@@ -179,11 +179,12 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         CampaignPublisher.objects.filter(campaign=instance).delete()
         for count, publisher in enumerate(publishers):
+            cost_model_price = CostModelPrice.objects.get(publisher=publisher)
             CampaignPublisher.objects.create(
                 campaign=instance,
                 publisher=publisher,
-                publisher_price=0,
-                advertiser_price=0,
+                publisher_price=cost_model_price.publisher_price,
+                advertiser_price=cost_model_price.advertiser_price,
                 order=count + 1
             )
 
