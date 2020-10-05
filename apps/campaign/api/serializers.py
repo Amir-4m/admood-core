@@ -85,11 +85,11 @@ class CampaignSerializer(serializers.ModelSerializer):
             value = timezone.now().date()
         return value
 
-    def validate_total_cost(self, value):
+    def validate_total_budget(self, value):
         user = self.context['request'].user
         if value > Transaction.balance(user):
             raise serializers.ValidationError(
-                {'total_cost': 'Ensure this value is less than or equal to your wallet balance.'})
+                {'total_budget': 'Ensure total budget is less than or equal to your wallet balance.'})
         return value
 
     def validate(self, attrs):
@@ -208,14 +208,14 @@ class CampaignApproveSerializer(serializers.ModelSerializer):
         if self.instance.status != Campaign.STATUS_DRAFT:
             raise serializers.ValidationError(
                 {'status': 'Ensure this campaign is a draft.'})
-        if self.instance.total_cost > Transaction.balance(self.instance.owner):
+        if self.instance.total_budget > Transaction.balance(self.instance.owner):
             raise serializers.ValidationError(
-                {'total_cost': 'Ensure this value is less than or equal to your wallet balance.'})
+                {'total_budget': 'Ensure total budget is less than or equal to your wallet balance.'})
         return attrs
 
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
-        Transaction.objects.create(user=instance.owner, value=-instance.total_cost)
+        Transaction.objects.create(user=instance.owner, value=-instance.total_budget)
         return instance
 
 
@@ -225,7 +225,7 @@ class CampaignRepeatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['start_date', 'end_date', 'daily_cost', 'total_cost', 'schedules', 'categories', 'publishers']
+        fields = ['start_date', 'end_date', 'daily_budget', 'total_budget', 'schedules', 'categories', 'publishers']
 
     def validate(self, attrs):
         medium = attrs.get('medium')
@@ -249,7 +249,7 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['id', 'schedules', 'name', 'start_date', 'end_date', 'total_cost', 'daily_cost']
+        fields = ['id', 'schedules', 'name', 'start_date', 'end_date', 'total_budget', 'daily_budget']
 
     def validate_schedules(self, value):
         for idx, schedule in enumerate(value):

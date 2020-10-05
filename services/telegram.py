@@ -28,7 +28,7 @@ def create_campaign(campaign, start_time, end_time):
         status="approved",
         is_enable=False,
         publishers=list(publishers),
-        max_view=campaign.max_view,
+        max_view=campaign.remaining_views,
         start_datetime=start_time,
         end_datetime=end_time,
     )

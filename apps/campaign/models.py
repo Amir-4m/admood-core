@@ -55,8 +55,8 @@ class Campaign(models.Model):
 
     utm = JSONField(validators=[validate_campaign_utm], null=True, blank=True)
 
-    daily_cost = models.PositiveIntegerField()
-    total_cost = models.PositiveIntegerField()
+    daily_budget = models.PositiveIntegerField()
+    total_budget = models.PositiveIntegerField()
     finish_balance = models.IntegerField(null=True, blank=True)
 
     is_enable = models.BooleanField(default=True)
@@ -101,12 +101,17 @@ class Campaign(models.Model):
         return self
 
     @property
-    def max_view(self):
-        max_cpv = self.contents.aggregate(
+    def remaining_views(self):
+        cost_model_price = self.contents.aggregate(
             max_cost_model_price=Coalesce(Max('cost_model_price'), 0)
         )['max_cost_model_price']
-        if max_cpv:
-            return int(min(self.daily_cost, self.total_cost, self.total_cost - self.cost) / max_cpv) * 1000
+        if cost_model_price:
+            return int(1000 * min(
+                self.daily_budget,
+                self.total_budget,
+                self.total_budget - self.cost
+            ) / cost_model_price
+                       )
         else:
             return 0
 
@@ -135,6 +140,7 @@ class CampaignReference(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     reference_id = models.IntegerField(null=True, blank=True)
     report = JSONField(null=True, blank=True)
+    max_view = models.IntegerField()
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
