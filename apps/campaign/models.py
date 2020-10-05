@@ -106,11 +106,11 @@ class Campaign(models.Model):
             max_cost_model_price=Coalesce(Max('cost_model_price'), 0)
         )['max_cost_model_price']
         if cost_model_price:
-            return int(1000 * min(
+            return int(min(
                 self.daily_budget,
                 self.total_budget,
                 self.total_budget - self.cost
-            ) / cost_model_price
+            ) * 1000 / cost_model_price
                        )
         else:
             return 0
