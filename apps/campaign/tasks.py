@@ -25,6 +25,8 @@ def create_telegram_campaign():
     # for telegram bot
     scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
     for campaign in scheduled_campaigns:
+        if campaign.remaining_views <= 0:
+            return
         schedules = campaign.schedules.filter(week_day=today.weekday())
 
         for schedule in schedules:
@@ -34,32 +36,26 @@ def create_telegram_campaign():
                 start_time=schedule.start_time,
                 end_time=schedule.end_time
             )
-
             if cr.reference_id:
-                # update campaign report
-                report = campaign_report(cr.reference_id)
-                if report:
-                    cr.report = report
-                    cr.save()
-            else:
-                # create telegram service campaign
-                reference_id = create_campaign(
-                    campaign,
-                    datetime.datetime.combine(now().date(), schedule.start_time).__str__(),
-                    datetime.datetime.combine(now().date(), schedule.end_time).__str__(),
-                )
+                return
+            # create telegram service campaign
+            reference_id = create_campaign(
+                campaign,
+                datetime.datetime.combine(now().date(), schedule.start_time).__str__(),
+                datetime.datetime.combine(now().date(), schedule.end_time).__str__(),
+            )
 
-                contents = campaign.contents.all()
-                for content in contents:
-                    content_id = create_content(content, reference_id)
-                    file = get_file(content.data.get('file', None))
-                    telegram_file_hash = content.data.get('telegram_file_hash', None)
-                    if file:
-                        create_file(file, content_id, telegram_file_hash)
+            contents = campaign.contents.all()
+            for content in contents:
+                content_id = create_content(content, reference_id)
+                file = get_file(content.data.get('file', None))
+                telegram_file_hash = content.data.get('telegram_file_hash', None)
+                if file:
+                    create_file(file, content_id, telegram_file_hash)
 
-                if enable_campaign(reference_id):
-                    cr.reference_id = reference_id
-                    cr.save()
+            if enable_campaign(reference_id):
+                cr.reference_id = reference_id
+                cr.save()
 
 
 @shared_task
