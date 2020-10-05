@@ -63,6 +63,7 @@ def update_telegram_view():
     campaign_references = CampaignReference.objects.filter(
         reference_id__isnull=False,
         report__isnull=True,
+        date=now().date(),
         end_time__lte=now().time(),
     )
     for campaign_reference in campaign_references:
@@ -70,4 +71,3 @@ def update_telegram_view():
         if report:
             campaign_reference.report = report
             campaign_reference.save()
-
