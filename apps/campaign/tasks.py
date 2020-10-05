@@ -63,7 +63,7 @@ def update_telegram_view():
     campaign_references = CampaignReference.objects.filter(
         reference_id__isnull=False,
         report__isnull=True,
-        end_time__gte=now().time(),
+        end_time__lte=now().time(),
     )
     for campaign_reference in campaign_references:
         report = campaign_report(campaign_reference.reference_id)
