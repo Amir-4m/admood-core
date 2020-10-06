@@ -176,6 +176,8 @@ class CampaignContent(models.Model):
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
     cost_model_price = models.IntegerField()
 
+    is_hidden = models.BooleanField(default=False)
+
     class Meta:
         verbose_name = 'Content'
         ordering = ['pk']
