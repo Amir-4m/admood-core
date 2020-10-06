@@ -49,6 +49,8 @@ def create_content(content, campaign_id):
         content=content.data.get('content'),
         links=content.data.get('links', []) or [],
         inlines=content.data.get('inlines', []) or [],
+        is_sticker=content.data.get('is_sticker', False),
+        mother_channel=content.data.get('mother_channel', None),
         view_type=content.data.get('view_type'),
     )
     try:
