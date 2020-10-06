@@ -29,6 +29,7 @@ def create_campaign(campaign, start_time, end_time):
         is_enable=False,
         publishers=list(publishers),
         max_view=campaign.remaining_views,
+        agents=campaign.extra_data.get('agents', []),
         start_datetime=start_time,
         end_datetime=end_time,
     )
