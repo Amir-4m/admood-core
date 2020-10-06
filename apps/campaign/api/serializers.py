@@ -335,8 +335,8 @@ class CampaignContentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CampaignContent
-        fields = '__all__'
-        read_only_fields = ['campaign']
+        exclude_fields = ('is_hidden',)
+        read_only_fields = ('campaign',)
 
     def validate(self, attrs):
         if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:

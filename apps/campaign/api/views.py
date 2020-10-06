@@ -81,7 +81,7 @@ class ContentViewSet(BaseViewSet,
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = CampaignContentSerializer
-    queryset = CampaignContent.objects.all()
+    queryset = CampaignContent.objects.exclude(is_hidden=True)
     http_method_names = ['get', 'post', 'head', 'put']
     pagination_class = LimitOffsetPagination
 
