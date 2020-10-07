@@ -6,7 +6,8 @@ import datetime
 
 from apps.campaign.models import Campaign, CampaignReference
 from apps.core.utils.get_file import get_file
-from services.telegram import create_campaign, create_content, create_file, enable_campaign, campaign_report
+from services.telegram import create_campaign, create_content, create_file, enable_campaign, campaign_report, \
+    get_contents
 from apps.medium.consts import Medium
 
 
@@ -61,14 +62,29 @@ def create_telegram_campaign():
 
 @shared_task
 def update_telegram_view():
-    campaign_references = CampaignReference.objects.filter(
+    campaign_refs = CampaignReference.objects.filter(
         reference_id__isnull=False,
-        report__isnull=True,
+        contents=[],
         date=now().date(),
         end_time__lte=now().time(),
     )
-    for campaign_reference in campaign_references:
-        report = campaign_report(campaign_reference.reference_id)
-        if report:
-            campaign_reference.report = report
-            campaign_reference.save()
+    for campaign_ref in campaign_refs:
+        reports = campaign_report(campaign_ref.reference_id)
+        for content in campaign_ref.contents:
+            for report in reports:
+                if content["ref_id"] == report["content"]:
+                    content["views"] = report["views"]
+        campaign_ref.save()
+
+        camp = campaign_ref.campaign
+        if camp.campaignreference_set.count() == 1:
+            ref_contents = get_contents(campaign_ref.reference_id)
+            for ref_content in ref_contents:
+                content = camp.contents.get(ref_content["id"])
+                files = ref_content.get("files")
+                for file in files:
+                    content.data["telegram_file_hash"] = file.get("telegram_file_hash", None)
+                    content.save()
+                    # currently one file can be saved
+                    break
+
