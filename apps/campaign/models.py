@@ -1,6 +1,6 @@
 import datetime
 
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db import models
 from django.db.models import Max
 from django.db.models.functions import Coalesce
@@ -141,6 +141,7 @@ class CampaignReference(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     reference_id = models.IntegerField(null=True, blank=True)
     report = JSONField(null=True, blank=True)
+    contents = ArrayField(base_field=JSONField(), null=True, blank=True)
     max_view = models.IntegerField()
     date = models.DateField()
     start_time = models.TimeField()
