@@ -34,6 +34,7 @@ def create_telegram_campaign():
             cr, created = CampaignReference.objects.get_or_create(
                 campaign=campaign,
                 date=today,
+                max_view=campaign.remaining_views,
                 start_time=schedule.start_time,
                 end_time=schedule.end_time
             )
