@@ -65,7 +65,6 @@ def create_telegram_campaign():
 def update_telegram_view():
     campaign_refs = CampaignReference.objects.filter(
         reference_id__isnull=False,
-        contents=[],
         date=now().date(),
         end_time__lte=now().time(),
     )
