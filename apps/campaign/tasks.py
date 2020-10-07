@@ -47,11 +47,12 @@ def create_telegram_campaign():
 
             contents = campaign.contents.all()
             for content in contents:
-                content_id = create_content(content, reference_id)
+                content_ref_id = create_content(content, reference_id)
                 file = get_file(content.data.get('file', None))
                 telegram_file_hash = content.data.get('telegram_file_hash', None)
                 if file:
-                    create_file(file, content_id, telegram_file_hash)
+                    create_file(file, content_ref_id, telegram_file_hash)
+                cr.contents.append({'content': content.pk, 'ref_id': content_ref_id, 'views': 0})
 
             if enable_campaign(reference_id):
                 cr.reference_id = reference_id
