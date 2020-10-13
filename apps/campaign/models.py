@@ -234,3 +234,8 @@ class CampaignPublisher(models.Model):
     order = models.PositiveIntegerField()
     publisher_price = models.PositiveIntegerField()
     advertiser_price = models.PositiveIntegerField()
+
+
+class TelegramCampaign(models.Model):
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    screenshot = models.ForeignKey(File, on_delete=models.CASCADE)
