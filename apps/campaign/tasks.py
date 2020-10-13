@@ -45,6 +45,7 @@ def create_telegram_campaign():
                 campaign,
                 datetime.datetime.combine(now().date(), schedule.start_time).__str__(),
                 datetime.datetime.combine(now().date(), schedule.end_time).__str__(),
+                "approved",
             )
 
             contents = campaign.contents.all()
