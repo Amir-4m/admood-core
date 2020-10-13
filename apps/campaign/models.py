@@ -4,6 +4,8 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from django.db import models
 from django.db.models import Max
 from django.db.models.functions import Coalesce
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
@@ -102,19 +104,18 @@ class Campaign(models.Model):
         return self
 
     @property
-    def remaining_views(self):
-        cost_model_price = self.contents.aggregate(
+    def max_cost_model_price(self):
+        return self.contents.aggregate(
             max_cost_model_price=Coalesce(Max('cost_model_price'), 0)
         )['max_cost_model_price']
-        if cost_model_price:
-            return int(min(
-                self.daily_budget,
-                self.total_budget,
-                self.total_budget - self.cost
-            ) * 1000 / cost_model_price
-                       )
-        else:
-            return 0
+
+    @property
+    def has_budget(self):
+        return min(self.daily_budget, self.total_budget - self.cost) > 0
+
+    @property
+    def remaining_views(self):
+        return int(min(self.daily_budget, self.total_budget - self.cost) * 1000 / self.max_cost_model_price)
 
     @property
     def cost(self):
@@ -125,15 +126,23 @@ class Campaign(models.Model):
                 cost += obj['views'] * content.cost_model_price
         return cost
 
-    def create_publisher_list(self):
-        for count, publisher in enumerate(self.publishers.all()):
-            CampaignPublisher.objects.create(
-                campaign=self,
-                publisher=publisher,
-                publisher_price=0,
-                advertiser_price=0,
-                order=count + 1
-            )
+
+def create_publisher_list(self):
+    for count, publisher in enumerate(self.publishers.all()):
+        CampaignPublisher.objects.create(
+            campaign=self,
+            publisher=publisher,
+            publisher_price=0,
+            advertiser_price=0,
+            order=count + 1
+        )
+
+
+@receiver(pre_save, sender=Campaign)
+def create_telegram_campaign(sender, instance, update_fields, **kwargs):
+    if update_fields == Campaign.STATUS_APPROVED:
+        # todo if there is no campaign create telegram campaign
+        pass
 
 
 class CampaignReference(models.Model):

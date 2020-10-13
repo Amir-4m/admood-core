@@ -6,8 +6,9 @@ from .models import (
     TargetDevice,
     CampaignSchedule,
     CampaignReference,
-    CampaignPublisher,
+    CampaignPublisher, TelegramCampaign,
 )
+from .views import test_campaign
 
 
 @admin.register(Province)
@@ -27,8 +28,20 @@ class CampaignPublisherInline(admin.TabularInline):
 
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
+    change_form_template = 'campaign/change_form.html'
     inlines = [TargetDeviceInline, CampaignPublisherInline]
     autocomplete_fields = ["owner", "publishers", "locations"]
+
+    def render_change_form(self, request, context, **kwargs):
+        return super().render_change_form(request, context, **kwargs)
+
+    def get_urls(self):
+        from django.urls import path
+        url_patterns = [
+            path(r'<int:pk>/test/', test_campaign, name="test_campaign"),
+        ]
+        url_patterns += super().get_urls()
+        return url_patterns
 
 
 @admin.register(CampaignContent)
@@ -43,4 +56,9 @@ class CampaignScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(CampaignReference)
 class CampaignAdBotAdmin(admin.ModelAdmin):
-    list_display = ("campaign", "reference_id", "date", "start_time", "end_time")
+    list_display = ("campaign", "ref_id", "date", "start_time", "end_time")
+
+
+@admin.register(TelegramCampaign)
+class TelegramCampaignAdmin(admin.ModelAdmin):
+    list_display = ("campaign", "screenshot")

@@ -1,6 +1,7 @@
 import json
 
 import requests
+from rest_framework.status import HTTP_400_BAD_REQUEST
 
 from admood_core.settings import ADBOT_API_TOKEN, ADBOT_API_URL
 from services.utils import file_type
@@ -18,14 +19,14 @@ CONTENT_URL = f'{ADBOT_API_URL}/api/v1/contents/'
 FILE_URL = f'{ADBOT_API_URL}/api/v1/files/'
 
 
-def create_campaign(campaign, start_time, end_time):
+def create_campaign(campaign, start_time, end_time, status):
     publishers = campaign.campaignpublisher_set.select_related('publisher').values_list(
         'publisher__ref_id', 'publisher_price'
     )
 
     data = dict(
         title=campaign.name,
-        status="approved",
+        status=status,
         is_enable=False,
         publishers=list(publishers),
         max_view=campaign.remaining_views,
@@ -36,6 +37,10 @@ def create_campaign(campaign, start_time, end_time):
     try:
         r = requests.post(url=CAMPAIGN_URL, headers=JSON_HEADERS, data=json.dumps(data))
         r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            raise Exception(e.response.text)
+        raise e
     except requests.exceptions.RequestException as e:
         raise e
 
@@ -122,3 +127,17 @@ def get_contents(campaign_id):
     campaign = get_campaign(campaign_id)
     contents = campaign.get('contents', None)
     return contents
+
+
+def test_campaign(campaign_id):
+    try:
+        r = requests.get(url=f'{CAMPAIGN_URL}{campaign_id}/test/', headers=HEADERS, timeout=120)
+        r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            raise Exception(e.response.text)
+        raise e
+    except requests.exceptions.RequestException as e:
+        raise e
+
+    return r.json()["detail"]
