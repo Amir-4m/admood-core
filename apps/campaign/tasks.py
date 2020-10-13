@@ -38,10 +38,10 @@ def create_telegram_campaign():
                 start_time=schedule.start_time,
                 end_time=schedule.end_time
             )
-            if cr.reference_id:
+            if cr.ref_id:
                 return
             # create telegram service campaign
-            reference_id = create_campaign(
+            ref_id = create_campaign(
                 campaign,
                 datetime.datetime.combine(now().date(), schedule.start_time).__str__(),
                 datetime.datetime.combine(now().date(), schedule.end_time).__str__(),
@@ -49,27 +49,27 @@ def create_telegram_campaign():
 
             contents = campaign.contents.all()
             for content in contents:
-                content_ref_id = create_content(content, reference_id)
+                content_ref_id = create_content(content, ref_id)
                 file = get_file(content.data.get('file', None))
                 telegram_file_hash = content.data.get('telegram_file_hash', None)
                 if file:
                     create_file(file, content_ref_id, telegram_file_hash)
                 cr.contents.append({'content': content.pk, 'ref_id': content_ref_id, 'views': 0})
 
-            if enable_campaign(reference_id):
-                cr.reference_id = reference_id
+            if enable_campaign(ref_id):
+                cr.ref_id = ref_id
                 cr.save()
 
 
 @shared_task
 def update_telegram_view():
     campaign_refs = CampaignReference.objects.filter(
-        reference_id__isnull=False,
+        ref_id__isnull=False,
         date=now().date(),
         end_time__lte=now().time(),
     )
     for campaign_ref in campaign_refs:
-        reports = campaign_report(campaign_ref.reference_id)
+        reports = campaign_report(campaign_ref.ref_id)
         for content in campaign_ref.contents:
             for report in reports:
                 if content["ref_id"] == report["content"]:
@@ -80,7 +80,7 @@ def update_telegram_view():
         if camp.campaignreference_set.count() == 1:
             for content in campaign_ref.contents:
                 content_id = content["content"]
-                for item in get_contents(campaign_ref.reference_id):
+                for item in get_contents(campaign_ref.ref_id):
                     if item["id"] == content["ref_id"]:
                         c = CampaignContent.objects.get(pk=content_id)
                         for file in item["files"]:

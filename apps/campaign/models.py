@@ -138,7 +138,7 @@ class Campaign(models.Model):
 
 class CampaignReference(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
-    reference_id = models.IntegerField(null=True, blank=True)
+    ref_id = models.IntegerField(null=True, blank=True)
     report = JSONField(null=True, blank=True)
     contents = JSONField(default=list)
     max_view = models.IntegerField()

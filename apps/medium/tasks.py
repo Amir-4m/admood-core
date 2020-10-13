@@ -10,7 +10,7 @@ def update_telegram_publishers():
     channels = get_publishers()
     for channel in channels:
         Publisher.objects.update_or_create(
-            reference_id=channel['id'],
+            ref_id=channel['id'],
             medium=Medium.TELEGRAM,
             defaults={
                 'name': channel['title'],

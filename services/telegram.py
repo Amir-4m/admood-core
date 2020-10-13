@@ -20,7 +20,7 @@ FILE_URL = f'{ADBOT_API_URL}/api/v1/files/'
 
 def create_campaign(campaign, start_time, end_time):
     publishers = campaign.campaignpublisher_set.select_related('publisher').values_list(
-        'publisher__reference_id', 'publisher_price'
+        'publisher__ref_id', 'publisher_price'
     )
 
     data = dict(

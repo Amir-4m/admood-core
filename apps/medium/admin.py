@@ -17,7 +17,7 @@ class PublisherAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['title', 'medium', 'display_text', 'reference_id']
+    list_display = ['title', 'medium', 'display_text', 'ref_id']
 
 
 @admin.register(CostModelPrice)
