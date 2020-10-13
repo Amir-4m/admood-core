@@ -38,7 +38,6 @@ class Campaign(models.Model):
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
-    reference_id = models.BigIntegerField(null=True, blank=True)
     publishers = models.ManyToManyField(Publisher, blank=True)
     categories = models.ManyToManyField(Category, blank=True)
 
