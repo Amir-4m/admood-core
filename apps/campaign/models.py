@@ -126,16 +126,15 @@ class Campaign(models.Model):
                 cost += obj['views'] * content.cost_model_price
         return cost
 
-
-def create_publisher_list(self):
-    for count, publisher in enumerate(self.publishers.all()):
-        CampaignPublisher.objects.create(
-            campaign=self,
-            publisher=publisher,
-            publisher_price=0,
-            advertiser_price=0,
-            order=count + 1
-        )
+    def create_publisher_list(self):
+        for count, publisher in enumerate(self.publishers.all()):
+            CampaignPublisher.objects.create(
+                campaign=self,
+                publisher=publisher,
+                publisher_price=0,
+                advertiser_price=0,
+                order=count + 1
+            )
 
 
 @receiver(pre_save, sender=Campaign)
