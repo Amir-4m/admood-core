@@ -61,6 +61,10 @@ def create_content(content, campaign_id):
     try:
         r = requests.post(url=CONTENT_URL, headers=JSON_HEADERS, data=json.dumps(data))
         r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            raise Exception(e.response.text)
+        raise e
     except requests.exceptions.RequestException as e:
         raise e
 
@@ -80,15 +84,22 @@ def create_file(file, content_id, telegram_file_hash=None):
         else:
             r = requests.post(url=FILE_URL, headers=HEADERS, data=data, files={'file': file})
         r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            raise Exception(e.response.text)
+        raise e
     except requests.exceptions.RequestException as e:
         raise e
-    return True
 
 
 def enable_campaign(campaign_id):
     try:
         r = requests.patch(url=f'{CAMPAIGN_URL}{campaign_id}/', headers=HEADERS, data={'is_enable': True})
         r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            raise Exception(e.response.text)
+        raise e
     except requests.exceptions.RequestException as e:
         raise e
     return True
@@ -98,6 +109,10 @@ def campaign_report(campaign_id):
     try:
         r = requests.get(url=f'{CAMPAIGN_URL}{campaign_id}/report', headers=HEADERS)
         r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            raise Exception(e.response.text)
+        raise e
     except requests.exceptions.RequestException as e:
         raise e
     return r.json()
@@ -109,6 +124,10 @@ def get_publishers():
     try:
         r = requests.get(url=f'{channels_url}', headers=headers)
         r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            raise Exception(e.response.text)
+        raise e
     except requests.exceptions.RequestException as e:
         raise e
     return r.json()
@@ -118,6 +137,10 @@ def get_campaign(campaign_id):
     try:
         r = requests.get(url=f'{CAMPAIGN_URL}{campaign_id}/', headers=HEADERS)
         r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            raise Exception(e.response.text)
+        raise e
     except requests.exceptions.RequestException as e:
         raise e
     return r.json()
