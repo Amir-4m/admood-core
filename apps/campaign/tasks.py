@@ -31,14 +31,14 @@ def create_telegram_campaign():
         schedules = campaign.schedules.filter(week_day=today.weekday())
 
         for schedule in schedules:
-            cr, created = CampaignReference.objects.get_or_create(
+            campaign_ref, created = CampaignReference.objects.get_or_create(
                 campaign=campaign,
                 date=today,
                 max_view=campaign.remaining_views,
                 start_time=schedule.start_time,
                 end_time=schedule.end_time
             )
-            if cr.ref_id:
+            if campaign_ref.ref_id:
                 return
             # create telegram service campaign
             ref_id = create_campaign(
@@ -55,11 +55,11 @@ def create_telegram_campaign():
                 telegram_file_hash = content.data.get('telegram_file_hash', None)
                 if file:
                     create_file(file, content_ref_id, telegram_file_hash)
-                cr.contents.append({'content': content.pk, 'ref_id': content_ref_id, 'views': 0})
+                campaign_ref.contents.append({'content': content.pk, 'ref_id': content_ref_id, 'views': 0})
 
             if enable_campaign(ref_id):
-                cr.ref_id = ref_id
-                cr.save()
+                campaign_ref.ref_id = ref_id
+                campaign_ref.save()
 
 
 @shared_task
