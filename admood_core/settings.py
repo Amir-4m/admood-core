@@ -169,7 +169,7 @@ AUTHENTICATION_BACKENDS = [
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('ACCESS_TOKEN_LIFETIME_MINUTES', default=30, cast=int)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=config('REFRESH_TOKEN_LIFETIME_DAYS', default=90, cast=int)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('REFRESH_TOKEN_LIFETIME_DAYS', default=90, cast=int)),
 }
 
 # Internationalization
