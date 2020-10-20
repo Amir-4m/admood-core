@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import UserProfile, Verification
@@ -9,23 +10,47 @@ from apps.accounts.models import UserProfile, Verification
 User = get_user_model()
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+class MyTokenObtainPairSerializer(TokenObtainSerializer):
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
 
     def validate(self, attrs):
         data = super().validate(attrs)
+
         refresh = self.get_token(self.user)
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
         data['lifetime'] = int(refresh.access_token.lifetime.total_seconds())
 
         return data
 
 
-class MyTokenRefreshSerializer(TokenRefreshSerializer):
+class MyTokenRefreshSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
 
     def validate(self, attrs):
-        data = super().validate(attrs)
         refresh = RefreshToken(attrs['refresh'])
-        data['lifetime'] = int(refresh.access_token.lifetime.total_seconds())
 
+        data = {'access': str(refresh.access_token)}
+
+        if api_settings.ROTATE_REFRESH_TOKENS:
+            if api_settings.BLACKLIST_AFTER_ROTATION:
+                try:
+                    # Attempt to blacklist the given refresh token
+                    refresh.blacklist()
+                except AttributeError:
+                    # If blacklist app not installed, `blacklist` method will
+                    # not be present
+                    pass
+
+            refresh.set_jti()
+            refresh.set_exp()
+
+            data['refresh'] = str(refresh)
+
+        data['lifetime'] = int(refresh.access_token.lifetime.total_seconds())
         return data
 
 
@@ -99,6 +124,7 @@ class VerifyUserSerializer(serializers.Serializer):
         rc.save()
         rc.user.verify()
         rc.user.save()
+
 
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()

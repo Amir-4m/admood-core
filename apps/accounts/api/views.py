@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.accounts.api.serializers import (
     MyTokenObtainPairSerializer,
@@ -22,11 +22,11 @@ from apps.accounts.models import UserProfile, Verification
 User = get_user_model()
 
 
-class TokenObtainPairView(TokenViewBase):
+class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-class TokenRefreshView(TokenViewBase):
+class MyTokenRefreshView(TokenRefreshView):
     serializer_class = MyTokenRefreshSerializer
 
 
