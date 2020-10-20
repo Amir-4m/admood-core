@@ -32,8 +32,8 @@ class GoogleAuthBackend(ModelBackend):
                 )
             return user
 
-        except Exception as e:
-            logger.error(e)
+        except:
+            return
 
 
 class EmailAuthBackend(ModelBackend):
