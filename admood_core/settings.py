@@ -188,8 +188,29 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
+# if DEVEL is False:
+#     import sentry_sdk
+#     from sentry_sdk.integrations.django import DjangoIntegration
+#     from sentry_sdk.integrations.celery import CeleryIntegration
+#
+#     sentry_sdk.init(
+#         dsn=f"https://{config('SENTRY_KEY')}@{config('SENTRY_HOST')}/{config('SENTRY_PROJECT_ID')}",
+#         integrations=[
+#             DjangoIntegration(),
+#             CeleryIntegration()
+#         ],
+#
+#         # If you wish to associate users to errors (assuming you are using
+#         # django.contrib.auth) you may enable sending PII data.
+#         send_default_pii=True,
+#
+#         # Custom settings
+#         debug=True,
+#         environment=config('SENTRY_ENV', default='development')  # 'production'
+#     )
+
 LOG_DIR = BASE_DIR / 'logs'
-LOGGING = ({
+LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
@@ -241,29 +262,7 @@ LOGGING = ({
         #     'propagate': False,
         # },
     },
-})
-
-if DEVEL is False:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-
-    # from sentry_sdk.integrations.celery import CeleryIntegration
-
-    sentry_sdk.init(
-        dsn=f"https://{config('SENTRY_KEY')}@{config('SENTRY_HOST')}/{config('SENTRY_PROJECT_ID')}",
-        integrations=[
-            DjangoIntegration(),
-            # CeleryIntegration()
-        ],
-
-        # If you wish to associate users to errors (assuming you are using
-        # django.contrib.auth) you may enable sending PII data.
-        send_default_pii=True,
-
-        # Custom settings
-        debug=DEBUG,
-        environment=config('SENTRY_ENV', default='development')  # 'production'
-    )
+}
 
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT')
