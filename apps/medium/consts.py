@@ -2,15 +2,17 @@ class Medium:
     WEB = 1
     IN_APP = 2
     TELEGRAM = 3
-    INSTAGRAM = 4
-    PUSH_MOBILE = 5
-    PUSH_WEB = 6
+    INSTAGRAM_POST = 4
+    INSTAGRAM_STORY = 5
+    PUSH_MOBILE = 6
+    PUSH_WEB = 7
 
     MEDIUM_CHOICES = (
         (WEB, "web"),
         (IN_APP, "in_app"),
         (TELEGRAM, "telegram"),
-        (INSTAGRAM, "instagram"),
+        (INSTAGRAM_POST, "instagram_post"),
+        (INSTAGRAM_STORY, "instagram_story"),
         (PUSH_MOBILE, "push_mobile"),
         (PUSH_WEB, "push_web"),
     )
