@@ -22,7 +22,7 @@ class UserManager(BaseUserManager):
         Create and save a user with the given username, email, and password.
         """
         email = self.normalize_email(extra_fields.get('email', None))
-        phone_number = self.normalize_email(extra_fields.get('phone_number', None))
+        phone_number = extra_fields.get('phone_number', None)
         username = self.model.normalize_username(username)
         try:
             assert username or email or phone_number, (
