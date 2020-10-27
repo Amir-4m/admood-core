@@ -1,13 +1,13 @@
 import logging
 
+from celery import shared_task
+from django.conf import settings
 from django.core import mail
 from django.core.mail import EmailMessage
 
-from celery import shared_task
-from django.conf import settings
-
 from admood_core.settings import SITE_URL, USER_VERIFICATION_URL, USER_RESET_PASSWORD_URL
 from apps.core.utils.mail import Mail
+from apps.core.utils.sms import api_send_sms
 
 logger = logging.getLogger('admood_core.accounts')
 
@@ -43,3 +43,11 @@ def send_reset_password(email_address, code):
     connection.open()
     connection.send_messages([message])
     connection.close()
+
+
+@shared_task
+def send_verification_sms(phone_number, text):
+    try:
+        api_send_sms(phone_number, text)
+    except:
+        raise
