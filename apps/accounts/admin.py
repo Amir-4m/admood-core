@@ -26,7 +26,7 @@ class MyUserAdmin(UserAdmin):
 
 @admin.register(Verification)
 class VerificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'uuid', 'created_time', 'verified_time',)
+    list_display = ('user', 'code', 'created_time', 'verified_time',)
 
 
 admin.site.register(UserProfile)
