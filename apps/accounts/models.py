@@ -41,9 +41,6 @@ class UserManager(BaseUserManager):
 
         user = self.model(username=username, **extra_fields)
 
-        if password is None:
-            password = User.objects.make_random_password()
-
         user.set_password(password)
         user.save(using=self._db)
         return user
