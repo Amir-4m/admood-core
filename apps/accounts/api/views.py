@@ -15,7 +15,7 @@ from apps.accounts.api.serializers import (
     UserProfileSerializer,
     RegisterSerializer,
     PasswordResetConfirmSerializer,
-    PasswordResetSerializer, VerifyUserSerializer,
+    PasswordResetSerializer, VerifyUserSerializer, RegisterPhoneSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -32,6 +32,16 @@ class MyTokenRefreshView(TokenRefreshView):
 
 class RegisterUserAPIView(GenericAPIView):
     serializer_class = RegisterSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class RegisterPhoneAPIView(GenericAPIView):
+    serializer_class = RegisterPhoneSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
