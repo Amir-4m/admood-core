@@ -229,14 +229,14 @@ class UserProfile(models.Model):
 
 class Verification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifications')
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    code = models.IntegerField(default=random.randint(10000, 99999))
     created_time = models.DateTimeField(auto_now_add=True)
     verified_time = models.DateTimeField(null=True, blank=True)
 
     @classmethod
-    def get(cls, uuid):
+    def get(cls, code):
         return cls.objects.get(
-            uuid=uuid,
+            code=code,
             verified_time__isnull=True,
             created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
         )
