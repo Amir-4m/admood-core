@@ -9,31 +9,31 @@ UserModel = get_user_model()
 logger = logging.getLogger('admood_core.accounts')
 
 
-class GoogleAuthBackend(ModelBackend):
-    def authenticate(self, request, username=None, password=None, **kwargs):
-        try:
-            response = requests.get("https://oauth2.googleapis.com/tokeninfo", params={"id_token": password})
-            data = json.loads(response.text)
-
-            if data['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-                raise ValueError('wrong issuer.')
-
-            email = data['email']
-            if username != email:
-                raise ValueError('email not match.')
-
-            try:
-                user = UserModel.objects.get(email=email)
-            # Create user if not exist
-            except UserModel.DoesNotExist:
-                user = UserModel.objects.create_user(
-                    email=email,
-                    is_verified=True,
-                )
-            return user
-
-        except:
-            return
+# class GoogleAuthBackend(ModelBackend):
+#     def authenticate(self, request, username=None, password=None, **kwargs):
+#         try:
+#             response = requests.get("https://oauth2.googleapis.com/tokeninfo", params={"id_token": password})
+#             data = json.loads(response.text)
+#
+#             if data['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+#                 raise ValueError('wrong issuer.')
+#
+#             email = data['email']
+#             if username != email:
+#                 raise ValueError('email not match.')
+#
+#             try:
+#                 user = UserModel.objects.get(email=email)
+#             # Create user if not exist
+#             except UserModel.DoesNotExist:
+#                 user = UserModel.objects.create_user(
+#                     email=email,
+#                     is_verified=True,
+#                 )
+#             return user
+#
+#         except:
+#             return
 
 
 class EmailAuthBackend(ModelBackend):
