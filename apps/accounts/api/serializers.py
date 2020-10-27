@@ -96,6 +96,31 @@ class RegisterSerializer(serializers.Serializer):
         return user
 
 
+class RegisterPhoneSerializer(serializers.Serializer):
+    phone_number = serializers.IntegerField()
+
+    def validate_phone_number(self, phone_number):
+        if User.objects.filter(phone_number=phone_number, is_verified=True).exists():
+            raise serializers.ValidationError('user with this phone number already exists.')
+        return phone_number
+
+    def create(self, validated_data):
+        phone_number = validated_data['phone_number']
+
+        try:
+            user = User.objects.get(phone_number=phone_number)
+        except User.DoesNotExist:
+            user = User.objects.create_user(
+                phone_number=phone_number,
+            )
+        else:
+            user.save()
+
+        user.send_verification_sms()
+
+        return user
+
+
 class UserRelatedField(serializers.RelatedField):
     def display_value(self, instance):
         return instance
