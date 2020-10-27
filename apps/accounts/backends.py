@@ -60,3 +60,49 @@ class EmailAuthBackend(ModelBackend):
         else:
             if user.check_password(password) and self.user_can_authenticate(user):
                 return user
+
+
+class PhoneAuthBackend(ModelBackend):
+
+    def user_can_authenticate(self, user):
+        """
+        Reject users with is_verified=False or is_active=False.
+        """
+        is_active = getattr(user, 'is_active', None)
+        is_verified = getattr(user, 'is_verified')
+        return is_verified and (is_active or is_active is None)
+
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        phone_number = kwargs.get('phone_number', None)
+        if phone_number is None or password is None:
+            return
+        try:
+            user = UserModel.objects.get(phone_number=phone_number)
+        except UserModel.DoesNotExist:
+            UserModel().set_password(password)
+        else:
+            if user.check_password(password) and self.user_can_authenticate(user):
+                return user
+
+
+class BaseAuthBackend(ModelBackend):
+    query_filter = {}
+
+    def user_can_authenticate(self, user):
+        """
+        Reject users with is_verified=False or is_active=False.
+        """
+        is_active = getattr(user, 'is_active', None)
+        is_verified = getattr(user, 'is_verified')
+        return is_verified and (is_active or is_active is None)
+
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        if phone_number is None or password is None:
+            return
+        try:
+            user = UserModel.objects.get(**self.query_filter)
+        except UserModel.DoesNotExist:
+            UserModel().set_password(password)
+        else:
+            if user.check_password(password) and self.user_can_authenticate(user):
+                return user
