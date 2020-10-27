@@ -133,7 +133,7 @@ class UserRelatedField(serializers.RelatedField):
 
 
 class VerifyUserSerializer(serializers.Serializer):
-    rc = serializers.SlugRelatedField(queryset=Verification.objects.all(), slug_field='uuid')
+    rc = serializers.SlugRelatedField(queryset=Verification.objects.all(), slug_field='code')
 
     def validate_rc(self, rc):
         if rc.is_valid():
