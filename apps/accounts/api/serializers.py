@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -91,7 +91,7 @@ class RegisterSerializer(serializers.Serializer):
             user.set_password(password)
             user.save()
 
-        user.email_verification_code()
+        user.send_verification_email()
 
         return user
 
