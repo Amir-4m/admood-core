@@ -77,7 +77,7 @@ class PasswordResetConfirmAPIView(GenericAPIView):
 
     def get_verification(self):
         try:
-            verification = Verification.objects.get(uuid=self.request.query_params.get('rc'))
+            verification = Verification.objects.get(code=self.request.query_params.get('rc'))
             if verification.is_valid:
                 return verification
         except:
