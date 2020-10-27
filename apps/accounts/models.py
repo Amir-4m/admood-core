@@ -10,7 +10,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from .tasks import send_verification_email, send_reset_password
+from .tasks import send_verification_email, send_reset_password, send_verification_sms
 from .validators import national_id_validator
 
 
@@ -154,9 +154,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def verify(self):
         self.is_verified = True
 
-    def email_verification_code(self):
+    def send_verification_email(self):
         verification = self.verifications.create()
-        send_verification_email.delay(self.email, verification.uuid.hex)
+        send_verification_email.delay(self.email, verification.code)
+
+    def send_verification_sms(self):
+        verification = self.verifications.create()
+        send_verification_sms.delay(self.phone_number, verification.code)
 
     def email_reset_password(self):
         verification = self.verifications.create()
