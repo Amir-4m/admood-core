@@ -1,5 +1,4 @@
 import random
-import uuid
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -164,7 +163,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def email_reset_password(self):
         verification = self.verifications.create()
-        send_reset_password.delay(self.email, verification.uuid.hex)
+        send_reset_password.delay(self.email, verification.code)
 
     @staticmethod
     def get_by_email(email):
