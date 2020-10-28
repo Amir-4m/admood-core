@@ -158,7 +158,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         send_verification_email.delay(self.email, verification.code)
 
     def send_verification_sms(self):
-        verification = self.verifications.create()
+        verification = self.verifications.create(code=random.randint(1000, 9999), type=Verification.TYPE_PHONE)
         send_verification_sms.delay(self.phone_number, verification.code)
 
     def email_reset_password(self):
@@ -227,18 +227,32 @@ class UserProfile(models.Model):
 
 
 class Verification(models.Model):
+    TYPE_EMAIL = 'email'
+    TYPE_PHONE = 'phone'
+
+    TYPE_CHOICES = (
+        (TYPE_EMAIL, 'email'),
+        (TYPE_PHONE, 'phone'),
+    )
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifications')
-    code = models.IntegerField(default=random.randint(10000, 99999))
+    code = models.CharField(max_length=32)
+    type = models.CharField(max_length=5, choices=TYPE_CHOICES, default=TYPE_PHONE)
+    reset_password = models.BooleanField(default=False)
     created_time = models.DateTimeField(auto_now_add=True)
     verified_time = models.DateTimeField(null=True, blank=True)
 
     @classmethod
-    def get(cls, code):
-        return cls.objects.get(
-            code=code,
-            verified_time__isnull=True,
-            created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
-        )
+    def get_valid(cls, user, code):
+        try:
+            return cls.objects.get(
+                user=user,
+                code=code,
+                verified_time__isnull=True,
+                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
+            )
+        except:
+            return None
 
     def is_valid(self):
         if self.verified_time:
