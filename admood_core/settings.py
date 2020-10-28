@@ -162,14 +162,14 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'apps.accounts.backends.GoogleAuthBackend',
     'apps.accounts.backends.EmailAuthBackend',
+    # 'apps.accounts.backends.GoogleAuthBackend',
 ]
 
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('ACCESS_TOKEN_LIFETIME_MINUTES', default=30, cast=int)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=config('REFRESH_TOKEN_LIFETIME_DAYS', default=90, cast=int)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('REFRESH_TOKEN_LIFETIME_DAYS', default=90, cast=int)),
 }
 
 # Internationalization
@@ -188,8 +188,29 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
+# if DEVEL is False:
+#     import sentry_sdk
+#     from sentry_sdk.integrations.django import DjangoIntegration
+#     from sentry_sdk.integrations.celery import CeleryIntegration
+#
+#     sentry_sdk.init(
+#         dsn=f"https://{config('SENTRY_KEY')}@{config('SENTRY_HOST')}/{config('SENTRY_PROJECT_ID')}",
+#         integrations=[
+#             DjangoIntegration(),
+#             CeleryIntegration()
+#         ],
+#
+#         # If you wish to associate users to errors (assuming you are using
+#         # django.contrib.auth) you may enable sending PII data.
+#         send_default_pii=True,
+#
+#         # Custom settings
+#         debug=True,
+#         environment=config('SENTRY_ENV', default='development')  # 'production'
+#     )
+
 LOG_DIR = BASE_DIR / 'logs'
-LOGGING = ({
+LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
@@ -241,29 +262,7 @@ LOGGING = ({
         #     'propagate': False,
         # },
     },
-})
-
-if DEVEL is False:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-
-    # from sentry_sdk.integrations.celery import CeleryIntegration
-
-    sentry_sdk.init(
-        dsn=f"https://{config('SENTRY_KEY')}@{config('SENTRY_HOST')}/{config('SENTRY_PROJECT_ID')}",
-        integrations=[
-            DjangoIntegration(),
-            # CeleryIntegration()
-        ],
-
-        # If you wish to associate users to errors (assuming you are using
-        # django.contrib.auth) you may enable sending PII data.
-        send_default_pii=True,
-
-        # Custom settings
-        debug=DEBUG,
-        environment=config('SENTRY_ENV', default='development')  # 'production'
-    )
+}
 
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT')
@@ -300,5 +299,6 @@ CELERY_BEAT_SCHEDULE = {
 
 ADBOT_API_TOKEN = config("ADBOT_API_TOKEN")
 ADBOT_API_URL = config('ADBOT_API_URL')
-ADINSTA_API_URL = config('ADINSTA_API_URL')
-ADINSTA_API_TOKEN = config("ADINSTA_API_TOKEN")
+
+SMS_API_URL = config("SMS_API_URL")
+SMS_API_TOKEN = config("SMS_API_TOKEN")

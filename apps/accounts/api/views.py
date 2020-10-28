@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.accounts.api.serializers import (
     MyTokenObtainPairSerializer,
@@ -15,23 +15,33 @@ from apps.accounts.api.serializers import (
     UserProfileSerializer,
     RegisterSerializer,
     PasswordResetConfirmSerializer,
-    PasswordResetSerializer, VerifyUserSerializer,
+    PasswordResetSerializer, VerifyUserSerializer, RegisterPhoneSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
 User = get_user_model()
 
 
-class TokenObtainPairView(TokenViewBase):
+class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-class TokenRefreshView(TokenViewBase):
+class MyTokenRefreshView(TokenRefreshView):
     serializer_class = MyTokenRefreshSerializer
 
 
 class RegisterUserAPIView(GenericAPIView):
     serializer_class = RegisterSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class RegisterPhoneAPIView(GenericAPIView):
+    serializer_class = RegisterPhoneSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -67,7 +77,7 @@ class PasswordResetConfirmAPIView(GenericAPIView):
 
     def get_verification(self):
         try:
-            verification = Verification.objects.get(uuid=self.request.query_params.get('rc'))
+            verification = Verification.objects.get(code=self.request.query_params.get('rc'))
             if verification.is_valid:
                 return verification
         except:

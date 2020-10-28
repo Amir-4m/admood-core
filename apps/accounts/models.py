@@ -1,5 +1,4 @@
 import random
-import uuid
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -10,7 +9,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from .tasks import send_verification_email, send_reset_password
+from .tasks import send_verification_email, send_reset_password, send_verification_sms
 from .validators import national_id_validator
 
 
@@ -22,7 +21,7 @@ class UserManager(BaseUserManager):
         Create and save a user with the given username, email, and password.
         """
         email = self.normalize_email(extra_fields.get('email', None))
-        phone_number = self.normalize_email(extra_fields.get('phone_number', None))
+        phone_number = extra_fields.get('phone_number', None)
         username = self.model.normalize_username(username)
         try:
             assert username or email or phone_number, (
@@ -40,9 +39,6 @@ class UserManager(BaseUserManager):
                 username += str(random.randint(10, 99))
 
         user = self.model(username=username, **extra_fields)
-
-        if password is None:
-            password = User.objects.make_random_password()
 
         user.set_password(password)
         user.save(using=self._db)
@@ -157,13 +153,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     def verify(self):
         self.is_verified = True
 
-    def email_verification_code(self):
+    def send_verification_email(self):
         verification = self.verifications.create()
-        send_verification_email.delay(self.email, verification.uuid.hex)
+        send_verification_email.delay(self.email, verification.code)
+
+    def send_verification_sms(self):
+        verification = self.verifications.create(code=random.randint(1000, 9999), type=Verification.TYPE_PHONE)
+        send_verification_sms.delay(self.phone_number, verification.code)
 
     def email_reset_password(self):
         verification = self.verifications.create()
-        send_reset_password.delay(self.email, verification.uuid.hex)
+        send_reset_password.delay(self.email, verification.code)
 
     @staticmethod
     def get_by_email(email):
@@ -227,18 +227,32 @@ class UserProfile(models.Model):
 
 
 class Verification(models.Model):
+    TYPE_EMAIL = 'email'
+    TYPE_PHONE = 'phone'
+
+    TYPE_CHOICES = (
+        (TYPE_EMAIL, 'email'),
+        (TYPE_PHONE, 'phone'),
+    )
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifications')
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    code = models.CharField(max_length=32)
+    type = models.CharField(max_length=5, choices=TYPE_CHOICES, default=TYPE_PHONE)
+    reset_password = models.BooleanField(default=False)
     created_time = models.DateTimeField(auto_now_add=True)
     verified_time = models.DateTimeField(null=True, blank=True)
 
     @classmethod
-    def get(cls, uuid):
-        return cls.objects.get(
-            uuid=uuid,
-            verified_time__isnull=True,
-            created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
-        )
+    def get_valid(cls, user, code):
+        try:
+            return cls.objects.get(
+                user=user,
+                code=code,
+                verified_time__isnull=True,
+                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
+            )
+        except:
+            return None
 
     def is_valid(self):
         if self.verified_time:
