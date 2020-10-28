@@ -163,6 +163,7 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'apps.accounts.backends.EmailAuthBackend',
+    'apps.accounts.backends.PhoneAuthBackend',
     # 'apps.accounts.backends.GoogleAuthBackend',
 ]
 

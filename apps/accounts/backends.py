@@ -5,6 +5,8 @@ import requests
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
+from apps.accounts.models import Verification
+
 UserModel = get_user_model()
 logger = logging.getLogger('admood_core.accounts')
 
@@ -66,43 +68,28 @@ class PhoneAuthBackend(ModelBackend):
 
     def user_can_authenticate(self, user):
         """
-        Reject users with is_verified=False or is_active=False.
+        Reject users with is_active=False.
         """
-        is_active = getattr(user, 'is_active', None)
-        is_verified = getattr(user, 'is_verified')
-        return is_verified and (is_active or is_active is None)
+        is_active = getattr(user, 'is_active')
+        return is_active
 
     def authenticate(self, request, username=None, password=None, **kwargs):
-        phone_number = kwargs.get('phone_number', None)
-        if phone_number is None or password is None:
+        if username is None or password is None:
             return
         try:
-            user = UserModel.objects.get(phone_number=phone_number)
+            user = UserModel.objects.get(phone_number=username)
         except UserModel.DoesNotExist:
+            # Run the default password hasher once to reduce the timing
+            # difference between an existing and a nonexistent user (#20760).
             UserModel().set_password(password)
         else:
-            if user.check_password(password) and self.user_can_authenticate(user):
-                return user
-
-
-class BaseAuthBackend(ModelBackend):
-    query_filter = {}
-
-    def user_can_authenticate(self, user):
-        """
-        Reject users with is_verified=False or is_active=False.
-        """
-        is_active = getattr(user, 'is_active', None)
-        is_verified = getattr(user, 'is_verified')
-        return is_verified and (is_active or is_active is None)
-
-    def authenticate(self, request, username=None, password=None, **kwargs):
-        if phone_number is None or password is None:
-            return
-        try:
-            user = UserModel.objects.get(**self.query_filter)
-        except UserModel.DoesNotExist:
-            UserModel().set_password(password)
-        else:
-            if user.check_password(password) and self.user_can_authenticate(user):
-                return user
+            verification = Verification.get_valid(user, password)
+            if verification:
+                verification.verify()
+                verification.save()
+                user.verify()
+                if self.user_can_authenticate(user):
+                    if verification.reset_password:
+                        user.set_unusable_password()
+                    user.save()
+                    return user
