@@ -250,5 +250,5 @@ class TelegramCampaign(models.Model):
 
 
 class InstagramCampaign(models.Model):
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='instagram_campaigns')
     screenshot = models.ForeignKey(File, on_delete=models.CASCADE)
