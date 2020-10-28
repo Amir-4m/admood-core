@@ -287,6 +287,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.medium.tasks.update_telegram_publishers",
         "schedule": crontab(hour=0, minute=0)
     },
+    "create_instagram_campaign_task": {
+        "task": "apps.campaign.tasks.create_instagram_campaign",
+        "schedule": crontab(minute="*/1"),
+    },
+    "update_instagram_publishers_task": {
+        "task": "apps.medium.tasks.update_instagram_publishers",
+        "schedule": crontab(hour=0, minute=0)
+    },
 }
 
 ADBOT_API_TOKEN = config("ADBOT_API_TOKEN")
