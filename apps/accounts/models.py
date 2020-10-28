@@ -1,4 +1,5 @@
 import random
+import uuid
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -154,16 +155,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.is_verified = True
 
     def send_verification_email(self):
-        verification = self.verifications.create()
-        send_verification_email.delay(self.email, verification.code)
-
-    def send_verification_sms(self):
-        verification = self.verifications.create(code=random.randint(1000, 9999), type=Verification.TYPE_PHONE)
-        send_verification_sms.delay(self.phone_number, verification.code)
+        verification = self.verifications.create(code=uuid.uuid4().hex,
+                                                 type=Verification.VERIFY_TYPE_EMAIL)
+        send_verification_email.delay(self.email, verification.verify_code)
 
     def email_reset_password(self):
-        verification = self.verifications.create()
-        send_reset_password.delay(self.email, verification.code)
+        verification = self.verifications.create(code=uuid.uuid4().hex,
+                                                 type=Verification.VERIFY_TYPE_EMAIL,
+                                                 reset_password=True)
+        send_reset_password.delay(self.email, verification.verify_code)
+
+    def send_verification_sms(self):
+        verification = self.verifications.create(code=random.randint(1000, 9999), type=Verification.VERIFY_TYPE_PHONE)
+        send_verification_sms.delay(self.phone_number, verification.verify_code)
 
     @staticmethod
     def get_by_email(email):
@@ -227,29 +231,37 @@ class UserProfile(models.Model):
 
 
 class Verification(models.Model):
-    TYPE_EMAIL = 'email'
-    TYPE_PHONE = 'phone'
+    VERIFY_TYPE_EMAIL = 'email'
+    VERIFY_TYPE_PHONE = 'phone'
 
-    TYPE_CHOICES = (
-        (TYPE_EMAIL, 'email'),
-        (TYPE_PHONE, 'phone'),
+    VERIFY_TYPE_CHOICES = (
+        (VERIFY_TYPE_EMAIL, 'email'),
+        (VERIFY_TYPE_PHONE, 'phone'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifications')
-    code = models.CharField(max_length=32)
-    type = models.CharField(max_length=5, choices=TYPE_CHOICES, default=TYPE_PHONE)
+    verify_code = models.CharField(max_length=32)
+    verify_type = models.CharField(max_length=5, choices=VERIFY_TYPE_CHOICES, default=VERIFY_TYPE_PHONE)
     reset_password = models.BooleanField(default=False)
     created_time = models.DateTimeField(auto_now_add=True)
     verified_time = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        unique_together = ('user', 'verify_code')
+
     @classmethod
-    def get_valid(cls, user, code):
+    def get_valid(cls, verify_code, user=None, verify_type=None):
+        query_filter = {}
+        if user:
+            query_filter['user'] = user
+        if verify_type:
+            query_filter['verify_type'] = verify_type
         try:
             return cls.objects.get(
-                user=user,
-                code=code,
+                verify_code=verify_code,
                 verified_time__isnull=True,
                 created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
+                **query_filter
             )
         except:
             return None
