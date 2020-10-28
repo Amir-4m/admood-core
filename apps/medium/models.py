@@ -41,7 +41,7 @@ class Publisher(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     name = models.CharField(max_length=50)
     url = models.URLField(null=True, blank=True)
-    is_enable = models.BooleanField()
+    is_enable = models.BooleanField(default=True)
     ref_id = models.IntegerField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     updated_time = models.DateTimeField(auto_now=True)
