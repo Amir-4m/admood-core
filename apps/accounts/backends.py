@@ -83,6 +83,8 @@ class PhoneAuthBackend(ModelBackend):
             # difference between an existing and a nonexistent user (#20760).
             UserModel().set_password(password)
         else:
+            if user.check_password(password) and self.user_can_authenticate(user):
+                return user
             verification = Verification.get_valid(user=user, verify_code=password)
             if verification:
                 verification.verify()
