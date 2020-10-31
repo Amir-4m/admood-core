@@ -54,27 +54,13 @@ class RegisterUserByPhoneAPIView(GenericAPIView):
 
 
 class VerifyUserAPIView(GenericAPIView):
-    queryset = Verification.objects.all()
-
-    def get_object(self):
-        code = self.request.data["rc"]
-        try:
-            return self.queryset.get(
-                verify_code=code,
-                verify_type=Verification.VERIFY_TYPE_EMAIL,
-                verified_time__isnull=True,
-                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
-            )
-        except:
-            raise NotFound
-
     def post(self, request):
-        verification = self.get_object()
-        verification.verify()
-        verification.save()
-        verification.user.verify()
-        verification.user.save()
-        return Response()
+        verification = Verification.verify_email(verify_code=request.data["rc"])
+        if verification:
+            verification.user.verify()
+            verification.user.save()
+            return Response()
+        return NotFound
 
 
 class PasswordResetAPIView(GenericAPIView):

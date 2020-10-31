@@ -249,6 +249,40 @@ class Verification(models.Model):
     class Meta:
         unique_together = ('user', 'verify_code')
 
+
+    @classmethod
+    def verify_email(cls, verify_code):
+        try:
+            verification = cls.objects.get(
+                verify_code=verify_code,
+                verify_type=Verification.VERIFY_TYPE_EMAIL,
+                verified_time__isnull=True,
+            )
+        except:
+            return None
+        else:
+            verification.verify()
+            verification.save()
+            return verification
+
+    @classmethod
+    def verify_phone_number(cls, user, verify_code):
+        try:
+            verification = cls.objects.get(
+                user=user,
+                verify_code=verify_code,
+                verify_type=Verification.VERIFY_TYPE_PHONE,
+                verified_time__isnull=True,
+                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
+            )
+        except:
+            return None
+        else:
+            verification.verify()
+            verification.save()
+            return verification
+
+
     @classmethod
     def get_valid(cls, verify_code, user=None, verify_type=None):
         query_filter = {}
