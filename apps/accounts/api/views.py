@@ -17,7 +17,7 @@ from apps.accounts.api.serializers import (
     UserProfileSerializer,
     RegisterSerializer,
     PasswordResetConfirmSerializer,
-    PasswordResetSerializer, VerifyUserSerializer, RegisterPhoneSerializer,
+    PasswordResetSerializer, RegisterPhoneSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -90,12 +90,13 @@ class PasswordResetConfirmAPIView(GenericAPIView):
     queryset = User.objects.all()
 
     def get_verification(self):
-        try:
-            verification = Verification.objects.get(code=self.request.query_params.get('rc'))
-            if verification.is_valid:
-                return verification
-        except:
-            raise Http404
+        verification = Verification.get_valid(
+            verify_code=self.request.query_params.get('rc'),
+            verify_type=Verification.VERIFY_TYPE_EMAIL
+        )
+        if verification:
+            return verification
+        raise NotFound
 
     def get(self, request):
         if self.get_verification():
@@ -108,6 +109,7 @@ class PasswordResetConfirmAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         verification.verify()
+        verification.save()
         return Response({'email': user.email})
 
 
