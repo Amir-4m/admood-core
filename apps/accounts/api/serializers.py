@@ -58,7 +58,7 @@ class MyTokenRefreshSerializer(serializers.Serializer):
         return data
 
 
-class RegisterSerializer(serializers.Serializer):
+class RegisterUserByEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(max_length=100, write_only=True)
     confirm_password = serializers.CharField(max_length=100, write_only=True)
@@ -100,7 +100,7 @@ class RegisterSerializer(serializers.Serializer):
         return user
 
 
-class RegisterPhoneSerializer(serializers.Serializer):
+class RegisterUserByPhoneSerializer(serializers.Serializer):
     phone_number = serializers.IntegerField(validators=[
         RegexValidator(r'^9[0-3,9]\d{8}$', _('Enter a valid phone number.'), 'invalid'),
     ], )

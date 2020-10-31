@@ -15,9 +15,10 @@ from apps.accounts.api.serializers import (
     MyTokenObtainPairSerializer,
     MyTokenRefreshSerializer,
     UserProfileSerializer,
-    RegisterSerializer,
+    RegisterUserByEmailSerializer,
     SetPasswordSerializer,
-    PasswordResetSerializer, RegisterPhoneSerializer,
+    PasswordResetSerializer,
+    RegisterUserByPhoneSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -32,8 +33,8 @@ class MyTokenRefreshView(TokenRefreshView):
     serializer_class = MyTokenRefreshSerializer
 
 
-class RegisterUserAPIView(GenericAPIView):
-    serializer_class = RegisterSerializer
+class RegisterUserByEmailAPIView(GenericAPIView):
+    serializer_class = RegisterUserByEmailSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -42,8 +43,8 @@ class RegisterUserAPIView(GenericAPIView):
         return Response(serializer.data)
 
 
-class RegisterPhoneAPIView(GenericAPIView):
-    serializer_class = RegisterPhoneSerializer
+class RegisterUserByPhoneAPIView(GenericAPIView):
+    serializer_class = RegisterUserByPhoneSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
