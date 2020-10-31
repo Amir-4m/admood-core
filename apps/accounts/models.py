@@ -93,7 +93,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         blank=True,
         validators=[
-            RegexValidator(r'^989[0-3,9]\d{8}$', _('Enter a valid phone number.'), 'invalid'),
+            RegexValidator(r'^9[0-3,9]\d{8}$', _('Enter a valid phone number.'), 'invalid'),
         ],
         error_messages={
             'unique': _("A user with this phone number already exists."),
