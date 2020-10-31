@@ -155,18 +155,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.is_verified = True
 
     def send_verification_email(self):
-        verification = self.verifications.create(code=uuid.uuid4().hex,
-                                                 type=Verification.VERIFY_TYPE_EMAIL)
+        verification = self.verifications.create(verify_code=uuid.uuid4().hex,
+                                                 verify_type=Verification.VERIFY_TYPE_EMAIL)
         send_verification_email.delay(self.email, verification.verify_code)
 
     def email_reset_password(self):
-        verification = self.verifications.create(code=uuid.uuid4().hex,
-                                                 type=Verification.VERIFY_TYPE_EMAIL,
+        verification = self.verifications.create(verify_code=uuid.uuid4().hex,
+                                                 verify_type=Verification.VERIFY_TYPE_EMAIL,
                                                  reset_password=True)
         send_reset_password.delay(self.email, verification.verify_code)
 
     def send_verification_sms(self):
-        verification = self.verifications.create(code=random.randint(1000, 9999), type=Verification.VERIFY_TYPE_PHONE)
+        verification = self.verifications.create(verify_code=random.randint(1000, 9999), verify_type=Verification.VERIFY_TYPE_PHONE)
         send_verification_sms.delay(self.phone_number, verification.verify_code)
 
     @staticmethod
