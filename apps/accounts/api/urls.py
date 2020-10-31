@@ -6,7 +6,7 @@ from .views import (MyTokenObtainPairView,
                     RegisterUserAPIView,
                     VerifyUserAPIView,
                     PasswordResetAPIView,
-                    PasswordResetConfirmAPIView, RegisterPhoneAPIView)
+                    PasswordResetConfirmAPIView, RegisterPhoneAPIView, SetPasswordAPIView)
 
 urlpatterns = [
     path('token/', MyTokenObtainPairView.as_view(), name="token"),
@@ -16,6 +16,7 @@ urlpatterns = [
     path('register/verify/', VerifyUserAPIView.as_view()),
     path('reset-pass/', PasswordResetAPIView.as_view()),
     path('reset-pass/confirm/', PasswordResetConfirmAPIView.as_view()),
+    path('set-password/', SetPasswordAPIView.as_view()),
     path('profile/', UserProfileViewSet.as_view({'get': 'retrieve',
                                                  'post': 'create',
                                                  'put': 'update',
