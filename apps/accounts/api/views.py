@@ -59,7 +59,7 @@ class VerifyUserAPIView(GenericAPIView):
     def get_object(self):
         code = self.request.data["rc"]
         try:
-            return self.queryset.objects.get(
+            return self.queryset.get(
                 verify_code=code,
                 verify_type=Verification.VERIFY_TYPE_EMAIL,
                 verified_time__isnull=True,
