@@ -144,12 +144,6 @@ def create_telegram_campaign(sender, instance, update_fields, **kwargs):
         pass
 
 
-@receiver(post_save, sender=Campaign)
-def add_publishers(sender, instance, created, **kwargs):
-    if instance.status == sender.STATUS_DRAFT:
-        pass
-
-
 class CampaignReference(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     ref_id = models.IntegerField(null=True, blank=True)
