@@ -16,7 +16,7 @@ from apps.accounts.api.serializers import (
     MyTokenRefreshSerializer,
     UserProfileSerializer,
     RegisterSerializer,
-    PasswordResetConfirmSerializer,
+    SetPasswordSerializer,
     PasswordResetSerializer, RegisterPhoneSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
@@ -86,7 +86,7 @@ class PasswordResetAPIView(GenericAPIView):
 
 
 class PasswordResetConfirmAPIView(GenericAPIView):
-    serializer_class = PasswordResetConfirmSerializer
+    serializer_class = SetPasswordSerializer
     queryset = User.objects.all()
 
     def get_verification(self):
@@ -111,6 +111,18 @@ class PasswordResetConfirmAPIView(GenericAPIView):
         verification.verify()
         verification.save()
         return Response({'email': user.email})
+
+
+class SetPasswordAPIView(GenericAPIView):
+    serializer_class = SetPasswordSerializer
+    authentication_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+
+    def put(self, request):
+        serializer = self.serializer_class(instance=request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response()
 
 
 class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
