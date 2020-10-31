@@ -73,6 +73,7 @@ class VerifyUserAPIView(GenericAPIView):
         verification.verify()
         verification.save()
         verification.user.verify()
+        verification.user.save()
         return Response()
 
 
