@@ -79,7 +79,7 @@ class PhoneAuthBackend(ModelBackend):
             return
         try:
             user = UserModel.objects.get(phone_number=username)
-        except UserModel.DoesNotExist:
+        except (UserModel.DoesNotExist, TypeError):
             # Run the default password hasher once to reduce the timing
             # difference between an existing and a nonexistent user (#20760).
             UserModel().set_password(password)
