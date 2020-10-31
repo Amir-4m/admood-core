@@ -181,7 +181,7 @@ class PasswordResetSerializer(serializers.Serializer):
         user.email_reset_password()
 
 
-class PasswordResetConfirmSerializer(serializers.ModelSerializer):
+class SetPasswordSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(max_length=100, write_only=True)
 
     class Meta:
