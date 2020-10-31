@@ -116,7 +116,8 @@ class PasswordResetConfirmAPIView(GenericAPIView):
 
 class SetPasswordAPIView(GenericAPIView):
     serializer_class = SetPasswordSerializer
-    authentication_classes = (IsAuthenticated,)
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
 
     def put(self, request):
