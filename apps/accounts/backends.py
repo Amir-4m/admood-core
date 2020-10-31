@@ -5,7 +5,7 @@ import requests
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
-from apps.accounts.models import Verification
+from apps.accounts.models import Verification, User
 
 UserModel = get_user_model()
 logger = logging.getLogger('admood_core.accounts')
@@ -65,7 +65,6 @@ class EmailAuthBackend(ModelBackend):
 
 
 class PhoneAuthBackend(ModelBackend):
-
     def user_can_authenticate(self, user):
         """
         Reject users with is_verified=False and is_active=False.
@@ -79,7 +78,7 @@ class PhoneAuthBackend(ModelBackend):
             return
         try:
             user = UserModel.objects.get(phone_number=username)
-        except (UserModel.DoesNotExist, TypeError):
+        except (UserModel.DoesNotExist, ValueError):
             # Run the default password hasher once to reduce the timing
             # difference between an existing and a nonexistent user (#20760).
             UserModel().set_password(password)
