@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
@@ -99,12 +101,9 @@ class RegisterSerializer(serializers.Serializer):
 
 
 class RegisterPhoneSerializer(serializers.Serializer):
-    phone_number = serializers.IntegerField()
-
-    def validate_phone_number(self, phone_number):
-        if User.objects.filter(phone_number=phone_number, is_verified=True).exists():
-            raise serializers.ValidationError('user with this phone number already exists.')
-        return phone_number
+    phone_number = serializers.IntegerField(validators=[
+        RegexValidator(r'^9[0-3,9]\d{8}$', _('Enter a valid phone number.'), 'invalid'),
+    ], )
 
     def create(self, validated_data):
         phone_number = validated_data['phone_number']
