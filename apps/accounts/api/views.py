@@ -128,7 +128,8 @@ class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
     @action(detail=False, methods=['get'])
     def has_profile(self, request):
         data = {
-            'has_profile': self.queryset.filter(user=request.user).exists()
+            'has_profile': self.queryset.filter(user=request.user).exists(),
+            'has_password': request.user.has_usable_password(),
         }
         return Response(data=data)
 
@@ -139,5 +140,6 @@ class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
             return Response(serializer.data)
         return Response({
             'phone_number': request.user.phone_number,
-            'email': request.user.email
+            'email': request.user.email,
+            'has_password': request.user.has_usable_password(),
         })
