@@ -27,7 +27,7 @@ class MyUserAdmin(UserAdmin):
 
 @admin.register(Verification)
 class VerificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'verify_code', 'created_time', 'verified_time',)
+    list_display = ('user', 'verify_code', 'verify_type', 'created_time', 'verified_time',)
     search_fields = ('user', 'verify_code')
     list_filter = ('verify_type', 'created_time', 'verified_time')
 
