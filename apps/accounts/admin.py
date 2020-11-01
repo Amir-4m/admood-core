@@ -22,6 +22,7 @@ class MyUserAdmin(UserAdmin):
     )
     list_display = ('username', 'phone_number', 'email', 'is_active', 'is_staff')
     search_fields = ('username', 'phone_number', 'email')
+    list_filter = ('is_active', 'is_verified')
 
 
 @admin.register(Verification)
