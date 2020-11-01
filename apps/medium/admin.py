@@ -31,5 +31,6 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(CostModelPrice)
 class CostModelPriceAdmin(admin.ModelAdmin):
-    list_display = ('medium', 'grade')
+    list_display = ('medium', 'grade', 'cost_model', 'advertiser_price', 'publisher_price')
+    search_fields = ('grade',)
     list_filter = ('medium',)
