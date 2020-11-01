@@ -64,7 +64,7 @@ class CampaignScheduleAdmin(admin.ModelAdmin):
 
 
 @admin.register(CampaignReference)
-class CampaignAdBotAdmin(admin.ModelAdmin):
+class CampaignReferenceAdmin(admin.ModelAdmin):
     list_display = ("campaign", "ref_id", "date", "start_time", "end_time")
 
 
