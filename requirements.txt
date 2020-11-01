@@ -10,7 +10,7 @@ drf-yasg==1.17.1
 
 requests # ==2.23.0
 Pillow # ==7.0.0
-sentry-sdk
+sentry-sdk==0.19.1
 google-auth==1.14.0
 jsonschema
 #
