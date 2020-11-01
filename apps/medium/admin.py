@@ -25,8 +25,11 @@ class PublisherAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['title', 'medium', 'display_text', 'ref_id']
+    search_fields = ['title']
+    list_filter = ('medium',)
 
 
 @admin.register(CostModelPrice)
 class CostModelPriceAdmin(admin.ModelAdmin):
-    list_display = ['medium', 'grade']
+    list_display = ('medium', 'grade')
+    list_filter = ('medium',)
