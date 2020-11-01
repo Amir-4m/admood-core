@@ -26,11 +26,20 @@ class CampaignPublisherInline(admin.TabularInline):
     extra = 1
 
 
+class CampaignContentInline(admin.TabularInline):
+    model = CampaignContent
+    extra = 0
+
+
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
+    list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
-    inlines = [TargetDeviceInline, CampaignPublisherInline]
-    autocomplete_fields = ["owner", "publishers", "locations"]
+    inlines = [CampaignContentInline, TargetDeviceInline, CampaignPublisherInline]
+    autocomplete_fields = ["owner"]
+    search_fields = ['medium', 'owner']
+    list_filter = ['medium', 'status', 'is_enable']
+    filter_horizontal = ['categories', 'locations', 'publishers']
 
     def render_change_form(self, request, context, **kwargs):
         return super().render_change_form(request, context, **kwargs)
