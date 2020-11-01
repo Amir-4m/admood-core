@@ -23,7 +23,7 @@ class Category(models.Model):
 class CostModelPrice(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
-    grade = models.PositiveSmallIntegerField()
+    grade = models.CharField(max_length=32)
     publisher_price = models.PositiveIntegerField()
     advertiser_price = models.PositiveIntegerField()
 
