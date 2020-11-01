@@ -32,4 +32,10 @@ class VerificationAdmin(admin.ModelAdmin):
     list_filter = ('verify_type', 'created_time', 'verified_time')
 
 
-admin.site.register(UserProfile)
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'first_name', 'last_name', 'company_name', 'type', 'status',)
+    search_fields = ('user', 'first_name', 'last_name', 'company_name')
+    list_filter = ('type', 'status')
+
+
