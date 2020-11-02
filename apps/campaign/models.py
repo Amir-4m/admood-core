@@ -177,7 +177,6 @@ class CampaignContent(models.Model):
     data = JSONField()
     description = models.TextField(blank=True, null=True)
     utm_term = models.CharField(max_length=100, blank=True, null=True)
-    utm_content = models.CharField(max_length=50, null=True, blank=True)
 
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
     cost_model_price = models.IntegerField()
