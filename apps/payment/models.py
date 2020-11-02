@@ -1,4 +1,7 @@
+import uuid
+
 from django.contrib.auth import get_user_model
+from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
@@ -39,3 +42,14 @@ class Transaction(models.Model):
     @classmethod
     def balance(cls, user):
         return Transaction.objects.filter(user=user).aggregate(balance=Coalesce(Sum('value'), 0))['balance']
+
+
+class Payment(models.Model):
+    created_time = models.DateTimeField(_("created time"), auto_now_add=True)
+    updated_time = models.DateTimeField(_("updated time"), auto_now=True)
+    invoice_number = models.UUIDField(_('uuid'), unique=True, default=uuid.uuid4, editable=False)
+    transaction_id = models.CharField(_('transaction id'), unique=True, null=True, max_length=40)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    is_paid = models.NullBooleanField(_("is paid"))
+    price = models.PositiveIntegerField(_('price'))
+    redirect_url = models.CharField(_('redirect url'), max_length=120)
