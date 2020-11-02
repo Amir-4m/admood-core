@@ -52,11 +52,9 @@ class Campaign(models.Model):
 
     extra_data = JSONField(default=dict)
 
-    utm_source = models.CharField(max_length=50, null=True, blank=True)
-    utm_medium = models.CharField(max_length=50, null=True, blank=True)
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
-
-    utm = JSONField(validators=[validate_campaign_utm], null=True, blank=True)
+    utm_medium = models.CharField(max_length=50, null=True, blank=True)
+    utm_content = models.CharField(max_length=50, null=True, blank=True)
 
     daily_budget = models.PositiveIntegerField()
     total_budget = models.PositiveIntegerField()
