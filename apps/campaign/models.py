@@ -233,6 +233,9 @@ class CampaignPublisher(models.Model):
     publisher_price = models.PositiveIntegerField()
     advertiser_price = models.PositiveIntegerField()
 
+    class Meta:
+        unique_together = ('campaign', 'publisher')
+
 
 class TelegramCampaign(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
@@ -242,6 +245,3 @@ class TelegramCampaign(models.Model):
 class InstagramCampaign(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='instagram_campaigns')
     screenshot = models.ForeignKey(File, on_delete=models.CASCADE)
-
-# hello everyone. I slept badly last night. I saw a bad dream. I hope my grandmother get well sooner.
-# piremardhaye por hashieh. please be a better person. be a good person is very important.
