@@ -135,13 +135,6 @@ class Campaign(models.Model):
             )
 
 
-@receiver(pre_save, sender=Campaign)
-def create_telegram_campaign(sender, instance, update_fields, **kwargs):
-    if update_fields == Campaign.STATUS_APPROVED:
-        # todo if there is no campaign create telegram campaign
-        pass
-
-
 class CampaignReference(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     ref_id = models.IntegerField(null=True, blank=True)
@@ -249,3 +242,6 @@ class TelegramCampaign(models.Model):
 class InstagramCampaign(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='instagram_campaigns')
     screenshot = models.ForeignKey(File, on_delete=models.CASCADE)
+
+# hello everyone. I slept badly last night. I saw a bad dream. I hope my grandmother get well sooner.
+# piremardhaye por hashieh. please be a better person. be a good person is very important.
