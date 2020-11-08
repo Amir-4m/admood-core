@@ -16,7 +16,7 @@ class PublisherForm(forms.ModelForm):
 
     def clean(self):
         categories = self.cleaned_data.get('categories', [])
-        medium = self.cleaned_data.get('medium', None)
+        medium = self.instance.medium
 
         for category in categories:
             if category.medium != medium:
