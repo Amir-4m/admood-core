@@ -48,12 +48,42 @@ def create_campaign(campaign, start_time, end_time, status):
 
 
 def create_content(content, campaign_id):
+    utm_source = "admood"
+    utm_campaign = content.campaign.utm_campaign
+    utm_medium = content.campaign.utm_medium
+    utm_content = content.campaign.utm_content
+
+    if utm_campaign is None:
+        utm_campaign = content.campaign.pk
+    if utm_medium is None:
+        utm_medium = content.campaign.utm_medium
+
+    links = content.data.get('links', []) or []
+    for i, link in enumerate(links, 1):
+        link['utm_source'] = utm_source
+        link["utm_campaign"] = utm_campaign
+        link["utm_medium"] = utm_medium
+        if utm_content is not None:
+            link['utm_content'] = utm_content
+        if link.get('utm_term', None):
+            link['utm_term'] = i
+
+    inlines = content.data.get('inlines', []) or []
+    for i, inline in enumerate(inlines, 1):
+        inline['utm_source'] = utm_source
+        inline["utm_campaign"] = utm_campaign
+        inline["utm_medium"] = utm_medium
+        if utm_content is not None:
+            inline['utm_content'] = utm_content
+        if inline.get('utm_term', None):
+            inline['utm_term'] = i
+
     data = dict(
         campaign=campaign_id,
         display_text=content.title,
         content=content.data.get('content'),
-        links=content.data.get('links', []) or [],
-        inlines=content.data.get('inlines', []) or [],
+        links=links,
+        inlines=inlines,
         is_sticker=content.data.get('is_sticker', False),
         mother_channel=content.data.get('mother_channel', None),
         view_type=content.data.get('view_type'),
