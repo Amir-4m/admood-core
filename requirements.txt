@@ -13,4 +13,5 @@ Pillow # ==7.0.0
 sentry-sdk==0.19.1
 google-auth==1.14.0
 jsonschema
-#
+
+django-admin-json-editor

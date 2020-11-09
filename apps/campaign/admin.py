@@ -1,4 +1,6 @@
 from django.contrib import admin
+
+from .forms import ContentAdminForm
 from .models import (
     Province,
     Campaign,
@@ -58,6 +60,7 @@ class CampaignAdmin(admin.ModelAdmin):
 class CampaignContentAdmin(admin.ModelAdmin):
     list_display = ("campaign", "title", "data")
     search_fields = ("campaign__name", "title",)
+    form = ContentAdminForm
 
 
 @admin.register(CampaignSchedule)
