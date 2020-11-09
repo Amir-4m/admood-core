@@ -56,6 +56,7 @@ staging:
     - git pull
     - pip install -r requirements.txt
     #    - python manage.py migrate
+    - python manage.py collectstatic
     - uwsgi --reload /tmp/$PROJECT_DIR-master.pid
     - supervisorctl restart $PROJECT_ABR:*
   only:
