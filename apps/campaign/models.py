@@ -1,15 +1,12 @@
 import datetime
 
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Max
 from django.db.models.functions import Coalesce
-from django.db.models.signals import pre_save, post_save
-from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
-from apps.campaign.api.validators import validate_campaign_utm
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.device.consts import ServiceProvider
@@ -42,6 +39,7 @@ class Campaign(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     publishers = models.ManyToManyField(Publisher, blank=True)
     categories = models.ManyToManyField(Category, blank=True)
+    final_publishers = models.ManyToManyField(Publisher, blank=True, related_name='final_campaigns')
 
     name = models.CharField(max_length=50)
     locations = models.ManyToManyField(Province, blank=True)
@@ -125,14 +123,7 @@ class Campaign(models.Model):
         return cost
 
     def create_publisher_list(self):
-        for count, publisher in enumerate(self.publishers.all()):
-            CampaignPublisher.objects.create(
-                campaign=self,
-                publisher=publisher,
-                publisher_price=0,
-                advertiser_price=0,
-                order=count + 1
-            )
+        pass
 
 
 class CampaignReference(models.Model):
@@ -224,17 +215,6 @@ class CampaignSchedule(models.Model):
 
     class Meta:
         verbose_name = 'Schedule'
-
-
-class CampaignPublisher(models.Model):
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
-    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
-    order = models.PositiveIntegerField()
-    publisher_price = models.PositiveIntegerField()
-    advertiser_price = models.PositiveIntegerField()
-
-    class Meta:
-        unique_together = ('campaign', 'publisher')
 
 
 class TelegramCampaign(models.Model):

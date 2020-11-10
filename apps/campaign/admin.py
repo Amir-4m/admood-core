@@ -8,7 +8,7 @@ from .models import (
     TargetDevice,
     CampaignSchedule,
     CampaignReference,
-    CampaignPublisher, TelegramCampaign,
+    TelegramCampaign,
 )
 from .views import test_campaign
 
@@ -24,10 +24,6 @@ class TargetDeviceInline(admin.TabularInline):
     extra = 1
 
 
-class CampaignPublisherInline(admin.TabularInline):
-    model = CampaignPublisher
-    extra = 1
-
 
 class CampaignContentInline(admin.TabularInline):
     model = CampaignContent
@@ -38,7 +34,7 @@ class CampaignContentInline(admin.TabularInline):
 class CampaignAdmin(admin.ModelAdmin):
     list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
-    inlines = [CampaignContentInline, TargetDeviceInline, CampaignPublisherInline]
+    inlines = [CampaignContentInline, TargetDeviceInline]
     autocomplete_fields = ["owner"]
     search_fields = ['medium', 'owner__username']
     list_filter = ['medium', 'status', 'is_enable']

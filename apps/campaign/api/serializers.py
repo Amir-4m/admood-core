@@ -3,11 +3,10 @@ import datetime
 from django.utils import timezone
 from rest_framework import serializers
 
-from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignPublisher
+from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice
 from apps.core.models import File
-from apps.medium.models import CostModelPrice
+from apps.medium.models import CostModelPrice, Publisher
 from apps.payment.models import Transaction
-from services.telegram import get_contents
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -52,7 +51,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = '__all__'
-        read_only_fields = ['status']
+        read_only_fields = ['status', 'final_publishers']
 
     def get_extra_kwargs(self):
         extra_kwargs = super().get_extra_kwargs()
@@ -133,15 +132,9 @@ class CampaignSerializer(serializers.ModelSerializer):
         for schedule_data in schedules:
             CampaignSchedule.objects.create(campaign=campaign, **schedule_data)
 
-        for count, publisher in enumerate(campaign.publishers.all()):
-            cost_model_price = CostModelPrice.objects.get(publisher=publisher)
-            CampaignPublisher.objects.create(
-                campaign=campaign,
-                publisher=publisher,
-                publisher_price=cost_model_price.publisher_price,
-                advertiser_price=cost_model_price.advertiser_price,
-                order=count + 1
-            )
+        publishers_by_categories = Publisher.get_by_categories(categories=campaign.categories.all())
+        final_publishers = (*campaign.publishers.all(), *publishers_by_categories)
+        campaign.final_publishers.add(*final_publishers)
 
         return campaign
 
@@ -177,16 +170,9 @@ class CampaignSerializer(serializers.ModelSerializer):
                 else:
                     CampaignSchedule.objects.create(campaign=instance, **schedule_data)
 
-        CampaignPublisher.objects.filter(campaign=instance).delete()
-        for count, publisher in enumerate(publishers):
-            cost_model_price = CostModelPrice.objects.get(publisher=publisher)
-            CampaignPublisher.objects.create(
-                campaign=instance,
-                publisher=publisher,
-                publisher_price=cost_model_price.publisher_price,
-                advertiser_price=cost_model_price.advertiser_price,
-                order=count + 1
-            )
+        publishers_by_categories = Publisher.get_by_categories(categories=instance.categories.all())
+        final_publishers = (*publishers, *publishers_by_categories)
+        instance.final_publishers.add(*final_publishers)
 
         return instance
 
