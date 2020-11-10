@@ -62,3 +62,7 @@ class Publisher(models.Model):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def get_by_categories(categories):
+        return Publisher.objects.filter(categories__in=categories).distinct()
