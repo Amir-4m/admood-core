@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import GenericAPIView
@@ -10,7 +9,6 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from admood_core import settings
 from apps.accounts.api.serializers import (
     MyTokenObtainPairSerializer,
     MyTokenRefreshSerializer,
@@ -19,6 +17,7 @@ from apps.accounts.api.serializers import (
     SetPasswordSerializer,
     PasswordResetSerializer,
     RegisterUserByPhoneSerializer,
+    VerifyUserSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -54,8 +53,12 @@ class RegisterUserByPhoneAPIView(GenericAPIView):
 
 
 class VerifyUserAPIView(GenericAPIView):
+    serializer_class = VerifyUserSerializer
+
     def post(self, request):
-        verification = Verification.verify_email(verify_code=request.data["rc"])
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        verification = Verification.verify_email(verify_code=serializer.data["rc"])
         if verification:
             verification.user.verify()
             verification.user.save()

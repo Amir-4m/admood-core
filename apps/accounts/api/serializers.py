@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -8,8 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from admood_core import settings
-from apps.accounts.models import UserProfile, Verification
+from apps.accounts.models import UserProfile
 
 User = get_user_model()
 
@@ -134,37 +132,7 @@ class UserRelatedField(serializers.RelatedField):
 
 
 class VerifyUserSerializer(serializers.Serializer):
-    code = serializers.CharField()
-
-    def validate_code(self, code):
-        try:
-            Verification.objects.get(
-                code=code,
-                type=Verification.VERIFY_TYPE_EMAIL,
-                verified_time__isnull=True,
-                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
-            )
-        except:
-            raise serializers.ValidationError(
-                {'code': 'invalid code'}
-            )
-        return code
-
-    def save(self, **kwargs):
-        try:
-            verification = Verification.objects.get(
-                code=self.validated_data['code'],
-                type=Verification.VERIFY_TYPE_EMAIL,
-                verified_time__isnull=True,
-                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
-            )
-        except:
-            raise serializers.ValidationError(
-                {'code': 'invalid code'}
-            )
-        verification.verify()
-        verification.save()
-        verification.user.verify()
+    rc = serializers.CharField()
 
 
 class PasswordResetSerializer(serializers.Serializer):
@@ -262,3 +230,7 @@ class LegalProfileSerializer(serializers.ModelSerializer):
             'register_code'
         ]
         read_only_fields = ['status']
+
+
+class VerifyUserSerializer(serializers.Serializer):
+    rc = serializers.CharField()
