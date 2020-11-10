@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
-    CampaignContentSerializer, CampaignDuplicateSerializer, CampaignApproveSerializer)
+    CampaignContentSerializer, CampaignDuplicateSerializer, CampaignApproveSerializer, EstimateActionsSerializer)
 from apps.campaign.models import Province, Campaign, CampaignContent
 from apps.core.consts import CostModel
 from apps.core.views import BaseViewSet
@@ -73,7 +73,7 @@ class CampaignViewSet(BaseViewSet,
         # todo: calculate min of cost model price
         return Response({'value': 3000})
 
-    @action(methods=['get'], url_path='estimate-actions/', serializer_class=CampaignDuplicateSerializer)
+    @action(detail=False, methods=['get'], url_path='estimate-actions', serializer_class=EstimateActionsSerializer)
     def estimate_actions(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -82,27 +82,27 @@ class CampaignViewSet(BaseViewSet,
         categories = serializer.data['categories']
 
         publishers_by_categories = Publisher.get_by_categories(categories)
-        publishers = [*publishers, *publishers_by_categories]
+        publishers = {*publishers, *publishers_by_categories}
 
         budget = serializer.data['budget']
 
         cpv_price_max = CostModelPrice.max_price(publishers, CostModel.CPV)
         cpv_price_min = CostModelPrice.min_price(publishers, CostModel.CPV)
 
-        views_max = budget / cpv_price_min
-        views_min = budget / cpv_price_max
-
         cpc_price_max = CostModelPrice.max_price(publishers, CostModel.CPC)
         cpc_price_min = CostModelPrice.min_price(publishers, CostModel.CPC)
 
-        clicks_max = budget / cpc_price_min
-        clicks_min = budget / cpc_price_max
+        cpv_min = budget // cpv_price_max if cpv_price_max else 0
+        cpv_max = budget // cpv_price_min if cpv_price_min else 0
+
+        cpc_min = budget // cpc_price_max if cpc_price_max else 0
+        cpc_max = budget // cpc_price_min if cpc_price_min else 0
 
         data = {
-            'views_min': views_min,
-            'views_max': views_max,
-            'clicks_min': clicks_min,
-            'clicks_max': clicks_max,
+            'cpv_min': cpv_min,
+            'cpv_max': cpv_max,
+            'cpc_min': cpc_min,
+            'cpc_max': cpc_max,
         }
 
         return Response(data=data)

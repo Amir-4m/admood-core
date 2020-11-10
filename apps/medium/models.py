@@ -38,14 +38,14 @@ class CostModelPrice(models.Model):
     @staticmethod
     def max_price(publishers, cost_model):
         return CostModelPrice.objects.filter(publisher__in=publishers, cost_model=cost_model).aggregate(
-            max_cpv_price=Coalesce(Max('advertiser_price'), 0)
-        )
+            max_price=Coalesce(Max('advertiser_price'), 0)
+        )['max_price']
 
     @staticmethod
     def min_price(publishers, cost_model):
         return CostModelPrice.objects.filter(publisher__in=publishers, cost_model=cost_model).aggregate(
-            max_cpv_price=Coalesce(Min('advertiser_price'), 0)
-        )
+            min_price=Coalesce(Min('advertiser_price'), 0)
+        )['min_price']
 
 
 class Publisher(models.Model):

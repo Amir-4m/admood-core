@@ -341,3 +341,9 @@ class CampaignContentSerializer(serializers.ModelSerializer):
             return self.context['request'].build_absolute_uri(file.url)
         except:
             return None
+
+
+class EstimateActionsSerializer(serializers.Serializer):
+    publishers = serializers.ListField()
+    categories = serializers.ListField()
+    budget = serializers.IntegerField()
