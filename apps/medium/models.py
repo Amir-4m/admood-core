@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Max, Min
+from django.db.models.functions import Coalesce
 
 from .consts import Medium
 from ..core.consts import CostModel
@@ -32,6 +34,18 @@ class CostModelPrice(models.Model):
 
     def __str__(self):
         return f'{self.grade}-{self.get_medium_display()}'
+
+    @staticmethod
+    def max_price(publishers, cost_model):
+        return CostModelPrice.objects.filter(publisher__in=publishers, cost_model=cost_model).aggregate(
+            max_cpv_price=Coalesce(Max('advertiser_price'), 0)
+        )
+
+    @staticmethod
+    def min_price(publishers, cost_model):
+        return CostModelPrice.objects.filter(publisher__in=publishers, cost_model=cost_model).aggregate(
+            max_cpv_price=Coalesce(Min('advertiser_price'), 0)
+        )
 
 
 class Publisher(models.Model):
