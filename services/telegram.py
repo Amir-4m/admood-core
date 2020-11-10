@@ -117,13 +117,16 @@ def create_content(content, campaign_id):
     return r.json()['id']
 
 
-def create_file(file, content_id, telegram_file_hash=None):
+def create_file(file, campaign_id=None, content_id=None, telegram_file_hash=None):
     data = dict(
         name=file.name,
         file_type=file_type(file.name),
-        campaign_content=content_id,
         telegram_file_hash=telegram_file_hash
     )
+    if campaign_id:
+        data['campaign'] = campaign_id
+    if content_id:
+        data['campaign_content'] = content_id
     try:
         if telegram_file_hash:
             r = requests.post(url=FILE_URL, headers=HEADERS, data=data)
