@@ -51,9 +51,6 @@ def create_telegram_campaign(campaign):
         "approved",
     )
 
-    screenshot = TelegramCampaign.objects.get(campaign=campaign).screenshot
-    create_file(screenshot, ref_id)
-
     contents = campaign.contents.all()
     for content in contents:
         content_ref_id = create_content(content, ref_id)
@@ -81,6 +78,6 @@ def create_telegram_test_campaign(campaign):
         file = get_file(content.data.get('file', None))
         telegram_file_hash = content.data.get('telegram_file_hash', None)
         if file:
-            create_file(file, content_ref_id, telegram_file_hash)
+            create_file(file, content_id=content_ref_id, telegram_file_hash=telegram_file_hash)
 
     return test_campaign(ref_id)
