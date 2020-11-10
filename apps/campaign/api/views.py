@@ -11,7 +11,9 @@ from apps.campaign.api.serializers import (
     CampaignSerializer,
     CampaignContentSerializer, CampaignDuplicateSerializer, CampaignApproveSerializer)
 from apps.campaign.models import Province, Campaign, CampaignContent
+from apps.core.consts import CostModel
 from apps.core.views import BaseViewSet
+from apps.medium.models import Publisher, CostModelPrice
 
 
 class ProvinceViewSet(BaseViewSet,
@@ -70,6 +72,40 @@ class CampaignViewSet(BaseViewSet,
     def cost_model(self, request, cost_model, pk=None):
         # todo: calculate min of cost model price
         return Response({'value': 3000})
+
+    @action(methods=['get'], url_path='estimate-actions/', serializer_class=CampaignDuplicateSerializer)
+    def estimate_actions(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        publishers = serializer.data['publishers']
+        categories = serializer.data['categories']
+
+        publishers_by_categories = Publisher.get_by_categories(categories)
+        publishers = [*publishers, *publishers_by_categories]
+
+        budget = serializer.data['budget']
+
+        cpv_price_max = CostModelPrice.max_price(publishers, CostModel.CPV)
+        cpv_price_min = CostModelPrice.min_price(publishers, CostModel.CPV)
+
+        views_max = budget / cpv_price_min
+        views_min = budget / cpv_price_max
+
+        cpc_price_max = CostModelPrice.max_price(publishers, CostModel.CPC)
+        cpc_price_min = CostModelPrice.min_price(publishers, CostModel.CPC)
+
+        clicks_max = budget / cpc_price_min
+        clicks_min = budget / cpc_price_max
+
+        data = {
+            'views_min': views_min,
+            'views_max': views_max,
+            'clicks_min': clicks_min,
+            'clicks_max': clicks_max,
+        }
+
+        return Response(data=data)
 
 
 class ContentViewSet(BaseViewSet,
