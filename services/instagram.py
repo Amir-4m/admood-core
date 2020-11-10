@@ -20,7 +20,7 @@ MEDIA_URL = f'{ADINSTA_API_URL}/api/v1/medias/'
 
 
 def create_insta_campaign(campaign, start_time, end_time, status):
-    publishers = campaign.campaignpublisher_set.select_related('publisher').values_list(
+    publishers = campaign.final_publishers.select_related('publisher').values_list(
         'publisher__ref_id', 'publisher_price'
     )
 

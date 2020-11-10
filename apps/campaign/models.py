@@ -218,7 +218,7 @@ class CampaignSchedule(models.Model):
 
 
 class TelegramCampaign(models.Model):
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    campaign = models.OneToOneField(Campaign, on_delete=models.CASCADE)
     screenshot = models.ForeignKey(File, on_delete=models.CASCADE)
 
 

@@ -4,6 +4,7 @@ import requests
 from rest_framework.status import HTTP_400_BAD_REQUEST
 
 from admood_core.settings import ADBOT_API_TOKEN, ADBOT_API_URL
+from apps.core.consts import CostModel
 from services.utils import file_type
 
 JSON_HEADERS = {
@@ -20,15 +21,19 @@ FILE_URL = f'{ADBOT_API_URL}/api/v1/files/'
 
 
 def create_campaign(campaign, start_time, end_time, status):
-    publishers = campaign.campaignpublisher_set.select_related('publisher').values_list(
-        'publisher__ref_id', 'publisher_price'
-    )
+    publishers = []
+    for publisher in campaign.final_publishers.all():
+        try:
+            publisher_price = publisher.cost_models.get(publisher=publisher, cost_model=CostModel.CPV).publisher_price
+        except:
+            publisher_price = 0
+        publishers.append((publisher.pk, publisher_price))
 
     data = dict(
         title=campaign.name,
         status=status,
         is_enable=False,
-        publishers=list(publishers),
+        publishers=publishers,
         max_view=campaign.remaining_views,
         agents=campaign.extra_data.get('agents', []),
         start_datetime=start_time,
@@ -48,46 +53,57 @@ def create_campaign(campaign, start_time, end_time, status):
 
 
 def create_content(content, campaign_id):
-    utm_source = "admood"
-    utm_campaign = content.campaign.utm_campaign
-    utm_medium = content.campaign.utm_medium
-    utm_content = content.campaign.utm_content
-
-    if utm_campaign is None:
-        utm_campaign = content.campaign.pk
-    if utm_medium is None:
+    if 'post_link' in content.data:
+        data = dict(
+            campaign=campaign_id,
+            display_text=content.title,
+            post_link=content.data.get('post_link'),
+            view_type=content.data.get('view_type'),
+        )
+    else:
+        utm_source = "admood"
+        utm_campaign = content.campaign.utm_campaign
         utm_medium = content.campaign.utm_medium
+        utm_content = content.campaign.utm_content
 
-    links = content.data.get('links', []) or []
-    for i, link in enumerate(links, 1):
-        link['utm_source'] = utm_source
-        link["utm_campaign"] = utm_campaign
-        link["utm_medium"] = utm_medium
-        if utm_content is not None:
-            link['utm_content'] = utm_content
-        if link.get('utm_term', None):
-            link['utm_term'] = i
+        if utm_campaign is None:
+            utm_campaign = content.campaign.pk
+        if utm_medium is None:
+            utm_medium = content.campaign.get_medium_display()
 
-    inlines = content.data.get('inlines', []) or []
-    for i, inline in enumerate(inlines, 1):
-        inline['utm_source'] = utm_source
-        inline["utm_campaign"] = utm_campaign
-        inline["utm_medium"] = utm_medium
-        if utm_content is not None:
-            inline['utm_content'] = utm_content
-        if inline.get('utm_term', None):
-            inline['utm_term'] = i
+        links = content.data.get('links', [])
+        for i, link in enumerate(links, 1):
+            link['utm_source'] = utm_source
+            link["utm_campaign"] = utm_campaign
+            link["utm_medium"] = utm_medium
+            if utm_content is not None:
+                link['utm_content'] = utm_content
+            if not link.get('utm_term', None):
+                link['utm_term'] = i
 
-    data = dict(
-        campaign=campaign_id,
-        display_text=content.title,
-        content=content.data.get('content'),
-        links=links,
-        inlines=inlines,
-        is_sticker=content.data.get('is_sticker', False),
-        mother_channel=content.data.get('mother_channel', None),
-        view_type=content.data.get('view_type'),
-    )
+        inlines = content.data.get('inlines', [])
+        for i, inline in enumerate(inlines, 1):
+            if inline.get('has_tracker'):
+                inline['utm_source'] = utm_source
+                inline["utm_campaign"] = utm_campaign
+                inline["utm_medium"] = utm_medium
+                if utm_content is not None:
+                    inline['utm_content'] = utm_content
+                    if inline.get('utm_term') is None:
+                        inline['utm_term'] = i
+            else:
+                inline.pop('utm_term')
+
+        data = dict(
+            campaign=campaign_id,
+            display_text=content.title,
+            content=content.data.get('content'),
+            links=links,
+            inlines=inlines,
+            is_sticker=content.data.get('is_sticker', False),
+            mother_channel=content.data.get('mother_channel', None),
+            view_type=content.data.get('view_type'),
+        )
     try:
         r = requests.post(url=CONTENT_URL, headers=JSON_HEADERS, data=json.dumps(data))
         r.raise_for_status()

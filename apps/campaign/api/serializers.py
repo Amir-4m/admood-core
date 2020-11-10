@@ -269,7 +269,7 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         categories = instance.categories.all()
         contents = instance.contents.all()
         target_devices = instance.target_devices.all()
-        campaign_publishers = instance.campaignpublisher_set.all()
+        campaign_publishers = instance.final_publishers.all()
         schedules = validated_data.pop("schedules", None)
 
         instance.pk = None

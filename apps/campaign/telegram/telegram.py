@@ -1,9 +1,9 @@
-from django.db.models import Q
 import datetime
+
 from django.utils.timezone import now
-from apps.campaign.models import Campaign, CampaignReference, CampaignSchedule
+
+from apps.campaign.models import CampaignReference, TelegramCampaign
 from apps.core.utils.get_file import get_file
-from apps.medium.consts import Medium
 from services.telegram import create_campaign, create_content, create_file, enable_campaign, test_campaign
 
 
@@ -40,6 +40,7 @@ def create_telegram_campaign(campaign):
         start_time=start_time,
         end_time=end_time,
     )
+
     if campaign_ref.ref_id:
         return
     # create telegram service campaign
@@ -49,6 +50,9 @@ def create_telegram_campaign(campaign):
         datetime.datetime.combine(date, end_time).__str__(),
         "approved",
     )
+
+    screenshot = TelegramCampaign.objects.get(campaign=campaign).screenshot
+    create_file(screenshot, ref_id)
 
     contents = campaign.contents.all()
     for content in contents:
