@@ -73,7 +73,7 @@ class CampaignViewSet(BaseViewSet,
         # todo: calculate min of cost model price
         return Response({'value': 3000})
 
-    @action(detail=False, methods=['get'], url_path='estimate-actions', serializer_class=EstimateActionsSerializer)
+    @action(detail=False, methods=['post'], url_path='estimate-actions', serializer_class=EstimateActionsSerializer)
     def estimate_actions(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
