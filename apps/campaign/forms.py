@@ -68,8 +68,8 @@ class CampaignAdminForm(forms.ModelForm):
     def clean(self):
         if self.cleaned_data.get('medium') == Medium.TELEGRAM:
             status = self.cleaned_data.get('status')
-            if status == Campaign.STATUS_APPROVED and hasattr(self.instance, 'telegramcampaign'):
-                return self.cleaned_data
-            else:
+            if status == Campaign.STATUS_APPROVED:
+                if hasattr(self.instance, 'telegramcampaign'):
+                    return self.cleaned_data
                 raise ValidationError({'status': 'to approve the campaign upload the test screenshot.'})
         return self.cleaned_data
