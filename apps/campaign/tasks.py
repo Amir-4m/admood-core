@@ -27,13 +27,19 @@ def create_telegram_campaign():
 
     # first try to create scheduled campaigns
     # for telegram bot
-    scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
+    scheduled_campaigns = campaigns.filter(
+        schedules__week_day=today.weekday(),
+    )
     for campaign in scheduled_campaigns:
         if campaign.remaining_views <= 0:
             campaign.is_enable = False
             campaign.save()
             return
-        schedules = campaign.schedules.filter(week_day=today.weekday())
+
+        schedules = campaign.schedules.filter(
+            week_day=today.weekday(),
+            start_time__gte=now().time(),
+        )
 
         for schedule in schedules:
             campaign_ref, created = CampaignReference.objects.get_or_create(
