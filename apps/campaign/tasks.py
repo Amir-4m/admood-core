@@ -38,7 +38,8 @@ def create_telegram_campaign():
 
         schedules = campaign.schedules.filter(
             week_day=today.weekday(),
-            start_time__gte=now().time(),
+            start_time__lte=now().time(),
+            end_time__gt=now().time(),
         )
 
         for schedule in schedules:
