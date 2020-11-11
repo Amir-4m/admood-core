@@ -119,10 +119,13 @@ class Campaign(models.Model):
     @property
     def cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(report__isnull=False):
+        for campaign_reference in self.campaignreference_set.filter(ref_id__isnull=False):
             for obj in campaign_reference.contents:
-                content = self.contents.get(pk=obj['content'])
-                cost += obj['views'] * content.cost_model_price
+                try:
+                    content = self.contents.get(pk=obj['content'])
+                    cost += obj['views'] * content.cost_model_price
+                except:
+                    continue
         return cost
 
     def create_publisher_list(self):
