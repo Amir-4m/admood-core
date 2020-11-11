@@ -61,6 +61,9 @@ class Campaign(models.Model):
     is_enable = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ('-created_time',)
+
     def __str__(self):
         return self.name
 
@@ -169,7 +172,7 @@ class CampaignContent(models.Model):
 
     class Meta:
         verbose_name = 'Content'
-        ordering = ['pk']
+        ordering = ['-campaign__created_time']
 
     def __str__(self):
         return self.title
