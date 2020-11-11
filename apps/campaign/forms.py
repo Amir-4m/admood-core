@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django_admin_json_editor import JSONEditorWidget
 
 from apps.campaign.models import CampaignContent, Campaign
+from apps.medium.consts import Medium
 
 DATA_SCHEMA = {
     'type': 'object',
@@ -65,10 +66,10 @@ class CampaignAdminForm(forms.ModelForm):
         fields = '__all__'
 
     def clean(self):
-        status = self.cleaned_data.get('status')
-        if status != Campaign.STATUS_APPROVED:
-            return self.cleaned_data
-        if hasattr(self.instance, 'telegramcampaign'):
-            return self.cleaned_data
-
-        raise ValidationError({'status': 'to approve the campaign upload the test screenshot.'})
+        if self.cleaned_data.get('medium') == Medium.TELEGRAM:
+            status = self.cleaned_data.get('status')
+            if status == Campaign.STATUS_APPROVED and hasattr(self.instance, 'telegramcampaign'):
+                return self.cleaned_data
+            else:
+                raise ValidationError({'status': 'to approve the campaign upload the test screenshot.'})
+        return self.cleaned_data
