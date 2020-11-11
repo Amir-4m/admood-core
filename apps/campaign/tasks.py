@@ -30,6 +30,8 @@ def create_telegram_campaign():
     scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
     for campaign in scheduled_campaigns:
         if campaign.remaining_views <= 0:
+            campaign.is_enable = False
+            campaign.save()
             return
         schedules = campaign.schedules.filter(week_day=today.weekday())
 
@@ -42,7 +44,7 @@ def create_telegram_campaign():
                 end_time=schedule.end_time
             )
             if campaign_ref.ref_id:
-                return
+                continue
             # create telegram service campaign
             ref_id = create_campaign(
                 campaign,
