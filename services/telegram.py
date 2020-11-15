@@ -78,7 +78,7 @@ def create_content(content, campaign_id):
             link["utm_medium"] = utm_medium
             if utm_content is not None:
                 link['utm_content'] = utm_content
-            if not link.get('utm_term', None):
+            if link.get('utm_term') is None:
                 link['utm_term'] = i
 
         inlines = content.data.get('inlines', [])
@@ -89,8 +89,8 @@ def create_content(content, campaign_id):
                 inline["utm_medium"] = utm_medium
                 if utm_content is not None:
                     inline['utm_content'] = utm_content
-                    if inline.get('utm_term') is None:
-                        inline['utm_term'] = i
+                if inline.get('utm_term') is None:
+                    inline['utm_term'] = i
             else:
                 inline.pop('utm_term')
 
