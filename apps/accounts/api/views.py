@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.http import Http404
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -13,9 +13,11 @@ from apps.accounts.api.serializers import (
     MyTokenObtainPairSerializer,
     MyTokenRefreshSerializer,
     UserProfileSerializer,
-    RegisterSerializer,
-    PasswordResetConfirmSerializer,
-    PasswordResetSerializer, VerifyUserSerializer, RegisterPhoneSerializer,
+    RegisterUserByEmailSerializer,
+    SetPasswordSerializer,
+    PasswordResetSerializer,
+    RegisterUserByPhoneSerializer,
+    VerifyUserSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -30,8 +32,8 @@ class MyTokenRefreshView(TokenRefreshView):
     serializer_class = MyTokenRefreshSerializer
 
 
-class RegisterUserAPIView(GenericAPIView):
-    serializer_class = RegisterSerializer
+class RegisterUserByEmailAPIView(GenericAPIView):
+    serializer_class = RegisterUserByEmailSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -40,8 +42,8 @@ class RegisterUserAPIView(GenericAPIView):
         return Response(serializer.data)
 
 
-class RegisterPhoneAPIView(GenericAPIView):
-    serializer_class = RegisterPhoneSerializer
+class RegisterUserByPhoneAPIView(GenericAPIView):
+    serializer_class = RegisterUserByPhoneSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -52,13 +54,16 @@ class RegisterPhoneAPIView(GenericAPIView):
 
 class VerifyUserAPIView(GenericAPIView):
     serializer_class = VerifyUserSerializer
-    queryset = Verification.objects.all()
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        verification = Verification.verify_email(verify_code=serializer.data["rc"])
+        if verification:
+            verification.user.verify()
+            verification.user.save()
+            return Response()
+        return NotFound
 
 
 class PasswordResetAPIView(GenericAPIView):
@@ -72,16 +77,17 @@ class PasswordResetAPIView(GenericAPIView):
 
 
 class PasswordResetConfirmAPIView(GenericAPIView):
-    serializer_class = PasswordResetConfirmSerializer
+    serializer_class = SetPasswordSerializer
     queryset = User.objects.all()
 
     def get_verification(self):
-        try:
-            verification = Verification.objects.get(code=self.request.query_params.get('rc'))
-            if verification.is_valid:
-                return verification
-        except:
-            raise Http404
+        verification = Verification.get_valid(
+            verify_code=self.request.query_params.get('rc'),
+            verify_type=Verification.VERIFY_TYPE_EMAIL
+        )
+        if verification:
+            return verification
+        raise NotFound
 
     def get(self, request):
         if self.get_verification():
@@ -94,7 +100,21 @@ class PasswordResetConfirmAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         verification.verify()
+        verification.save()
         return Response({'email': user.email})
+
+
+class SetPasswordAPIView(GenericAPIView):
+    serializer_class = SetPasswordSerializer
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+
+    def put(self, request):
+        serializer = self.serializer_class(instance=request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response()
 
 
 class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
@@ -112,7 +132,8 @@ class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
     @action(detail=False, methods=['get'])
     def has_profile(self, request):
         data = {
-            'has_profile': self.queryset.filter(user=request.user).exists()
+            'has_profile': self.queryset.filter(user=request.user).exists(),
+            'has_password': request.user.has_usable_password(),
         }
         return Response(data=data)
 
@@ -123,5 +144,6 @@ class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
             return Response(serializer.data)
         return Response({
             'phone_number': request.user.phone_number,
-            'email': request.user.email
+            'email': request.user.email,
+            'has_password': request.user.has_usable_password(),
         })

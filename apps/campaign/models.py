@@ -1,15 +1,12 @@
 import datetime
 
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Max
 from django.db.models.functions import Coalesce
-from django.db.models.signals import pre_save, post_save
-from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
-from apps.campaign.api.validators import validate_campaign_utm
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.device.consts import ServiceProvider
@@ -42,6 +39,7 @@ class Campaign(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     publishers = models.ManyToManyField(Publisher, blank=True)
     categories = models.ManyToManyField(Category, blank=True)
+    final_publishers = models.ManyToManyField(Publisher, blank=True, related_name='final_campaigns')
 
     name = models.CharField(max_length=50)
     locations = models.ManyToManyField(Province, blank=True)
@@ -52,11 +50,9 @@ class Campaign(models.Model):
 
     extra_data = JSONField(default=dict)
 
-    utm_source = models.CharField(max_length=50, null=True, blank=True)
-    utm_medium = models.CharField(max_length=50, null=True, blank=True)
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
-
-    utm = JSONField(validators=[validate_campaign_utm], null=True, blank=True)
+    utm_medium = models.CharField(max_length=50, null=True, blank=True)
+    utm_content = models.CharField(max_length=50, null=True, blank=True)
 
     daily_budget = models.PositiveIntegerField()
     total_budget = models.PositiveIntegerField()
@@ -64,6 +60,9 @@ class Campaign(models.Model):
 
     is_enable = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-created_time',)
 
     def __str__(self):
         return self.name
@@ -120,33 +119,16 @@ class Campaign(models.Model):
     @property
     def cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(report__isnull=False):
+        for campaign_reference in self.campaignreference_set.filter(ref_id__isnull=False):
             for obj in campaign_reference.contents:
-                content = self.contents.get(pk=obj['content'])
-                cost += obj['views'] * content.cost_model_price
+                try:
+                    content = self.contents.get(pk=obj['content'])
+                    cost += obj['views'] * content.cost_model_price
+                except:
+                    continue
         return cost
 
     def create_publisher_list(self):
-        for count, publisher in enumerate(self.publishers.all()):
-            CampaignPublisher.objects.create(
-                campaign=self,
-                publisher=publisher,
-                publisher_price=0,
-                advertiser_price=0,
-                order=count + 1
-            )
-
-
-@receiver(pre_save, sender=Campaign)
-def create_telegram_campaign(sender, instance, update_fields, **kwargs):
-    if update_fields == Campaign.STATUS_APPROVED:
-        # todo if there is no campaign create telegram campaign
-        pass
-
-
-@receiver(post_save, sender=Campaign)
-def add_publishers(sender, instance, created, **kwargs):
-    if instance.status == sender.STATUS_DRAFT:
         pass
 
 
@@ -185,7 +167,6 @@ class CampaignContent(models.Model):
     data = JSONField()
     description = models.TextField(blank=True, null=True)
     utm_term = models.CharField(max_length=100, blank=True, null=True)
-    utm_content = models.CharField(max_length=50, null=True, blank=True)
 
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
     cost_model_price = models.IntegerField()
@@ -194,7 +175,7 @@ class CampaignContent(models.Model):
 
     class Meta:
         verbose_name = 'Content'
-        ordering = ['pk']
+        ordering = ['-campaign__created_time', '-pk']
 
     def __str__(self):
         return self.title
@@ -242,16 +223,8 @@ class CampaignSchedule(models.Model):
         verbose_name = 'Schedule'
 
 
-class CampaignPublisher(models.Model):
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
-    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
-    order = models.PositiveIntegerField()
-    publisher_price = models.PositiveIntegerField()
-    advertiser_price = models.PositiveIntegerField()
-
-
 class TelegramCampaign(models.Model):
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    campaign = models.OneToOneField(Campaign, on_delete=models.CASCADE)
     screenshot = models.ForeignKey(File, on_delete=models.CASCADE)
 
 

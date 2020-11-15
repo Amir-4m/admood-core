@@ -4,7 +4,7 @@ from django.utils.timezone import now
 
 import datetime
 
-from apps.campaign.models import Campaign, CampaignReference, CampaignContent
+from apps.campaign.models import Campaign, CampaignReference, CampaignContent, TelegramCampaign
 from apps.core.utils.get_file import get_file
 from services.telegram import (
     create_campaign, create_content, create_file,
@@ -27,11 +27,20 @@ def create_telegram_campaign():
 
     # first try to create scheduled campaigns
     # for telegram bot
-    scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
+    scheduled_campaigns = campaigns.filter(
+        schedules__week_day=today.weekday(),
+    )
     for campaign in scheduled_campaigns:
         if campaign.remaining_views <= 0:
+            campaign.is_enable = False
+            campaign.save()
             return
-        schedules = campaign.schedules.filter(week_day=today.weekday())
+
+        schedules = campaign.schedules.filter(
+            week_day=today.weekday(),
+            start_time__lte=now().time(),
+            end_time__gt=now().time(),
+        )
 
         for schedule in schedules:
             campaign_ref, created = CampaignReference.objects.get_or_create(
@@ -42,7 +51,7 @@ def create_telegram_campaign():
                 end_time=schedule.end_time
             )
             if campaign_ref.ref_id:
-                return
+                continue
             # create telegram service campaign
             ref_id = create_campaign(
                 campaign,
@@ -51,13 +60,16 @@ def create_telegram_campaign():
                 "approved",
             )
 
+            screenshot = TelegramCampaign.objects.get(campaign=campaign).screenshot.file
+            create_file(screenshot, campaign_id=ref_id)
+
             contents = campaign.contents.all()
             for content in contents:
                 content_ref_id = create_content(content, ref_id)
                 file = get_file(content.data.get('file', None))
                 telegram_file_hash = content.data.get('telegram_file_hash', None)
                 if file:
-                    create_file(file, content_ref_id, telegram_file_hash)
+                    create_file(file, content_id=content_ref_id, telegram_file_hash=telegram_file_hash)
                 campaign_ref.contents.append({'content': content.pk, 'ref_id': content_ref_id, 'views': 0})
 
             if enable_campaign(ref_id):

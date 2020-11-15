@@ -21,12 +21,21 @@ class MyUserAdmin(UserAdmin):
         }),
     )
     list_display = ('username', 'phone_number', 'email', 'is_active', 'is_staff')
-    search_fields = ('username', 'phone_number')
+    search_fields = ('username', 'phone_number', 'email')
+    list_filter = ('is_active', 'is_verified')
 
 
 @admin.register(Verification)
 class VerificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'code', 'created_time', 'verified_time',)
+    list_display = ('user', 'verify_code', 'verify_type', 'created_time', 'verified_time',)
+    search_fields = ('user', 'verify_code')
+    list_filter = ('verify_type', 'created_time', 'verified_time')
 
 
-admin.site.register(UserProfile)
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'first_name', 'last_name', 'company_name', 'type', 'status',)
+    search_fields = ('user', 'first_name', 'last_name', 'company_name')
+    list_filter = ('type', 'status')
+
+

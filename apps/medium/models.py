@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Max, Min
+from django.db.models.functions import Coalesce
 
 from .consts import Medium
 from ..core.consts import CostModel
@@ -23,7 +25,7 @@ class Category(models.Model):
 class CostModelPrice(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
-    grade = models.PositiveSmallIntegerField()
+    grade = models.CharField(max_length=32)
     publisher_price = models.PositiveIntegerField()
     advertiser_price = models.PositiveIntegerField()
 
@@ -32,6 +34,18 @@ class CostModelPrice(models.Model):
 
     def __str__(self):
         return f'{self.grade}-{self.get_medium_display()}'
+
+    @staticmethod
+    def max_price(publishers, cost_model):
+        return CostModelPrice.objects.filter(publisher__in=publishers, cost_model=cost_model).aggregate(
+            max_price=Coalesce(Max('advertiser_price'), 0)
+        )['max_price']
+
+    @staticmethod
+    def min_price(publishers, cost_model):
+        return CostModelPrice.objects.filter(publisher__in=publishers, cost_model=cost_model).aggregate(
+            min_price=Coalesce(Min('advertiser_price'), 0)
+        )['min_price']
 
 
 class Publisher(models.Model):
@@ -48,3 +62,7 @@ class Publisher(models.Model):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def get_by_categories(categories):
+        return Publisher.objects.filter(categories__in=categories).distinct()

@@ -43,7 +43,7 @@ AUTH_USER_MODEL = 'accounts.User'
 
 USER_VERIFICATION_CODE_MIN_VALUE = config("USER_VERIFICATION_CODE_MIN_VALUE", default=100000)
 USER_VERIFICATION_CODE_MAX_VALUE = config("USER_VERIFICATION_CODE_MAX_VALUE", default=999999)
-USER_VERIFICATION_LIFETIME = config("USER_VERIFICATION_CODE_LIFETIME", default=120)
+USER_VERIFICATION_LIFETIME = config("USER_VERIFICATION_CODE_LIFETIME", default=2)
 
 # Application definition
 INSTALLED_APPS = [
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'django_admin_json_editor',
 
     'apps.core',
     'apps.accounts',
@@ -163,6 +164,7 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'apps.accounts.backends.EmailAuthBackend',
+    'apps.accounts.backends.PhoneAuthBackend',
     # 'apps.accounts.backends.GoogleAuthBackend',
 ]
 

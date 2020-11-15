@@ -1,9 +1,9 @@
-from django.db.models import Q
 import datetime
+
 from django.utils.timezone import now
-from apps.campaign.models import Campaign, CampaignReference, CampaignSchedule
+
+from apps.campaign.models import CampaignReference, TelegramCampaign
 from apps.core.utils.get_file import get_file
-from apps.medium.consts import Medium
 from services.telegram import create_campaign, create_content, create_file, enable_campaign, test_campaign
 
 
@@ -40,6 +40,7 @@ def create_telegram_campaign(campaign):
         start_time=start_time,
         end_time=end_time,
     )
+
     if campaign_ref.ref_id:
         return
     # create telegram service campaign
@@ -77,6 +78,6 @@ def create_telegram_test_campaign(campaign):
         file = get_file(content.data.get('file', None))
         telegram_file_hash = content.data.get('telegram_file_hash', None)
         if file:
-            create_file(file, content_ref_id, telegram_file_hash)
+            create_file(file, content_id=content_ref_id, telegram_file_hash=telegram_file_hash)
 
     return test_campaign(ref_id)

@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import UserProfile, Verification
+from apps.accounts.models import UserProfile
 
 User = get_user_model()
 
@@ -54,7 +56,7 @@ class MyTokenRefreshSerializer(serializers.Serializer):
         return data
 
 
-class RegisterSerializer(serializers.Serializer):
+class RegisterUserByEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(max_length=100, write_only=True)
     confirm_password = serializers.CharField(max_length=100, write_only=True)
@@ -96,13 +98,10 @@ class RegisterSerializer(serializers.Serializer):
         return user
 
 
-class RegisterPhoneSerializer(serializers.Serializer):
-    phone_number = serializers.IntegerField()
-
-    def validate_phone_number(self, phone_number):
-        if User.objects.filter(phone_number=phone_number, is_verified=True).exists():
-            raise serializers.ValidationError('user with this phone number already exists.')
-        return phone_number
+class RegisterUserByPhoneSerializer(serializers.Serializer):
+    phone_number = serializers.IntegerField(validators=[
+        RegexValidator(r'^9[0-3,9]\d{8}$', _('Enter a valid phone number.'), 'invalid'),
+    ], )
 
     def create(self, validated_data):
         phone_number = validated_data['phone_number']
@@ -133,22 +132,7 @@ class UserRelatedField(serializers.RelatedField):
 
 
 class VerifyUserSerializer(serializers.Serializer):
-    rc = serializers.SlugRelatedField(queryset=Verification.objects.all(), slug_field='code')
-
-    def validate_rc(self, rc):
-        if rc.is_valid():
-            return rc
-        else:
-            raise serializers.ValidationError(
-                {'rc': 'invalid rc'}
-            )
-
-    def save(self, **kwargs):
-        rc = self.validated_data['rc']
-        rc.verify()
-        rc.save()
-        rc.user.verify()
-        rc.user.save()
+    rc = serializers.CharField()
 
 
 class PasswordResetSerializer(serializers.Serializer):
@@ -165,7 +149,7 @@ class PasswordResetSerializer(serializers.Serializer):
         user.email_reset_password()
 
 
-class PasswordResetConfirmSerializer(serializers.ModelSerializer):
+class SetPasswordSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(max_length=100, write_only=True)
 
     class Meta:
@@ -246,3 +230,7 @@ class LegalProfileSerializer(serializers.ModelSerializer):
             'register_code'
         ]
         read_only_fields = ['status']
+
+
+class VerifyUserSerializer(serializers.Serializer):
+    rc = serializers.CharField()

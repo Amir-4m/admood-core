@@ -2,10 +2,14 @@
 {% load static %}
 
 {% block submit_buttons_bottom %}
+    {%  if original %}
     <div class="submit-row" style="text-align: right">
-        <a href="{% url "admin:test_campaign" original.pk %} ">
-            <input type="button" value="Test" name="test" style="background: green"/>
-        </a>
+
+            <a href="{% url "admin:test_campaign" original.pk %} ">
+                <input type="button" value="Test" name="test" style="background: green"/>
+            </a>
+        }
     </div>
+    {% endif %}
     {{ block.super }}
 {% endblock %}
