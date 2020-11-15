@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>افزایش موجودی</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="{% static 'payment/css/style.css' %}">
+</head>
+
+<body>
+<div class="header">
+    <img src="{% static 'payment/images/hami-logo.svg' %}" alt="Hami">
+</div>
+<div class="main-box">
+    <div class="alert-box">
+        <img class="responsive-logo" src="{% static 'payment/images/hami-logo.svg' %}" alt="Hami">
+        <h3>افزایش موجودی با موفقیت انجام شد</h3>
+        <img src="{% static 'payment/images/success-charge.svg' %}" alt="Hami">
+        <a href="{{ redirect_url }}" class="return-app"
+           rel="noopener noreferrer">بازگشت به پنل کاربری</a>
+    </div>
+</div>
+</body>
+</html>
