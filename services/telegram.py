@@ -27,7 +27,7 @@ def create_campaign(campaign, start_time, end_time, status):
             publisher_price = publisher.cost_models.get(publisher=publisher, cost_model=CostModel.CPV).publisher_price
         except:
             publisher_price = 0
-        publishers.append((publisher.pk, publisher_price))
+        publishers.append((publisher.ref_id, publisher_price))
 
     data = dict(
         title=campaign.name,
