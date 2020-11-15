@@ -10,5 +10,5 @@ class TransactionAdmin(admin.ModelAdmin):
 
 
 @admin.register(Payment)
-class TransactionAdmin(admin.ModelAdmin):
+class PaymentAdmin(admin.ModelAdmin):
     list_display = ['user', 'is_paid', 'updated_time', 'created_time']
