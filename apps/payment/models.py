@@ -52,4 +52,3 @@ class Payment(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     is_paid = models.NullBooleanField(_("is paid"))
     price = models.PositiveIntegerField(_('price'))
-    redirect_url = models.CharField(_('redirect url'), max_length=120)

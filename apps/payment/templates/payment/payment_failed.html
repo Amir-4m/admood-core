@@ -3,18 +3,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>admood</title>
-    <link rel="stylesheet" href="{% static 'instagram_app/css/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>افزایش موجودی</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="{% static 'payment/css/style.css' %}">
 </head>
-<body style="direction: rtl; text-align: center">
-<div class="payment_done">
-    <h2>متاسفانه پرداخت شما با موفقیت انجام نشد!</h2>
-    <h5>در حال بازگشت به برنامه</h5>
-    <img src="{% static 'instagram_app/image/paydone.svg' %}" alt="done"/>
-    <br>
-    <button><a href="{{ redirect_url }}?succeeded={{ purchase_verified }}">بازگشت به برنامه</a></button>
-
-</div>
+<body>
+    <div class="header">
+    <img src="{% static 'payment/images/hami-logo.svg' %}" alt="Hami">
+    </div>
+    <div class="main-box">
+        <div class="alert-box">
+        <img class="responsive-logo" src="{% static 'payment/images/hami-logo.svg' %}" alt="Hami">
+            <h3>افزایش موجودی با خطا مواجه گردید</h3>
+        <img src="{% static 'payment/images/error-charge.png' %}" alt="Hami">
+            <a href="{{ redirect_url }}" class="return-app"
+                rel="noopener noreferrer">بازگشت به پنل کاربری</a>
+        </div>
+    </div>
 </body>
 </html>

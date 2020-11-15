@@ -50,9 +50,7 @@ class PaymentViewSet(ListModelMixin,
         serializer.is_valid(raise_exception=True)
         obj = Payment.objects.create(
             price=data['price'],
-            redirect_url=data['redirect_url'],
             user=request.user
-
         )
         try:
             # creating order in payment system

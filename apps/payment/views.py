@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -38,7 +39,7 @@ class PaymentView(View):
                     value=order.price
                 )
         context = {
-            "redirect_url": order.redirect_url,
+            "redirect_url": settings.PAYMENT_REDIRECT_URL,
             "purchase_verified": purchase_verified
         }
         return render(request, html, context)
