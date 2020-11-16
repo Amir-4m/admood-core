@@ -7,6 +7,7 @@ from django.db.models import Sum
 from django.db.models.functions import Coalesce
 
 from admood_core import settings
+from apps.campaign.models import Campaign
 from apps.core.consts import Bank
 
 
@@ -33,10 +34,28 @@ from apps.core.consts import Bank
 #     ip = models.IPAddressField()
 #     created_time = models.DateTimeField(auto_now_add=True)
 
-
 class Transaction(models.Model):
+    TYPE_DEPOSIT = 'DEPOSIT'
+    TYPE_WITHDRAW = 'WITHDRAW'
+    TYPE_DEDUCT = 'DEDUCT'
+    TYPE_REFUND = 'REFUND'
+    TYPE_GIFT = 'GIFT'
+    TYPE_PENALTY = 'PENALTY'
+
+    TYPE_CHOICES = [
+        (TYPE_DEPOSIT, _('Deposit')),
+        (TYPE_WITHDRAW, _('Withdraw')),
+        (TYPE_DEDUCT, _('Deduct')),
+        (TYPE_REFUND, _('Refund')),
+        (TYPE_GIFT, _('Gift')),
+        (TYPE_PENALTY, _('Penalty')),
+    ]
+
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     value = models.IntegerField()
+    description = models.TextField(blank=True)
+    transaction_type = models.CharField(max_length=8, choices=TYPE_CHOICES, default=TYPE_DEDUCT)
+    campaign = models.ForeignKey(Campaign, null=True, on_delete=models.PROTECT)
     created_time = models.DateTimeField(auto_now_add=True)
 
     @classmethod
