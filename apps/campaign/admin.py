@@ -51,6 +51,7 @@ class CampaignAdmin(admin.ModelAdmin):
         url_patterns += super().get_urls()
         return url_patterns
 
+
 @admin.register(CampaignContent)
 class CampaignContentAdmin(admin.ModelAdmin):
     list_display = ("campaign", "title", "data")
