@@ -3,7 +3,7 @@ import json
 import requests
 from rest_framework.status import HTTP_400_BAD_REQUEST
 
-from admood_core.settings import ADBOT_API_TOKEN, ADBOT_API_URL
+from admood_core.settings import ADBOT_API_TOKEN, ADBOT_API_URL, ADBOT_AGENTS
 from apps.core.consts import CostModel
 from services.utils import file_type
 
@@ -35,7 +35,7 @@ def create_campaign(campaign, start_time, end_time, status):
         is_enable=False,
         publishers=publishers,
         max_view=campaign.remaining_views,
-        agents=campaign.extra_data.get('agents', []),
+        agents=campaign.extra_data.get('agents', [ADBOT_AGENTS]),
         start_datetime=start_time,
         end_datetime=end_time,
     )
