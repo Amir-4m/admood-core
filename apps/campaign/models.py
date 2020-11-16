@@ -228,6 +228,7 @@ class CampaignSchedule(models.Model):
 class TelegramCampaign(models.Model):
     campaign = models.OneToOneField(Campaign, on_delete=models.CASCADE)
     screenshot = models.ForeignKey(File, on_delete=models.CASCADE)
+    telegram_file_hash = models.CharField(max_length=512, blank=True)
 
 
 class InstagramCampaign(models.Model):
