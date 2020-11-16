@@ -196,7 +196,7 @@ class CampaignApproveSerializer(serializers.ModelSerializer):
                 {'status': 'Ensure this campaign is a draft.'})
         if self.instance.total_budget > Transaction.balance(self.instance.owner):
             raise serializers.ValidationError(
-                {'total_budget': 'Ensure total budget is less than or equal to your wallet balance.'})
+                {'total_budget': 'Ensure wallet balance more than total budget.'})
         return attrs
 
     def update(self, instance, validated_data):
