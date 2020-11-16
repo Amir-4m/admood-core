@@ -34,7 +34,7 @@ def create_campaign(campaign, start_time, end_time, status):
         is_enable=False,
         publishers=publishers,
         max_view=campaign.remaining_views,
-        agents=campaign.extra_data.get('agents', [ADBOT_AGENTS]),
+        agents=campaign.extra_data.get('agents', [ADBOT_AGENTS]) if campaign.extra_data else [ADBOT_AGENTS],
         start_datetime=start_time,
         end_datetime=end_time,
     )
