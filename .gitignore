@@ -52,6 +52,7 @@ static/*
 logs/*
 db.sqlite3
 .idea
+.vscode
 **/migrations/0*.py
 *.session
 *.pid
