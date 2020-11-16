@@ -27,12 +27,14 @@ class Campaign(models.Model):
     STATUS_WAITING = 1
     STATUS_APPROVED = 2
     STATUS_REJECTED = 3
+    STATUS_BLOCKED = 4
 
     STATUS_CHOICES = (
-        (STATUS_DRAFT, "draft"),
-        (STATUS_WAITING, "waiting"),
-        (STATUS_APPROVED, "approved"),
-        (STATUS_REJECTED, "rejected"),
+        (STATUS_DRAFT, _("draft")),
+        (STATUS_WAITING, _("waiting")),
+        (STATUS_APPROVED, _("approved")),
+        (STATUS_REJECTED, _("rejected")),
+        (STATUS_BLOCKED, _("blocked")),
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -56,7 +58,6 @@ class Campaign(models.Model):
 
     daily_budget = models.PositiveIntegerField()
     total_budget = models.PositiveIntegerField()
-    finish_balance = models.IntegerField(null=True, blank=True)
 
     is_enable = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
