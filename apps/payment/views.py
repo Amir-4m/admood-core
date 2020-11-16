@@ -36,7 +36,9 @@ class PaymentView(View):
             if order.is_paid is True:
                 Transaction.objects.create(
                     user=order.user,
-                    value=order.price
+                    value=order.price,
+                    description=f" {order.invoice_number} شماره پیگیری شارژ کیف پول ",
+                    transaction_type=Transaction.TYPE_DEPOSIT
                 )
         context = {
             "redirect_url": settings.PAYMENT_REDIRECT_URL,
