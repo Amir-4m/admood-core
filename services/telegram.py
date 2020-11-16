@@ -1,7 +1,6 @@
 import json
 
 import requests
-from rest_framework.status import HTTP_400_BAD_REQUEST
 
 from admood_core.settings import ADBOT_API_TOKEN, ADBOT_API_URL, ADBOT_AGENTS
 from apps.core.consts import CostModel
@@ -199,6 +198,12 @@ def get_contents(campaign_id):
     campaign = get_campaign(campaign_id)
     contents = campaign.get('contents', None)
     return contents
+
+
+def campaign_telegram_file_hash(campaign_id):
+    campaign = get_campaign(campaign_id)
+    file = campaign.get('file')['telegram_file_hash']
+    return file
 
 
 def test_campaign(campaign_id):
