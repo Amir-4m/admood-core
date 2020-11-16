@@ -40,6 +40,8 @@ class PaymentView(View):
                 )
         context = {
             "redirect_url": settings.PAYMENT_REDIRECT_URL,
-            "purchase_verified": purchase_verified
+            "purchase_verified": purchase_verified,
+            "price": order.price,
+            "invoice_number": order.invoice_number
         }
         return render(request, html, context)
