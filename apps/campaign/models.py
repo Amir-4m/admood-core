@@ -50,7 +50,7 @@ class Campaign(models.Model):
     start_date = models.DateField(default=datetime.date.today, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
-    extra_data = JSONField(default=dict)
+    extra_data = JSONField(null=True, blank=True)
 
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
     utm_medium = models.CharField(max_length=50, null=True, blank=True)
