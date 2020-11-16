@@ -142,6 +142,7 @@ class CampaignReference(models.Model):
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
+    updated_time = models.DateTimeField(null=True, blank=True)
 
 
 class TargetDevice(models.Model):
