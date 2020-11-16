@@ -19,6 +19,15 @@
         <img class="responsive-logo" src="{% static 'payment/images/hami-logo.svg' %}" alt="Hami">
         <h3>افزایش موجودی با موفقیت انجام شد</h3>
         <img src="{% static 'payment/images/success-charge.svg' %}" alt="Hami">
+        <div class="receipt">
+            <span class="title">شماره پیگیری:</span>
+            <span class="value">{{ invoice_number }}</span>
+        </div>
+        <div class="receipt">
+            <span class="title">مبلغ:</span>
+            <span class="value">{{ price }}</span>
+            <span class="value">تومان</span>
+        </div>
         <a href="{{ redirect_url }}" class="return-app"
            rel="noopener noreferrer">بازگشت به پنل کاربری</a>
     </div>
