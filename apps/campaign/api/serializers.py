@@ -203,7 +203,7 @@ class CampaignApproveSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         Transaction.objects.create(user=instance.owner,
                                    value=-instance.total_budget,
-                                   type=Transaction.TYPE_DEDUCT,
+                                   transaction_type=Transaction.TYPE_DEDUCT,
                                    campaign=instance)
         return instance
 
