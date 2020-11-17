@@ -40,6 +40,9 @@ class CampaignAdmin(admin.ModelAdmin):
     list_filter = ['medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
+    readonly_fields = ('name', 'owner', 'locations', 'description',
+                       'start_date', 'end_date', 'publishers', 'categories',
+                       'utm_campaign', 'utm_content', 'medium')
 
     def render_change_form(self, request, context, **kwargs):
         return super().render_change_form(request, context, **kwargs)
