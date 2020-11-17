@@ -4,7 +4,6 @@ from django_admin_json_editor import JSONEditorWidget
 
 from apps.campaign.models import CampaignContent, Campaign
 from apps.medium.consts import Medium
-from apps.payment.models import Transaction
 
 DATA_SCHEMA = {
     'type': 'object',
@@ -74,10 +73,4 @@ class CampaignAdminForm(forms.ModelForm):
                     if hasattr(self.instance, 'telegramcampaign'):
                         return self.cleaned_data
                     raise ValidationError({'status': 'to approve the campaign upload the test screenshot.'})
-                elif status == Campaign.STATUS_REJECTED:
-                    Transaction.objects.create(user=self.instance.owner,
-                                               value=self.instance.total_budget,
-                                               transaction_type=Transaction.TYPE_REFUND,
-                                               campaign=self.instance,
-                                               )
         return self.cleaned_data
