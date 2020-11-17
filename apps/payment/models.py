@@ -6,6 +6,8 @@ from django.db import models
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 
+from khayyam import JalaliDatetime
+
 from admood_core import settings
 from apps.campaign.models import Campaign
 from apps.core.consts import Bank
@@ -61,6 +63,10 @@ class Transaction(models.Model):
     @classmethod
     def balance(cls, user):
         return Transaction.objects.filter(user=user).aggregate(balance=Coalesce(Sum('value'), 0))['balance']
+
+    @property
+    def jalali_date(self):
+        return JalaliDatetime(self.created_time).strftime('%A %d %B %Y')
 
 
 class Payment(models.Model):

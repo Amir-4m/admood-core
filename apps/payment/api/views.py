@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from apps.payment.api.serializers import PaymentSerializer
+from apps.payment.api.serializers import PaymentSerializer, TransactionSerializer
 from apps.payment.models import Transaction, Payment
 from apps.payment.utils import payment_request
 
@@ -102,3 +102,21 @@ class PaymentViewSet(ListModelMixin,
             )
             raise ParseError('error occurred in setting gateway')
         return Response(data=response.json())
+
+
+class TransactionViewSet(ListModelMixin,
+                         GenericViewSet):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+
+    def get_queryset(self):
+        qs = super(TransactionViewSet, self).get_queryset()
+        return qs.filter(user=self.request.user)
+
+    @action(methods=['get'], detail=False, url_path='balance')
+    def balance(self, request, *args, **kwargs):
+        balance = Transaction.balance(request.user)
+        data = {'balance': balance}
+        return Response(data=data)

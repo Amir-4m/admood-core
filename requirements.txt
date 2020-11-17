@@ -5,7 +5,6 @@ celery>=4.3,<4.4
 psycopg2-binary
 
 djangorestframework>=3.11,<3.12
-djangorestframework-simplejwt==4.4.0
 drf-yasg==1.17.1
 
 requests # ==2.23.0
@@ -13,5 +12,6 @@ Pillow # ==7.0.0
 sentry-sdk==0.19.1
 google-auth==1.14.0
 jsonschema
+khayyam
 
 django-admin-json-editor
