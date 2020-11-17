@@ -55,7 +55,7 @@ class Transaction(models.Model):
     value = models.IntegerField()
     description = models.TextField(blank=True)
     transaction_type = models.CharField(max_length=8, choices=TYPE_CHOICES)
-    campaign = models.ForeignKey(Campaign, null=True, on_delete=models.PROTECT)
+    campaign = models.ForeignKey(Campaign, blank=True, null=True, on_delete=models.PROTECT)
     created_time = models.DateTimeField(auto_now_add=True)
 
     @classmethod
