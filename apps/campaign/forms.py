@@ -76,7 +76,7 @@ class CampaignAdminForm(forms.ModelForm):
             if status == Campaign.STATUS_REJECTED:
                 Transaction.objects.create(user=self.instance.owner,
                                            value=self.instance.total_budget,
-                                           type=Transaction.TYPE_REFUND,
+                                           transaction_type=Transaction.TYPE_REFUND,
                                            campaign=self.cleaned_data['campaign']
                                            )
         return self.cleaned_data
