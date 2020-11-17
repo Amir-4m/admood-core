@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class MediaConfig(AppConfig):
+class MediumConfig(AppConfig):
     name = 'apps.medium'

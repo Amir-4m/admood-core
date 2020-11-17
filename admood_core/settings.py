@@ -47,6 +47,13 @@ USER_VERIFICATION_LIFETIME = config("USER_VERIFICATION_CODE_LIFETIME", default=2
 
 # Application definition
 INSTALLED_APPS = [
+    'apps.campaign.apps.CampaignConfig',
+    'apps.core.apps.CoreConfig',
+    'apps.accounts.apps.AccountsConfig',
+    'apps.device.apps.DeviceConfig',
+    'apps.medium.apps.MediumConfig',
+    'apps.payment.apps.PaymentConfig',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,13 +63,6 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_admin_json_editor',
-
-    'apps.core',
-    'apps.accounts',
-    'apps.device',
-    'apps.medium',
-    'apps.campaign',
-    'apps.payment',
 ]
 
 if DEVEL:
