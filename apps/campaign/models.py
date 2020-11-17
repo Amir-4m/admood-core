@@ -65,6 +65,10 @@ class Campaign(models.Model):
     class Meta:
         ordering = ('-created_time',)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._b_status = self.status
+
     def __str__(self):
         return self.name
 
