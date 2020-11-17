@@ -67,16 +67,17 @@ class CampaignAdminForm(forms.ModelForm):
         fields = '__all__'
 
     def clean(self):
-        if self.cleaned_data.get('medium') == Medium.TELEGRAM:
-            status = self.cleaned_data.get('status')
-            if status == Campaign.STATUS_APPROVED:
-                if hasattr(self.instance, 'telegramcampaign'):
-                    return self.cleaned_data
-                raise ValidationError({'status': 'to approve the campaign upload the test screenshot.'})
-            if status == Campaign.STATUS_REJECTED:
-                Transaction.objects.create(user=self.instance.owner,
-                                           value=self.instance.total_budget,
-                                           transaction_type=Transaction.TYPE_REFUND,
-                                           campaign=self.cleaned_data['campaign']
-                                           )
+        if self.instance:
+            if self.instance.medium == Medium.TELEGRAM:
+                status = self.cleaned_data.get('status')
+                if status == Campaign.STATUS_APPROVED:
+                    if hasattr(self.instance, 'telegramcampaign'):
+                        return self.cleaned_data
+                    raise ValidationError({'status': 'to approve the campaign upload the test screenshot.'})
+                elif status == Campaign.STATUS_REJECTED:
+                    Transaction.objects.create(user=self.instance.owner,
+                                               value=self.instance.total_budget,
+                                               transaction_type=Transaction.TYPE_REFUND,
+                                               campaign=self.instance,
+                                               )
         return self.cleaned_data
