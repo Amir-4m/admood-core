@@ -39,6 +39,7 @@ class CampaignAdmin(admin.ModelAdmin):
     search_fields = ['medium', 'owner__username']
     list_filter = ['medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
+    radio_fields = {'status': admin.VERTICAL}
 
     def render_change_form(self, request, context, **kwargs):
         return super().render_change_form(request, context, **kwargs)
