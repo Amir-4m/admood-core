@@ -74,5 +74,9 @@ class CampaignAdminForm(forms.ModelForm):
                     return self.cleaned_data
                 raise ValidationError({'status': 'to approve the campaign upload the test screenshot.'})
             if status == Campaign.STATUS_REJECTED:
-                Transaction.objects.create(user=self.instance.owner, value=self.instance.total_budget)
+                Transaction.objects.create(user=self.instance.owner,
+                                           value=self.instance.total_budget,
+                                           type=Transaction.TYPE_REFUND,
+                                           campaign=self.cleaned_data['campaign']
+                                           )
         return self.cleaned_data
