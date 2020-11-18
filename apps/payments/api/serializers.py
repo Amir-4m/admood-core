@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from apps.payment.models import Payment, Transaction
+from apps.payments.models import Deposit, Transaction
 
 
-class PaymentSerializer(serializers.ModelSerializer):
+class DepositSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Payment
+        model = Deposit
         fields = ('id', 'invoice_number', 'is_paid', 'price', 'created_time', 'updated_time')
 
 

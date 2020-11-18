@@ -10,9 +10,9 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from apps.payment.api.serializers import PaymentSerializer, TransactionSerializer
-from apps.payment.models import Transaction, Payment
-from apps.payment.utils import payment_request
+from .serializers import DepositSerializer, TransactionSerializer
+from ..models import Transaction, Deposit
+from ..utils import payment_request
 
 logger = logging.getLogger(__name__)
 
@@ -27,17 +27,17 @@ class BalanceAPIView(APIView):
         return Response(data=data)
 
 
-class PaymentViewSet(ListModelMixin,
+class DepositViewSet(ListModelMixin,
                      RetrieveModelMixin,
                      GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
+    queryset = Deposit.objects.all()
+    serializer_class = DepositSerializer
 
     def get_queryset(self):
         user = self.request.user
-        qs = super(PaymentViewSet, self).get_queryset()
+        qs = super(DepositViewSet, self).get_queryset()
         return qs.filter(user=user)
 
     def perform_create(self, serializer):
@@ -48,7 +48,7 @@ class PaymentViewSet(ListModelMixin,
         data = request.data
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        obj = Payment.objects.create(
+        obj = Deposit.objects.create(
             price=data['price'],
             user=request.user
         )

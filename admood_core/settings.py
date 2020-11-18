@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'apps.device',
     'apps.medium',
     'apps.campaign',
-    'apps.payment',
+    'apps.payments',
 ]
 
 if DEVEL:

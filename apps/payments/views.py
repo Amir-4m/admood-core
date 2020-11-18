@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
-from apps.payment.models import Payment, Transaction
+from .models import Deposit, Transaction
 
 
 class PaymentView(View):
@@ -17,11 +17,11 @@ class PaymentView(View):
         purchase_verified = purchase_verified.lower().strip()
         with transaction.atomic():
             try:
-                order = Payment.objects.select_for_update('self').get(
+                order = Deposit.objects.select_for_update('self').get(
                     transaction_id=transaction_id,
                     is_paid=None
                 )
-            except Payment.DoesNotExist:
+            except Deposit.DoesNotExist:
                 return HttpResponse('سفارشی یافت نشد !')
 
             if purchase_verified == 'true':

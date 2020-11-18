@@ -5,6 +5,6 @@ urlpatterns = [
     path('campaign/', include("apps.campaign.api.urls")),
     path('medium/', include("apps.medium.api.urls")),
     path('device/', include("apps.device.api.urls")),
-    path('payment/', include("apps.payment.api.urls")),
+    path('payments/', include("apps.payments.api.urls")),
     path('', include("apps.core.api.urls")),
 ]

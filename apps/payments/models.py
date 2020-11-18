@@ -66,10 +66,10 @@ class Transaction(models.Model):
 
     @property
     def jalali_date(self):
-        return JalaliDatetime(self.created_time).strftime('%A %d %B %Y')
+        return JalaliDatetime(self.created_time).strftime('%C')
 
 
-class Payment(models.Model):
+class Deposit(models.Model):
     created_time = models.DateTimeField(_("created time"), auto_now_add=True)
     updated_time = models.DateTimeField(_("updated time"), auto_now=True)
     invoice_number = models.UUIDField(_('uuid'), unique=True, default=uuid.uuid4, editable=False)
