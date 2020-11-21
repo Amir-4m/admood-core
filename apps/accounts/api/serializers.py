@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import UserProfile
+from apps.accounts.models import UserProfile, Verification
 
 User = get_user_model()
 
@@ -255,4 +255,13 @@ class ChangePasswordSerializer(serializers.Serializer):
         instance.set_password(validated_data['password'])
         instance.save()
         return instance
+
+
+class SetPhoneNumberSerializer(serializers.Serializer):
+    phone_number = serializers.IntegerField()
+
+
+class VerifyPhoneNumberSerializer(serializers.Serializer):
+    phone_number = serializers.IntegerField()
+    verify_code = serializers.CharField()
 

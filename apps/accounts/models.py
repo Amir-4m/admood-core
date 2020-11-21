@@ -165,8 +165,12 @@ class User(AbstractBaseUser, PermissionsMixin):
                                                  reset_password=True)
         send_reset_password.delay(self.email, verification.verify_code)
 
-    def send_verification_sms(self):
-        verification = self.verifications.create(verify_code=random.randint(1000, 9999), verify_type=Verification.VERIFY_TYPE_PHONE)
+    def send_verification_sms(self, phone_number=None):
+        if phone_number is None:
+            phone_number = self.phone_number
+        verification = self.verifications.create(verify_code=random.randint(10000, 99999),
+                                                 verify_type=Verification.VERIFY_TYPE_PHONE,
+                                                 phone_number=phone_number, )
         send_verification_sms.delay(self.phone_number, verification.verify_code)
 
     @staticmethod
@@ -240,6 +244,12 @@ class Verification(models.Model):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verifications')
+    phone_number = models.BigIntegerField(null=True,
+                                          blank=True,
+                                          validators=[
+                                              RegexValidator(r'^9[0-3,9]\d{8}$', _('Enter a valid phone number.'),
+                                                             'invalid'),
+                                          ], )
     verify_code = models.CharField(max_length=32)
     verify_type = models.CharField(max_length=5, choices=VERIFY_TYPE_CHOICES, default=VERIFY_TYPE_PHONE)
     reset_password = models.BooleanField(default=False)
@@ -249,9 +259,8 @@ class Verification(models.Model):
     class Meta:
         unique_together = ('user', 'verify_code')
 
-
     @classmethod
-    def verify_email(cls, verify_code):
+    def verify_user_by_email(cls, verify_code):
         try:
             verification = cls.objects.get(
                 verify_code=verify_code,
@@ -266,7 +275,7 @@ class Verification(models.Model):
             return verification
 
     @classmethod
-    def verify_phone_number(cls, user, verify_code):
+    def verify_user_by_phone_number(cls, user, verify_code):
         try:
             verification = cls.objects.get(
                 user=user,
@@ -282,6 +291,23 @@ class Verification(models.Model):
             verification.save()
             return verification
 
+    @classmethod
+    def verify_phone_number(cls, user, phone_number, verify_code):
+        try:
+            verification = cls.objects.get(
+                user=user,
+                phone_number=phone_number,
+                verify_code=verify_code,
+                verify_type=Verification.VERIFY_TYPE_PHONE,
+                verified_time__isnull=True,
+                created_time__gt=timezone.now() - timezone.timedelta(minutes=settings.USER_VERIFICATION_LIFETIME),
+            )
+        except:
+            return None
+        else:
+            verification.verify()
+            verification.save()
+            return verification
 
     @classmethod
     def get_valid(cls, verify_code, user=None, verify_type=None):
