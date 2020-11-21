@@ -232,5 +232,27 @@ class LegalProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['status']
 
 
-class VerifyUserSerializer(serializers.Serializer):
-    rc = serializers.CharField()
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    password = serializers.CharField()
+    confirm_password = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ('old_password', 'password', 'confirm_password')
+
+    def validate_old_password(self, old_password):
+        if self.instance.check_password(old_password):
+            return old_password
+        raise serializers.ValidationError({'old_password': 'The old password you have entered is incorrect.'})
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({'password': 'password mismatch'})
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
+

@@ -65,43 +65,12 @@ class Campaign(models.Model):
     class Meta:
         ordering = ('-created_time',)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._b_status = self.status
+
     def __str__(self):
         return self.name
-
-    def clone(self):
-        publishers = self.publishers.all()
-        locations = self.locations.all()
-        categories = self.categories.all()
-        contents = self.contents.all()
-        target_devices = self.target_devices.all()
-        schedules = self.schedules.all()
-
-        self.pk = None
-        self.status = Campaign.STATUS_WAITING
-        self.save()
-        self.publishers.set(publishers)
-        self.locations.set(locations)
-        self.categories.set(categories)
-
-        for content in contents:
-            content = content
-            content.pk = None
-            content.campaign = self
-            content.save()
-
-        for target_device in target_devices:
-            target_device = target_device
-            target_device.pk = None
-            target_device.campaign = self
-            target_device.save()
-
-        for schedule in schedules:
-            schedule = schedule
-            schedule.pk = None
-            schedule.campaign = self
-            schedule.save()
-
-        return self
 
     @property
     def max_cost_model_price(self):
