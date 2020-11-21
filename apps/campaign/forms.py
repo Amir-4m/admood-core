@@ -4,7 +4,7 @@ from django_admin_json_editor import JSONEditorWidget
 
 from apps.campaign.models import CampaignContent, Campaign
 from apps.medium.consts import Medium
-from apps.payment.models import Transaction
+from apps.payments.models import Transaction
 
 DATA_SCHEMA = {
     'type': 'object',
