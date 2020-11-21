@@ -6,7 +6,7 @@ from rest_framework import serializers
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice
 from apps.core.models import File
 from apps.medium.models import CostModelPrice, Publisher
-from apps.payment.models import Transaction
+from apps.payments.models import Transaction
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
