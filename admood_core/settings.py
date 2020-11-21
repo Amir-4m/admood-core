@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'apps.accounts.apps.AccountsConfig',
     'apps.device.apps.DeviceConfig',
     'apps.medium.apps.MediumConfig',
-    'apps.payment.apps.PaymentConfig',
+    'apps.payments.apps.PaymentConfig',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -159,6 +159,7 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DATETIME_FORMAT': '%Y-%m-%d %H:%M',
     'TIME_FORMAT': '%H:%M',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
 }
 
 AUTHENTICATION_BACKENDS = [
