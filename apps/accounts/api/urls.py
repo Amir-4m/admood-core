@@ -6,7 +6,7 @@ from .views import (MyTokenObtainPairView,
                     RegisterUserByEmailAPIView,
                     VerifyUserAPIView,
                     PasswordResetAPIView,
-                    PasswordResetConfirmAPIView, RegisterUserByPhoneAPIView, SetPasswordAPIView)
+                    PasswordResetConfirmAPIView, RegisterUserByPhoneAPIView, SetPasswordAPIView, ChangePasswordAPIView)
 
 urlpatterns = [
     path('token/', MyTokenObtainPairView.as_view(), name="token"),
@@ -22,4 +22,5 @@ urlpatterns = [
                                                  'put': 'update',
                                                  'patch': 'partial_update'})),
     path('has_profile/', UserProfileViewSet.as_view({'get': 'has_profile'})),
+    path('change-pass/', ChangePasswordAPIView.as_view()),
 ]

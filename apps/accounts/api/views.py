@@ -17,7 +17,7 @@ from apps.accounts.api.serializers import (
     SetPasswordSerializer,
     PasswordResetSerializer,
     RegisterUserByPhoneSerializer,
-    VerifyUserSerializer,
+    VerifyUserSerializer, ChangePasswordSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -147,3 +147,15 @@ class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
             'email': request.user.email,
             'has_password': request.user.has_usable_password(),
         })
+
+
+class ChangePasswordAPIView(GenericAPIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangePasswordSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(instance=request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response()
