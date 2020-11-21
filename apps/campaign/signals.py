@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from apps.campaign.models import Campaign
-from apps.payment.models import Transaction
+from apps.payments.models import Transaction
 
 
 @receiver(post_save, sender=Campaign)
