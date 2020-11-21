@@ -5,6 +5,7 @@ celery>=4.3,<4.4
 psycopg2-binary
 
 djangorestframework>=3.11,<3.12
+djangorestframework-simplejwt==4.4.0
 drf-yasg==1.17.1
 
 requests # ==2.23.0
@@ -15,4 +16,3 @@ jsonschema
 khayyam
 
 django-admin-json-editor
-
