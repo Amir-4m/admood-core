@@ -260,8 +260,12 @@ class ChangePasswordSerializer(serializers.Serializer):
 class SetPhoneNumberSerializer(serializers.Serializer):
     phone_number = serializers.IntegerField()
 
+    def validate_phone_number(self, phone_number):
+        if User.objects.filter(phone_number=phone_number).exists():
+            raise serializers.ValidationError({'phone_number': _('user with this phone number is already exists.')})
+        return phone_number
+
 
 class VerifyPhoneNumberSerializer(serializers.Serializer):
     phone_number = serializers.IntegerField()
     verify_code = serializers.CharField()
-

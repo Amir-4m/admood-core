@@ -182,11 +182,16 @@ class VerifyPhoneNumberAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user = request.user
+        phone_number = serializer.validated_data['phone_number']
+        verify_code = serializer.validated_data['verify_code']
         verification = Verification.verify_phone_number(
-            user=request.user,
-            phone_number=serializer.validated_data['phone_number'],
-            verify_code=serializer.validated_data['verify_code'],
+            user=user,
+            phone_number=phone_number,
+            verify_code=verify_code,
         )
         if verification:
-            return Response()
+            user.phone_number = phone_number
+            user.save()
+            return Response({'phone_number': phone_number})
         raise NotFound

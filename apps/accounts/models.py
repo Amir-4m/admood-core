@@ -171,7 +171,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verification = self.verifications.create(verify_code=random.randint(10000, 99999),
                                                  verify_type=Verification.VERIFY_TYPE_PHONE,
                                                  phone_number=phone_number, )
-        send_verification_sms.delay(self.phone_number, verification.verify_code)
+        send_verification_sms.delay(phone_number, verification.verify_code)
 
     @staticmethod
     def get_by_email(email):
