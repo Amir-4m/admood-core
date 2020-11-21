@@ -17,7 +17,7 @@ from apps.accounts.api.serializers import (
     SetPasswordSerializer,
     PasswordResetSerializer,
     RegisterUserByPhoneSerializer,
-    VerifyUserSerializer, ChangePasswordSerializer,
+    VerifyUserSerializer, ChangePasswordSerializer, SetPhoneNumberSerializer, VerifyPhoneNumberSerializer,
 )
 from apps.accounts.models import UserProfile, Verification
 
@@ -58,12 +58,12 @@ class VerifyUserAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        verification = Verification.verify_email(verify_code=serializer.data["rc"])
+        verification = Verification.verify_user_by_email(verify_code=serializer.data["rc"])
         if verification:
             verification.user.verify()
             verification.user.save()
             return Response()
-        return NotFound
+        raise NotFound
 
 
 class PasswordResetAPIView(GenericAPIView):
@@ -159,3 +159,39 @@ class ChangePasswordAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response()
+
+
+class SetPhoneNumberAPIView(GenericAPIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = SetPhoneNumberSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        user.send_verification_sms(phone_number=serializer.validated_data['phone_number'])
+        return Response(data=serializer.data)
+
+
+class VerifyPhoneNumberAPIView(GenericAPIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = VerifyPhoneNumberSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        phone_number = serializer.validated_data['phone_number']
+        verify_code = serializer.validated_data['verify_code']
+        verification = Verification.verify_phone_number(
+            user=user,
+            phone_number=phone_number,
+            verify_code=verify_code,
+        )
+        if verification:
+            user.phone_number = phone_number
+            user.save()
+            return Response({'phone_number': phone_number})
+        raise NotFound

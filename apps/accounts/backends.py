@@ -85,7 +85,7 @@ class PhoneAuthBackend(ModelBackend):
         else:
             if user.check_password(password) and self.user_can_authenticate(user):
                 return user
-            verification = Verification.verify_phone_number(user=user, verify_code=password)
+            verification = Verification.verify_user_by_phone_number(user=user, verify_code=password)
             if verification:
                 user.verify()
                 if verification.reset_password:

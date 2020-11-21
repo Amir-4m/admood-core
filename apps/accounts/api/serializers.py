@@ -7,7 +7,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import UserProfile
+from apps.accounts.models import UserProfile, Verification
 
 User = get_user_model()
 
@@ -70,12 +70,12 @@ class RegisterUserByEmailSerializer(serializers.Serializer):
 
     def validate_password(self, password):
         if password != self.initial_data['confirm_password']:
-            raise serializers.ValidationError("password mismatch.")
+            raise serializers.ValidationError(_("password mismatch."))
         return password
 
     def validate_email(self, email):
         if User.objects.filter(email=email, is_verified=True).exists():
-            raise serializers.ValidationError('user with this email already exists.')
+            raise serializers.ValidationError(_('user with this email already exists.'))
         return email
 
     def create(self, validated_data):
@@ -244,7 +244,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate_old_password(self, old_password):
         if self.instance.check_password(old_password):
             return old_password
-        raise serializers.ValidationError({'old_password': 'The old password you have entered is incorrect.'})
+        raise serializers.ValidationError(_('the old password you have entered is incorrect.'))
 
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
@@ -256,3 +256,16 @@ class ChangePasswordSerializer(serializers.Serializer):
         instance.save()
         return instance
 
+
+class SetPhoneNumberSerializer(serializers.Serializer):
+    phone_number = serializers.IntegerField()
+
+    def validate_phone_number(self, phone_number):
+        if User.objects.filter(phone_number=phone_number).exists():
+            raise serializers.ValidationError(_('user with this phone number is already exists.'))
+        return phone_number
+
+
+class VerifyPhoneNumberSerializer(serializers.Serializer):
+    phone_number = serializers.IntegerField()
+    verify_code = serializers.CharField()
