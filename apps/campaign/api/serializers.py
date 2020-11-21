@@ -271,8 +271,9 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         publishers = instance.publishers.all()
         categories = instance.categories.all()
         contents = instance.contents.all()
+        telegram_campaign = instance.telegramcampaign
         target_devices = instance.target_devices.all()
-        campaign_publishers = instance.final_publishers.all()
+        final_publishers = instance.final_publishers.all()
         schedules = validated_data.pop("schedules", None)
 
         instance.pk = None
@@ -281,6 +282,7 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         instance.locations.set(locations)
         instance.publishers.set(publishers)
         instance.categories.set(categories)
+        instance.final_publishers.set(final_publishers)
 
         for schedule_data in schedules:
             CampaignSchedule.objects.create(
@@ -300,10 +302,9 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
             target_device.campaign = instance
             target_device.save()
 
-        for campaign_publisher in campaign_publishers:
-            campaign_publisher.pk = None
-            campaign_publisher.campaign = instance
-            campaign_publisher.save()
+        telegram_campaign.pk = None
+        telegram_campaign.campaign = instance
+        telegram_campaign.save()
 
         return instance
 
