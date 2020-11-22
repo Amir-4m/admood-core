@@ -16,3 +16,9 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ['user', 'is_paid', 'updated_time', 'created_time']
     list_filter = ('is_paid',)
     search_fields = ('transaction_id',)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
