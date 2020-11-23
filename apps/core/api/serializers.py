@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.core.models import File
@@ -13,5 +12,5 @@ class FileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         file = validated_data['file']
         ext = file.name.split('.')[-1]
-        file.name = f"{datetime.now().strftime('%Y-%m-%d')}_{self.context['request'].user.username}.{ext}"
+        file.name = f"{timezone.now().strftime('%Y-%m-%d-%H-%-M-%-S')}_{self.context['request'].user.username}.{ext}"
         return super(FileSerializer, self).create(validated_data)
