@@ -213,7 +213,7 @@ class UserProfile(models.Model):
     image = models.ImageField(null=True, blank=True)
     bio = models.TextField(blank=True)
     national_id = models.CharField(max_length=10, blank=True, validators=[national_id_validator])
-    address = models.TextField(max_length=256, blank=True)
+    address = models.TextField(blank=True)
     post_code = models.CharField(max_length=10, blank=True)
     company_name = models.CharField(max_length=50, blank=True)
     eco_code = models.CharField(max_length=10, blank=True)
