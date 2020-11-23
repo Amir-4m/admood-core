@@ -113,7 +113,7 @@ class TransactionViewSet(ListModelMixin,
 
     def get_queryset(self):
         qs = super(TransactionViewSet, self).get_queryset()
-        return qs.filter(user=self.request.user)
+        return qs.filter(user=self.request.user).order_by('-id')
 
     @action(methods=['get'], detail=False, url_path='balance')
     def balance(self, request, *args, **kwargs):
