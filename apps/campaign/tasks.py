@@ -1,17 +1,17 @@
+import datetime
+
 from celery import shared_task
 from django.db.models import Q
 from django.utils.timezone import now
 
-import datetime
-
 from apps.campaign.models import Campaign, CampaignReference, CampaignContent, TelegramCampaign
 from apps.core.utils.get_file import get_file
+from apps.medium.consts import Medium
+from services.instagram import create_insta_campaign, create_insta_content, create_insta_media, enable_Insta_campaign
 from services.telegram import (
     create_campaign, create_content, create_file,
-    enable_campaign, campaign_report, get_contents
+    enable_campaign, campaign_report, get_contents, campaign_telegram_file_hash
 )
-from services.instagram import create_insta_campaign, create_insta_content, create_insta_media, enable_Insta_campaign
-from apps.medium.consts import Medium
 
 
 @shared_task
@@ -22,19 +22,23 @@ def create_telegram_campaign():
         Q(status=Campaign.STATUS_APPROVED),
         Q(medium=Medium.TELEGRAM),
         Q(start_date__lte=today),
-        Q(end_date__gte=today) | Q(end_date__isnull=True),
     )
 
+    # disable expired campaigns
+    exp_campaigns = campaigns.filter(end_date__lt=today).update(is_enable=False)
+
+    campaigns = campaigns.difference(exp_campaigns)
     # first try to create scheduled campaigns
     # for telegram bot
     scheduled_campaigns = campaigns.filter(
         schedules__week_day=today.weekday(),
     )
     for campaign in scheduled_campaigns:
+        # disable campaigns which have zero remaining view
         if campaign.remaining_views <= 0:
             campaign.is_enable = False
             campaign.save()
-            return
+            continue
 
         schedules = campaign.schedules.filter(
             week_day=today.weekday(),
@@ -60,8 +64,10 @@ def create_telegram_campaign():
                 "approved",
             )
 
+            telegram_campaign = TelegramCampaign.objects.get(campaign=campaign)
+            telegram_file_hash = telegram_campaign.telegram_file_hash
             screenshot = TelegramCampaign.objects.get(campaign=campaign).screenshot.file
-            create_file(screenshot, campaign_id=ref_id)
+            create_file(file=screenshot, campaign_id=ref_id, telegram_file_hash=telegram_file_hash)
 
             contents = campaign.contents.all()
             for content in contents:
@@ -77,19 +83,25 @@ def create_telegram_campaign():
                 campaign_ref.save()
 
 
+# update content view in Campaign Reference model and add telegram file hashes
 @shared_task
 def update_telegram_view():
     campaign_refs = CampaignReference.objects.filter(
         ref_id__isnull=False,
         date=now().date(),
         end_time__lte=now().time(),
+        report_time__isnull=True,
     )
     for campaign_ref in campaign_refs:
+
+        campaign_ref.campaign.telegramcampaign.telegram_file_hash = campaign_telegram_file_hash(campaign_ref.ref_id)
+
         reports = campaign_report(campaign_ref.ref_id)
         for content in campaign_ref.contents:
             for report in reports:
                 if content["ref_id"] == report["content"]:
                     content["views"] = report["views"]
+        campaign_ref.report_time = now()
         campaign_ref.save()
 
         camp = campaign_ref.campaign
