@@ -164,8 +164,3 @@ def create_instagram_campaign():
             if enable_Insta_campaign(ref_id):
                 campaign_ref.ref_id = ref_id
                 campaign_ref.save()
-
-# is it better to move making campaigns expired to another task
-# I don't increase my stocks shares.
-# I hope fameli could break it' resistance.
-# I had a high risk trading. I wanted to waite for tomorrow but I prefer to buy femeli today.
