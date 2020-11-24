@@ -15,7 +15,6 @@ def update_telegram_publishers():
             medium=Medium.TELEGRAM,
             defaults={
                 'name': channel['title'],
-                'is_enable': channel['is_enable']
             }
         )
 
