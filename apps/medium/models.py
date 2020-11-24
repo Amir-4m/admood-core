@@ -49,13 +49,27 @@ class CostModelPrice(models.Model):
 
 
 class Publisher(models.Model):
+
+    STATUS_WAITING = 0
+    STATUS_APPROVED = 1
+    STATUS_REJECTED = 2
+    STATUS_BLOCKED = 3
+
+    STATUS_CHOICES = (
+        (STATUS_WAITING, 'waiting'),
+        (STATUS_APPROVED, 'approved'),
+        (STATUS_REJECTED, 'rejected'),
+        (STATUS_BLOCKED, 'blocked'),
+    )
+
     cost_models = models.ManyToManyField(CostModelPrice, blank=True)
     categories = models.ManyToManyField(Category, blank=True)
 
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     name = models.CharField(max_length=50)
     url = models.URLField(null=True, blank=True)
-    is_enable = models.BooleanField(default=True)
+    is_enable = models.BooleanField(default=False)
+    status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_WAITING)
     ref_id = models.IntegerField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     updated_time = models.DateTimeField(auto_now=True)
