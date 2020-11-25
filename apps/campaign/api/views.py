@@ -68,11 +68,12 @@ class CampaignViewSet(BaseViewSet,
         serializer.save()
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'], url_path=r'cost_model/(?P<cost_model>[^/.]+)')
+    @action(detail=True, methods=['get'], url_path=r'cost_model/(?P<int:cost_model>[^/.]+)')
     def cost_model(self, request, *args, **kwargs):
         campaign = self.get_object()
-        cpv_price_max = CostModelPrice.max_price(campaign.final_publishers.all(), CostModel.CPV)
-        return Response({'value': cpv_price_max})
+        cost_model = kwargs.get('cost_model', CostModel.CPV)
+        cp_price_max = CostModelPrice.max_price(campaign.final_publishers.all(), cost_model)
+        return Response({'value': cp_price_max})
 
     @action(detail=False, methods=['post'], url_path='estimate-actions', serializer_class=EstimateActionsSerializer)
     def estimate_actions(self, request):
@@ -93,17 +94,33 @@ class CampaignViewSet(BaseViewSet,
         cpc_price_max = CostModelPrice.max_price(publishers, CostModel.CPC)
         cpc_price_min = CostModelPrice.min_price(publishers, CostModel.CPC)
 
+        cpi_price_max = CostModelPrice.max_price(publishers, CostModel.CPI)
+        cpi_price_min = CostModelPrice.min_price(publishers, CostModel.CPI)
+
+        cpr_price_max = CostModelPrice.max_price(publishers, CostModel.CPR)
+        cpr_price_min = CostModelPrice.min_price(publishers, CostModel.CPR)
+
         cpv_min = budget // cpv_price_max if cpv_price_max else 0
         cpv_max = budget // cpv_price_min if cpv_price_min else 0
 
         cpc_min = budget // cpc_price_max if cpc_price_max else 0
         cpc_max = budget // cpc_price_min if cpc_price_min else 0
 
+        cpi_min = budget // cpi_price_max if cpi_price_max else 0
+        cpi_max = budget // cpi_price_min if cpi_price_min else 0
+
+        cpr_min = budget // cpr_price_max if cpr_price_max else 0
+        cpr_max = budget // cpr_price_min if cpr_price_min else 0
+
         data = {
             'cpv_min': cpv_min,
             'cpv_max': cpv_max,
             'cpc_min': cpc_min,
             'cpc_max': cpc_max,
+            'cpi_min': cpi_min,
+            'cpi_max': cpi_max,
+            'cpr_min': cpr_min,
+            'cpr_max': cpr_max,
         }
 
         return Response(data=data)
