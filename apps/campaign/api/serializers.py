@@ -267,7 +267,9 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         publishers = instance.publishers.all()
         categories = instance.categories.all()
         contents = instance.contents.all()
-        telegram_campaign = instance.telegramcampaign
+        telegram_campaign = None
+        if hasattr(instance, 'telegramcampaign'):
+            telegram_campaign = instance.telegramcampaign
         target_devices = instance.target_devices.all()
         final_publishers = instance.final_publishers.all()
         schedules = validated_data.pop("schedules", None)
@@ -298,9 +300,10 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
             target_device.campaign = instance
             target_device.save()
 
-        telegram_campaign.pk = None
-        telegram_campaign.campaign = instance
-        telegram_campaign.save()
+        if telegram_campaign:
+            telegram_campaign.pk = None
+            telegram_campaign.campaign = instance
+            telegram_campaign.save()
 
         return instance
 
