@@ -4,7 +4,9 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice
+from apps.core.consts import CostModel
 from apps.core.models import File
+from apps.medium.consts import Medium
 from apps.medium.models import CostModelPrice, Publisher
 from apps.payments.models import Transaction
 
@@ -322,6 +324,15 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:
             raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
         return attrs
+
+    def create(self, validated_data):
+        campaign = validated_data['campaign']
+        if campaign.medium in [Medium.INSTAGRAM_STORY, Medium.INSTAGRAM_POST]:
+            if campaign.contents.all().count() > 0:
+                raise serializers.ValidationError({"campaign": "instagram campaigns can only have 1 content!"})
+            if validated_data['cost_model'] not in [CostModel.CPR, CostModel.CPI]:
+                raise serializers.ValidationError({"cost_model": ["invalid value for cost model"]})
+        return super(CampaignContentSerializer, self).create(validated_data)
 
     def get_file_url(self, obj):
         try:

@@ -68,11 +68,11 @@ class CampaignViewSet(BaseViewSet,
         serializer.save()
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'], url_path=r'cost_model/(?P<int:cost_model>[^/.]+)')
+    @action(detail=True, methods=['get'], url_path=r'cost_model/(?P<cost_model>[^/.]+)')
     def cost_model(self, request, *args, **kwargs):
         campaign = self.get_object()
         cost_model = kwargs.get('cost_model', CostModel.CPV)
-        cp_price_max = CostModelPrice.max_price(campaign.final_publishers.all(), cost_model)
+        cp_price_max = CostModelPrice.max_price(campaign.final_publishers.all(), int(cost_model))
         return Response({'value': cp_price_max})
 
     @action(detail=False, methods=['post'], url_path='estimate-actions', serializer_class=EstimateActionsSerializer)
