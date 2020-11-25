@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
+import ast
 import os
 from datetime import timedelta
-
 from pathlib import Path
 
 from celery.schedules import crontab
@@ -277,18 +277,22 @@ CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 CELERY_BROKER_USER = config("CELERY_BROKER_USER")
 CELERY_BROKER_PASSWORD = config("CELERY_BROKER_PASSWORD")
 
+CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB = ast.literal_eval(config("CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB"))
+UPDATE_TELEGRAM_INFO_TASK_CRONTAB = ast.literal_eval(config('UPDATE_TELEGRAM_INFO_TASK_CRONTAB'))
+UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB = ast.literal_eval('UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB')
+
 CELERY_BEAT_SCHEDULE = {
     "create_telegram_campaign_task": {
-        "task": "apps.campaign.tasks.create_telegram_campaign",
-        "schedule": crontab(minute="*/1"),
+        "task": "apps.campaign.tasks.create_telegram_campaign_task",
+        "schedule": crontab(**CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB),
     },
-    "update_telegram_view": {
-        "task": "apps.campaign.tasks.update_telegram_view",
-        "schedule": crontab(minute="*/1"),
+    "update_telegram_info_task": {
+        "task": "apps.campaign.tasks.update_telegram_info_task",
+        "schedule": crontab(**UPDATE_TELEGRAM_INFO_TASK_CRONTAB),
     },
     "update_telegram_publishers_task": {
-        "task": "apps.medium.tasks.update_telegram_publishers",
-        "schedule": crontab(hour=0, minute=0)
+        "task": "apps.medium.tasks.update_telegram_publishers_task",
+        "schedule": crontab(**UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB)
     },
     "create_instagram_campaign_task": {
         "task": "apps.campaign.tasks.create_instagram_campaign",
@@ -303,6 +307,7 @@ CELERY_BEAT_SCHEDULE = {
 ADBOT_API_TOKEN = config("ADBOT_API_TOKEN")
 ADBOT_API_URL = config('ADBOT_API_URL')
 ADBOT_AGENTS = config('ADBOT_AGENTS', default='admood')
+ADBOT_MAX_CONCURRENT_CAMPAIGN = config('ADBOT_MAX_CONCURRENT_CAMPAIGN', default=5, cast=int)
 
 SMS_API_URL = config("SMS_API_URL")
 SMS_API_TOKEN = config("SMS_API_TOKEN")

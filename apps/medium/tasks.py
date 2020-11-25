@@ -7,7 +7,7 @@ from services.instagram import get_insta_publishers
 
 
 @shared_task
-def update_telegram_publishers():
+def update_telegram_publishers_task():
     channels = get_publishers()
     for channel in channels:
         Publisher.objects.update_or_create(
