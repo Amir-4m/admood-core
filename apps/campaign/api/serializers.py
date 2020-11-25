@@ -100,8 +100,8 @@ class CampaignSerializer(serializers.ModelSerializer):
             if self.instance.status != Campaign.STATUS_DRAFT:
                 raise serializers.ValidationError({"non_field_errors": ["only draft campaigns are editable."]})
             medium = self.instance.medium
-            publishers = attrs.get('publishers', self.instance.publishers.filter(medium=medium))
-            categories = attrs.get('categories', self.instance.categories.filter(medium=medium))
+            publishers = attrs.get('publishers', self.instance.publishers.all())
+            categories = attrs.get('categories', self.instance.categories.all())
         else:
             medium = attrs.get('medium')
             publishers = attrs.get('publishers', [])
