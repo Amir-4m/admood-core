@@ -58,7 +58,7 @@ def create_telegram_test_campaign(campaign):
     ref_id = create_campaign(
         campaign,
         now().__str__(),
-        (now() + datetime.timedelta(hours=1)).__str__(),
+        (now() + timedelta(hours=1)).__str__(),
         "test",
     )
     contents = campaign.contents.all()
