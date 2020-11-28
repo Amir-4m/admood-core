@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Max, Min
 from django.db.models.functions import Coalesce
@@ -11,6 +12,7 @@ class Category(models.Model):
     ref_id = models.PositiveIntegerField(null=True, blank=True)
     title = models.CharField(max_length=50, db_index=True)
     display_text = models.CharField(max_length=50)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -28,6 +30,7 @@ class CostModelPrice(models.Model):
     grade = models.CharField(max_length=32)
     publisher_price = models.PositiveIntegerField()
     advertiser_price = models.PositiveIntegerField()
+    created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('medium', 'cost_model', 'grade',)
@@ -48,8 +51,12 @@ class CostModelPrice(models.Model):
         )['min_price']
 
 
-class Publisher(models.Model):
+class ApprovedPublisherManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status=Publisher.STATUS_APPROVED, is_enable=True)
 
+
+class Publisher(models.Model):
     STATUS_WAITING = 0
     STATUS_APPROVED = 1
     STATUS_REJECTED = 2
@@ -68,11 +75,16 @@ class Publisher(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     name = models.CharField(max_length=50)
     url = models.URLField(null=True, blank=True)
+    extra_data = JSONField(null=True, blank=True)
     is_enable = models.BooleanField(default=False)
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_WAITING)
     ref_id = models.IntegerField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+    approved_objects = ApprovedPublisherManager()
 
     def __str__(self):
         return self.name

@@ -13,7 +13,8 @@ class PublisherAdmin(admin.ModelAdmin):
     list_display = ['name', 'medium', 'status', 'is_enable']
     list_filter = ['medium', 'status', 'is_enable']
     search_fields = ['name', 'medium']
-    fields = ['name', 'medium', 'is_enable', 'status', 'categories', 'cost_models', 'description', 'url', 'ref_id']
+    fields = ['name', 'medium', 'is_enable', 'status', 'categories', 'cost_models', 'extra_data', 'description', 'url',
+              'ref_id']
     filter_horizontal = ['cost_models', 'categories']
     readonly_fields = ['medium', 'ref_id', 'url']
     form = PublisherForm
