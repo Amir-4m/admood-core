@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Max, Min
 from django.db.models.functions import Coalesce
@@ -50,8 +51,12 @@ class CostModelPrice(models.Model):
         )['min_price']
 
 
-class Publisher(models.Model):
+class ApprovedPublisherManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status=Publisher.STATUS_APPROVED, is_enable=True)
 
+
+class Publisher(models.Model):
     STATUS_WAITING = 0
     STATUS_APPROVED = 1
     STATUS_REJECTED = 2
@@ -77,6 +82,9 @@ class Publisher(models.Model):
     description = models.TextField(null=True, blank=True)
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+    approved_objects = ApprovedPublisherManager()
 
     def __str__(self):
         return self.name
