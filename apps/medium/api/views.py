@@ -30,11 +30,11 @@ class PublisherViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        medium = self.request.query_params.get('medium')
-        if medium is not None:
+        medium = self.request.query_params.get('medium', '')
+        if medium.isdigit():
             queryset = queryset.filter(medium=medium)
-        category = self.request.query_params.get('category')
-        if category is not None:
+        category = self.request.query_params.get('category', '')
+        if category.isdigit():
             queryset = queryset.filter(categories=category)
 
         return queryset
