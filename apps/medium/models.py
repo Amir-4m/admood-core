@@ -11,6 +11,7 @@ class Category(models.Model):
     ref_id = models.PositiveIntegerField(null=True, blank=True)
     title = models.CharField(max_length=50, db_index=True)
     display_text = models.CharField(max_length=50)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -28,6 +29,7 @@ class CostModelPrice(models.Model):
     grade = models.CharField(max_length=32)
     publisher_price = models.PositiveIntegerField()
     advertiser_price = models.PositiveIntegerField()
+    created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('medium', 'cost_model', 'grade',)
@@ -73,6 +75,7 @@ class Publisher(models.Model):
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_WAITING)
     ref_id = models.IntegerField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
