@@ -1,4 +1,5 @@
 from rest_framework import viewsets, mixins, filters
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -23,6 +24,7 @@ class PublisherViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = PublisherSerializer
     queryset = Publisher.approved_objects.all()
+    pagination_class = LimitOffsetPagination
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
 
