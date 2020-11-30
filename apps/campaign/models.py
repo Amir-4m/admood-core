@@ -81,10 +81,6 @@ class Campaign(models.Model):
         )['max_cost_model_price']
 
     @property
-    def has_budget(self):
-        return min(self.daily_budget, self.total_budget - self.cost) > 0
-
-    @property
     def remaining_views(self):
         return int(min(self.daily_budget, self.total_budget - self.cost) * 1000 / self.max_cost_model_price)
 
