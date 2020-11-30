@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from celery import shared_task
+from django.db import transaction
 from django.db.models import Q, Count
 from django.utils.timezone import now
 
@@ -9,6 +10,7 @@ from admood_core.settings import ADBOT_MAX_CONCURRENT_CAMPAIGN
 from apps.campaign.models import Campaign, CampaignReference, CampaignContent
 from apps.core.utils.get_file import get_file
 from apps.medium.consts import Medium
+from apps.payments.models import Transaction
 from services.instagram import create_insta_campaign, create_insta_content, create_insta_media, enable_Insta_campaign
 from services.telegram import (
     campaign_report, get_contents, campaign_telegram_file_hash
@@ -18,17 +20,30 @@ from services.telegram import (
 @shared_task
 def create_telegram_campaign_task():
     campaigns = Campaign.objects.filter(
-        Q(is_enable=True),
-        Q(status=Campaign.STATUS_APPROVED),
-        Q(medium=Medium.TELEGRAM),
-        Q(start_date__lte=now().date()),
+        is_enable=True,
+        status=Campaign.STATUS_APPROVED,
+        medium=Medium.TELEGRAM,
+        start_date__lte=now().date(),
     )
 
     # disable expired and over budget campaigns
     for campaign in campaigns.all():
-        if campaign.remaining_views <= 0 or (campaign.end_date is not None and campaign.end_date > now().date()):
-            campaign.is_enable = False
-            campaign.save()
+        if campaign.total_cost >= campaign.total_budget or (
+                campaign.end_date is not None and campaign.end_date > now().date()):
+            with transaction.atomic:
+                if campaign.total_cost > campaign.total_budget:
+                    Transaction.objects.create(
+                        user=campaign.owner,
+                        value=campaign.total_cost - campaign.total_budget,
+                        campaign=campaign,
+                        transaction_type=Transaction.TYPE_DEDUCT,
+                    )
+                campaign.is_enable = False
+                campaign.save()
+                continue
+
+        if campaign.remaining_views <= 0:
+            continue
 
     # create scheduled campaigns
     for campaign in campaigns.all():
@@ -42,9 +57,9 @@ def create_telegram_campaign_task():
 
     # create non scheduled campaigns if possible
     concurrent_campaign_count = CampaignReference.objects.filter(
-            ref_id__isnull=False,
-            date=now().date(),
-            updated_time__isnull=True
+        ref_id__isnull=False,
+        date=now().date(),
+        updated_time__isnull=True
     ).count()
     if concurrent_campaign_count < ADBOT_MAX_CONCURRENT_CAMPAIGN:
         campaigns = campaigns.filter(
