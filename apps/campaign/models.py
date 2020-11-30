@@ -82,7 +82,12 @@ class Campaign(models.Model):
 
     @property
     def remaining_views(self):
-        return int(min(self.daily_budget, self.total_budget - self.cost) * 1000 / self.max_cost_model_price)
+        budget = self.total_budget - self.total_cost
+        if self.daily_budget:
+            budget = min(self.daily_budget - self.today_cost, budget)
+        if budget > 0 and self.max_cost_model_price > 0:
+            return int(budget * 1000 / self.max_cost_model_price)
+        return 0
 
     @property
     def cost(self):
