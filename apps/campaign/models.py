@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Max
 from django.db.models.functions import Coalesce
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
@@ -81,23 +82,38 @@ class Campaign(models.Model):
         )['max_cost_model_price']
 
     @property
-    def has_budget(self):
-        return min(self.daily_budget, self.total_budget - self.cost) > 0
-
-    @property
     def remaining_views(self):
-        return int(min(self.daily_budget, self.total_budget - self.cost) * 1000 / self.max_cost_model_price)
+        budget = self.total_budget - self.total_cost
+        if self.daily_budget:
+            budget = min(self.daily_budget - self.today_cost, budget)
+        if budget > 0 and self.max_cost_model_price > 0:
+            return int(budget * 1000 / self.max_cost_model_price)
+        return 0
 
     @property
-    def cost(self):
+    def total_cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(ref_id__isnull=False):
-            for obj in campaign_reference.contents:
-                try:
-                    content = self.contents.get(pk=obj['content'])
-                    cost += obj['views'] * content.cost_model_price
-                except:
-                    continue
+        for campaign_reference in self.campaignreference_set.filter(updated_time__isnull=False):
+            if isinstance(campaign_reference.contents, list):
+                for obj in campaign_reference.contents:
+                    try:
+                        content = self.contents.get(pk=obj['content'])
+                        cost += obj['views'] * content.cost_model_price
+                    except:
+                        continue
+        return cost
+
+    @property
+    def today_cost(self):
+        cost = 0
+        for campaign_reference in self.campaignreference_set.filter(updated_time__date=now().date()):
+            if isinstance(campaign_reference.contents, list):
+                for obj in campaign_reference.contents:
+                    try:
+                        content = self.contents.get(pk=obj['content'])
+                        cost += obj['views'] * content.cost_model_price
+                    except:
+                        continue
         return cost
 
     def create_publisher_list(self):

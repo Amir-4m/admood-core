@@ -27,7 +27,7 @@ class PublisherViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name']
-    ordering_fields = ['name', 'extra_data__member_no']
+    ordering_fields = ['name', 'extra_data__member_no', 'extra_data__view_efficiency']
 
     def get_queryset(self):
         queryset = super().get_queryset()

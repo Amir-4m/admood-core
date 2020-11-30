@@ -73,7 +73,7 @@ class CampaignScheduleAdmin(admin.ModelAdmin):
 class CampaignReferenceAdmin(admin.ModelAdmin):
     list_display = ("campaign", "ref_id", "date", "start_time", "end_time")
     search_fields = ('campaign__name', 'ref_id')
-    list_filter = ('date', 'start_time', 'end_time')
+    list_filter = ('date', 'campaign__medium')
 
 
 @admin.register(TelegramCampaign)
