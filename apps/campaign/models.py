@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Max
 from django.db.models.functions import Coalesce
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
@@ -99,6 +100,19 @@ class Campaign(models.Model):
                     cost += obj['views'] * content.cost_model_price
                 except:
                     continue
+        return cost
+
+    @property
+    def today_cost(self):
+        cost = 0
+        for campaign_reference in self.campaignreference_set.filter(updated_time__date=now().date()):
+            if isinstance(campaign_reference.contents, list):
+                for obj in campaign_reference.contents:
+                    try:
+                        content = self.contents.get(pk=obj['content'])
+                        cost += obj['views'] * content.cost_model_price
+                    except:
+                        continue
         return cost
 
     def create_publisher_list(self):
