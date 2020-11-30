@@ -91,15 +91,16 @@ class Campaign(models.Model):
         return 0
 
     @property
-    def cost(self):
+    def total_cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(ref_id__isnull=False):
-            for obj in campaign_reference.contents:
-                try:
-                    content = self.contents.get(pk=obj['content'])
-                    cost += obj['views'] * content.cost_model_price
-                except:
-                    continue
+        for campaign_reference in self.campaignreference_set.filter(updated_time__isnull=False):
+            if isinstance(campaign_reference.contents, list):
+                for obj in campaign_reference.contents:
+                    try:
+                        content = self.contents.get(pk=obj['content'])
+                        cost += obj['views'] * content.cost_model_price
+                    except:
+                        continue
         return cost
 
     @property
