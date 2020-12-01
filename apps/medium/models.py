@@ -74,6 +74,7 @@ class Publisher(models.Model):
 
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     name = models.CharField(max_length=50)
+    tag = models.CharField(max_length=50, null=True, blank=True)
     url = models.URLField(null=True, blank=True)
     extra_data = JSONField(null=True, blank=True)
     is_enable = models.BooleanField(default=False)
@@ -87,7 +88,7 @@ class Publisher(models.Model):
     approved_objects = ApprovedPublisherManager()
 
     def __str__(self):
-        return self.name
+        return f'{self.name} - {self.get_medium_display()}'
 
     @staticmethod
     def get_by_categories(categories):
