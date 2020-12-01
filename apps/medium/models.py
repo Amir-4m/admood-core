@@ -74,6 +74,7 @@ class Publisher(models.Model):
 
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     name = models.CharField(max_length=50)
+    tag = models.CharField(max_length=50, null=True, blank=True)
     url = models.URLField(null=True, blank=True)
     extra_data = JSONField(null=True, blank=True)
     is_enable = models.BooleanField(default=False)
