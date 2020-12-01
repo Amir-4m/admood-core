@@ -88,7 +88,7 @@ class Publisher(models.Model):
     approved_objects = ApprovedPublisherManager()
 
     def __str__(self):
-        return self.name
+        return f'{self.name} - {self.get_medium_display()}'
 
     @staticmethod
     def get_by_categories(categories):
