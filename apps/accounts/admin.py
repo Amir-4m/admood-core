@@ -22,7 +22,7 @@ class MyUserAdmin(UserAdmin):
     )
     list_display = ('username', 'phone_number', 'email', 'is_active', 'is_staff')
     search_fields = ('username', 'phone_number', 'email')
-    list_filter = ('is_active', 'is_verified')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_verified')
 
 
 @admin.register(Verification)
@@ -37,5 +37,3 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'first_name', 'last_name', 'company_name', 'type', 'status',)
     search_fields = ('user', 'first_name', 'last_name', 'company_name')
     list_filter = ('type', 'status')
-
-
