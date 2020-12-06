@@ -145,4 +145,5 @@ class ContentViewSet(BaseViewSet,
 
     def perform_create(self, serializer):
         campaign = get_object_or_404(Campaign, pk=self.kwargs['campaign_id'])
+        serializer.context.update({'campaign': campaign})
         serializer.save(campaign=campaign)

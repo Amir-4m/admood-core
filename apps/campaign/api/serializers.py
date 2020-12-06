@@ -325,55 +325,55 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         data = attrs.get('data')
         is_igtv = data.get('is_igtv')
         files = data.get('file')
+        campaign = self.context['campaign']
 
         if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:
             raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
 
-        if is_igtv is True and files and len(files) > 1:
-            file = File.objects.filter(pk=files[0]).first()
-
-            if file is not None and file_type(file.__str__()) != 'video':
-                raise serializers.ValidationError({"campaign": "file format is not valid!"})
-            raise serializers.ValidationError({"campaign": "igtv can only have 1 file!"})
-
-        elif is_igtv is False and files and len(files) > 10:
-            raise serializers.ValidationError({"campaign": "album posts can not have more 10 files!"})
-
-        return attrs
-
-    def create(self, validated_data):
-        campaign = validated_data['campaign']
+        # validating instagram medium type campaign contents
         if campaign.medium in [Medium.INSTAGRAM_STORY, Medium.INSTAGRAM_POST]:
-
             if campaign.contents.all().count() > 0:
                 raise serializers.ValidationError({"campaign": "instagram campaigns can only have 1 content!"})
 
-            if validated_data['cost_model'] not in [CostModel.CPR, CostModel.CPI]:
+            if attrs['cost_model'] not in [CostModel.CPR, CostModel.CPI]:
                 raise serializers.ValidationError({"cost_model": ["invalid value for cost model"]})
 
-        return super(CampaignContentSerializer, self).create(validated_data)
+            if is_igtv and files is not None:
+                file = File.objects.filter(pk=files[0]).first()
 
-    def get_file_url(self, obj):
-        try:
-            files = obj.data.get('file')
-            if files is not None and isinstance(files, list):
-                file_urls = []
-                for f_id in files:
-                    try:
-                        file_obj = File.objects.get(pk=f_id)
-                    except File.DoesNotExist:
-                        continue
-                    file_urls.append({
-                        "url": self.context['request'].build_absolute_uri(file_obj.file.url),
-                        "type": file_type(file_obj.__str__())
-                    })
-                return file_urls
-            else:
-                file_id = files or obj.data.get('imageId')
-                file = File.objects.get(pk=file_id).file
-                return self.context['request'].build_absolute_uri(file.url)
-        except Exception as e:
-            return None
+                if file is not None and file_type(file.__str__()) != 'video':
+                    raise serializers.ValidationError({"campaign": "file format is not valid!"})
+
+                if len(files) > 1:
+                    raise serializers.ValidationError({"campaign": "igtv can only have 1 file!"})
+
+            elif not is_igtv and files:
+                if len(files) > 10:
+                    raise serializers.ValidationError({"campaign": "album posts can not have more 10 files!"})
+        return attrs
+
+
+def get_file_url(self, obj):
+    try:
+        files = obj.data.get('file')
+        if files is not None and isinstance(files, list):
+            file_urls = []
+            for f_id in files:
+                try:
+                    file_obj = File.objects.get(pk=f_id)
+                except File.DoesNotExist:
+                    continue
+                file_urls.append({
+                    "url": self.context['request'].build_absolute_uri(file_obj.file.url),
+                    "type": file_type(file_obj.__str__())
+                })
+            return file_urls
+        else:
+            file_id = files or obj.data.get('imageId')
+            file = File.objects.get(pk=file_id).file
+            return self.context['request'].build_absolute_uri(file.url)
+    except Exception as e:
+        return None
 
 
 class EstimateActionsSerializer(serializers.Serializer):
