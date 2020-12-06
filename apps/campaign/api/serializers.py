@@ -322,23 +322,34 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         read_only_fields = ('campaign',)
 
     def validate(self, attrs):
+        extra_data = attrs.get('extra_data')
+        is_igtv = extra_data.get('is_igtv')
+        files = extra_data.get('file')
+
         if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:
             raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
+
+        if is_igtv is True and files and len(files) > 1:
+            file = File.objects.filter(pk=files[0]).first()
+
+            if file is not None and file_type(file.__str__()) != 'video':
+                raise serializers.ValidationError({"campaign": "file format is not valid!"})
+            raise serializers.ValidationError({"campaign": "igtv can only have 1 file!"})
+
+        elif is_igtv is False and files and len(files) > 10:
+            raise serializers.ValidationError({"campaign": "album posts can not have more 10 files!"})
+
         return attrs
 
     def create(self, validated_data):
         campaign = validated_data['campaign']
         if campaign.medium in [Medium.INSTAGRAM_STORY, Medium.INSTAGRAM_POST]:
-            is_igtv = campaign.extra_data.get('is_igtv')
-            files = validated_data.get('file')
+
             if campaign.contents.all().count() > 0:
                 raise serializers.ValidationError({"campaign": "instagram campaigns can only have 1 content!"})
+
             if validated_data['cost_model'] not in [CostModel.CPR, CostModel.CPI]:
                 raise serializers.ValidationError({"cost_model": ["invalid value for cost model"]})
-            if is_igtv is True and validated_data.get('file') and len(files) > 1 and file_type(files[0]) == 'video':
-                raise serializers.ValidationError({"campaign": "igtv can only have 1 file!"})
-            elif is_igtv is False and validated_data.get('file') and len(files) > 10:
-                raise serializers.ValidationError({"campaign": "album posts can not have more 10 files!"})
 
         return super(CampaignContentSerializer, self).create(validated_data)
 
@@ -348,13 +359,21 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                 files = obj.data.get('file')
                 file_urls = []
                 if files is not None and isinstance(files, list):
-                    file_urls = [self.context['request'].build_absolute_uri(File.objects.get(pk=file_id).file.url) for file_id in files]
+                    for f_id in files:
+                        try:
+                            file_obj = File.objects.get(pk=f_id)
+                        except File.DoesNotExist:
+                            continue
+                        file_urls.append({
+                            "url": self.context['request'].build_absolute_uri(file_obj.file.url),
+                            "type": file_type(file_obj.__str__())
+                        })
                 return file_urls
             else:
                 file_id = obj.data.get('file') or obj.data.get('imageId')
                 file = File.objects.get(pk=file_id).file
                 return self.context['request'].build_absolute_uri(file.url)
-        except:
+        except Exception as e:
             return None
 
 
