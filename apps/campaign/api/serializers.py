@@ -322,9 +322,9 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         read_only_fields = ('campaign',)
 
     def validate(self, attrs):
-        extra_data = attrs.get('extra_data')
-        is_igtv = extra_data.get('is_igtv')
-        files = extra_data.get('file')
+        data = attrs.get('data')
+        is_igtv = data.get('is_igtv')
+        files = data.get('file')
 
         if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:
             raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
