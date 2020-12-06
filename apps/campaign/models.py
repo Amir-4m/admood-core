@@ -16,6 +16,10 @@ from apps.medium.consts import Medium
 from apps.medium.models import Publisher, Category
 
 
+def json_default():
+    return {'': ''}
+
+
 class Province(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -51,7 +55,7 @@ class Campaign(models.Model):
     start_date = models.DateField(default=datetime.date.today, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
-    extra_data = JSONField(null=True, blank=True)
+    extra_data = JSONField(default=json_default)
 
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
     utm_medium = models.CharField(max_length=50, null=True, blank=True)

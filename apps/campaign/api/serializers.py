@@ -9,6 +9,7 @@ from apps.core.models import File
 from apps.medium.consts import Medium
 from apps.medium.models import CostModelPrice, Publisher
 from apps.payments.models import Transaction
+from services.utils import file_type
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -328,17 +329,31 @@ class CampaignContentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         campaign = validated_data['campaign']
         if campaign.medium in [Medium.INSTAGRAM_STORY, Medium.INSTAGRAM_POST]:
+            is_igtv = campaign.extra_data.get('is_igtv')
+            files = validated_data.get('file')
             if campaign.contents.all().count() > 0:
                 raise serializers.ValidationError({"campaign": "instagram campaigns can only have 1 content!"})
             if validated_data['cost_model'] not in [CostModel.CPR, CostModel.CPI]:
                 raise serializers.ValidationError({"cost_model": ["invalid value for cost model"]})
+            if is_igtv is True and validated_data.get('file') and len(files) > 1 and file_type(files[0]) == 'video':
+                raise serializers.ValidationError({"campaign": "igtv can only have 1 file!"})
+            elif is_igtv is False and validated_data.get('file') and len(files) > 10:
+                raise serializers.ValidationError({"campaign": "album posts can not have more 10 files!"})
+
         return super(CampaignContentSerializer, self).create(validated_data)
 
     def get_file_url(self, obj):
         try:
-            file_id = obj.data.get('file') or obj.data.get('imageId')
-            file = File.objects.get(pk=file_id).file
-            return self.context['request'].build_absolute_uri(file.url)
+            if obj.campaign.medium == Medium.INSTAGRAM_POST:
+                files = obj.data.get('file')
+                file_urls = []
+                if files is not None and isinstance(files, list):
+                    file_urls = [self.context['request'].build_absolute_uri(File.objects.get(pk=file_id).file.url) for file_id in files]
+                return file_urls
+            else:
+                file_id = obj.data.get('file') or obj.data.get('imageId')
+                file = File.objects.get(pk=file_id).file
+                return self.context['request'].build_absolute_uri(file.url)
         except:
             return None
 
