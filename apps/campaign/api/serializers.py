@@ -355,22 +355,21 @@ class CampaignContentSerializer(serializers.ModelSerializer):
 
     def get_file_url(self, obj):
         try:
-            if obj.campaign.medium == Medium.INSTAGRAM_POST:
-                files = obj.data.get('file')
+            files = obj.data.get('file')
+            if files is not None and isinstance(files, list):
                 file_urls = []
-                if files is not None and isinstance(files, list):
-                    for f_id in files:
-                        try:
-                            file_obj = File.objects.get(pk=f_id)
-                        except File.DoesNotExist:
-                            continue
-                        file_urls.append({
-                            "url": self.context['request'].build_absolute_uri(file_obj.file.url),
-                            "type": file_type(file_obj.__str__())
-                        })
-                return file_urls
+                for f_id in files:
+                    try:
+                        file_obj = File.objects.get(pk=f_id)
+                    except File.DoesNotExist:
+                        continue
+                    file_urls.append({
+                        "url": self.context['request'].build_absolute_uri(file_obj.file.url),
+                        "type": file_type(file_obj.__str__())
+                    })
+                    return file_urls
             else:
-                file_id = obj.data.get('file') or obj.data.get('imageId')
+                file_id = files or obj.data.get('imageId')
                 file = File.objects.get(pk=file_id).file
                 return self.context['request'].build_absolute_uri(file.url)
         except Exception as e:
