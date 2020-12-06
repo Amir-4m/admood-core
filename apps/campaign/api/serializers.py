@@ -66,6 +66,13 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         return extra_kwargs
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['utm_campaign_default'] = instance.id
+        data['utm_medium_default'] = instance.get_medium_display()
+        data['utm_content_default'] = 'کانال نمایش دهنده تبلیغ'
+        return data
+
     def validate_schedules(self, value):
         for idx, schedule in enumerate(value):
             start_time = schedule.get('start_time')

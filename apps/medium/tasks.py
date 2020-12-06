@@ -15,8 +15,11 @@ def update_telegram_publishers_task():
             medium=Medium.TELEGRAM,
             defaults={
                 'name': channel['title'],
-                'tag': channel['tag'],
-                'extra_data': {'member_no': channel['member_no'], 'view_efficiency': channel['view_efficiency']}
+                'extra_data': {
+                    'member_no': channel['member_no'],
+                    'view_efficiency': channel['view_efficiency'],
+                    'tag': channel['tag']
+                }
             }
         )
 
