@@ -367,7 +367,7 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                         "url": self.context['request'].build_absolute_uri(file_obj.file.url),
                         "type": file_type(file_obj.__str__())
                     })
-                    return file_urls
+                return file_urls
             else:
                 file_id = files or obj.data.get('imageId')
                 file = File.objects.get(pk=file_id).file
