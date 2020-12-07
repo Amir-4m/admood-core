@@ -19,6 +19,7 @@ from services.telegram import (
 
 @shared_task
 def create_telegram_campaign_task():
+    # filter approved and enable telegram campaigns
     campaigns = Campaign.objects.filter(
         is_enable=True,
         status=Campaign.STATUS_APPROVED,
@@ -31,6 +32,7 @@ def create_telegram_campaign_task():
         if campaign.total_cost >= campaign.total_budget or (
                 campaign.end_date is not None and campaign.end_date > now().date()):
             with transaction.atomic:
+                # create a deduct transaction
                 if campaign.total_cost > campaign.total_budget:
                     Transaction.objects.create(
                         user=campaign.owner,
@@ -42,6 +44,7 @@ def create_telegram_campaign_task():
                 campaign.save()
                 continue
 
+        # if campaign doesn't have remaining views for today or at all
         if campaign.remaining_views <= 0:
             continue
 
@@ -76,6 +79,7 @@ def create_telegram_campaign_task():
 # update content view in Campaign Reference model and add telegram file hashes
 @shared_task
 def update_telegram_info_task():
+    # filter appropriate campaigns to save gotten views
     campaign_refs = CampaignReference.objects.filter(
         ref_id__isnull=False,
         date=now().date(),
@@ -84,8 +88,10 @@ def update_telegram_info_task():
     )
     for campaign_ref in campaign_refs:
 
+        # store telegram file hash of screenshot in TelegramCampaign model
         campaign_ref.campaign.telegramcampaign.telegram_file_hash = campaign_telegram_file_hash(campaign_ref.ref_id)
 
+        # get each content views and store in content json field
         reports = campaign_report(campaign_ref.ref_id)
         for content in campaign_ref.contents:
             for report in reports:
@@ -95,6 +101,7 @@ def update_telegram_info_task():
         campaign_ref.save()
 
         camp = campaign_ref.campaign
+        # getting file hashes for the first campaign reference is enough
         if camp.campaignreference_set.count() == 1:
             for content in campaign_ref.contents:
                 content_id = content["content"]
