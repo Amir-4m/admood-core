@@ -7,7 +7,7 @@ from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSc
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.medium.consts import Medium
-from apps.medium.models import CostModelPrice, Publisher
+from apps.medium.models import Publisher
 from apps.payments.models import Transaction
 
 
