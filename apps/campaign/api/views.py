@@ -68,6 +68,7 @@ class CampaignViewSet(BaseViewSet,
         serializer.save()
         return Response(serializer.data)
 
+    # Evaluate max model price based on campaign's publishers
     @action(detail=True, methods=['get'], url_path=r'cost_model/(?P<cost_model>[^/.]+)')
     def cost_model(self, request, *args, **kwargs):
         campaign = self.get_object()
