@@ -62,6 +62,9 @@ class ContentAdminForm(forms.ModelForm):
 
 
 class CampaignAdminForm(forms.ModelForm):
+    daily_budget = forms.IntegerField(localize=True)
+    total_budget = forms.IntegerField(localize=True)
+
     class Meta:
         model = Campaign
         fields = '__all__'

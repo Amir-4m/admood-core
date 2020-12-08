@@ -177,12 +177,12 @@ SIMPLE_JWT = {
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
-LANGUAGE_CODE = 'fa-ir'
+LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Tehran'
 USE_I18N = False
-USE_L10N = False
+USE_L10N = True
 USE_TZ = False
-
+USE_THOUSAND_SEPARATOR = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 STATIC_ROOT = BASE_DIR / 'static'
