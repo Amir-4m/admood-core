@@ -127,7 +127,7 @@ class Campaign(models.Model):
 class CampaignReference(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     ref_id = models.IntegerField(null=True, blank=True)
-    extra_data = JSONField(null=True, blank=True)
+    extra_data = JSONField(default=json_default)
     contents = JSONField(default=list)
     max_view = models.IntegerField()
     date = models.DateField()
@@ -157,7 +157,7 @@ class CampaignContent(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='contents')
     title = models.CharField(max_length=250)
     landing_url = models.URLField(blank=True, null=True)
-    data = JSONField()
+    data = JSONField(default=json_default)
     description = models.TextField(blank=True, null=True)
     utm_term = models.CharField(max_length=100, blank=True, null=True)
 
