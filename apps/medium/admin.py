@@ -10,17 +10,14 @@ from .models import (
 
 @admin.register(Publisher)
 class PublisherAdmin(admin.ModelAdmin):
-    list_display = ['name', 'medium', 'status', 'get_categories', 'is_enable', 'created_time', 'updated_time']
-    list_filter = ['medium', 'status', 'is_enable']
+    list_display = ['name', 'medium', 'status', 'is_enable', 'created_time', 'updated_time']
+    list_filter = ['medium', 'status', 'is_enable', 'categories']
     search_fields = ['name', 'medium']
     fields = ['name', 'tag', 'medium', 'is_enable', 'status', 'categories', 'cost_models',
               'extra_data', 'description', 'url', 'ref_id']
     filter_horizontal = ['cost_models', 'categories']
     readonly_fields = ['medium', 'ref_id', 'url']
     form = PublisherForm
-
-    def get_categories(self, obj):
-        return ", ".join([cat.title for cat in obj.categories.all()[:3]])
 
     def has_add_permission(self, request):
         return False

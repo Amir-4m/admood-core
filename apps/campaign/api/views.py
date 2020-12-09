@@ -141,7 +141,8 @@ class ContentViewSet(BaseViewSet,
 
     def get_queryset(self):
         campaign_id = self.kwargs['campaign_id']
-        return self.queryset.filter(campaign__owner=self.request.user, campaign__id=campaign_id)
+        qs = self.queryset.filter(campaign__owner=self.request.user, campaign__id=campaign_id).order_by('pk')
+        return qs
 
     def get_serializer_context(self):
         context = super(ContentViewSet, self).get_serializer_context()
