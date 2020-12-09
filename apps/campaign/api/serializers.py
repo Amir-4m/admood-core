@@ -350,7 +350,7 @@ class CampaignContentSerializer(serializers.ModelSerializer):
 
         # validating instagram medium type campaign contents
         if campaign.medium in [Medium.INSTAGRAM_STORY, Medium.INSTAGRAM_POST]:
-            if campaign.contents.all().count() > 0:
+            if not self.instance and campaign.contents.all().count() > 0:
                 raise serializers.ValidationError({"content": "instagram campaigns can only have 1 content!"})
 
             if attrs['cost_model'] not in [CostModel.CPR, CostModel.CPI]:
@@ -381,7 +381,7 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                     except File.DoesNotExist:
                         continue
                     file_urls.append({
-                        "url": self.context['request'].build_absolute_uri(file_obj.file.url),
+                        "file": self.context['request'].build_absolute_uri(file_obj.file.url),
                         "type": file_type(file_obj.__str__())
                     })
                 return file_urls
