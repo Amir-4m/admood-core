@@ -10,8 +10,8 @@ from .models import (
 
 @admin.register(Publisher)
 class PublisherAdmin(admin.ModelAdmin):
-    list_display = ['name', 'medium', 'status', 'is_enable']
-    list_filter = ['medium', 'status', 'is_enable']
+    list_display = ['name', 'medium', 'status', 'is_enable', 'created_time', 'updated_time']
+    list_filter = ['medium', 'status', 'is_enable', 'categories']
     search_fields = ['name', 'medium']
     fields = ['name', 'medium', 'is_enable', 'status', 'categories', 'cost_models',
               'extra_data', 'description', 'url', 'ref_id']
