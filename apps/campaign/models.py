@@ -168,7 +168,7 @@ class CampaignContent(models.Model):
 
     class Meta:
         verbose_name = 'Content'
-        ordering = ['-campaign__created_time', '-pk']
+        ordering = ['pk']
 
     def __str__(self):
         return self.title
