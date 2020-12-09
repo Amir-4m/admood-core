@@ -325,7 +325,13 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         data = attrs.get('data')
         is_igtv = data.get('is_igtv')
         files = data.get('file')
-        campaign = self.context['campaign']
+
+        try:
+            campaign = Campaign.objects.get(id=self.context['view'].kwargs['campaign_id'])
+            attrs.update({'campaign': campaign})
+
+        except Campaign.DoesNotExist:
+            raise serializers.ValidationError({"campaign": "campaign with this id does not exist!"})
 
         if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:
             raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
@@ -333,7 +339,7 @@ class CampaignContentSerializer(serializers.ModelSerializer):
         # validating instagram medium type campaign contents
         if campaign.medium in [Medium.INSTAGRAM_STORY, Medium.INSTAGRAM_POST]:
             if campaign.contents.all().count() > 0:
-                raise serializers.ValidationError({"campaign": "instagram campaigns can only have 1 content!"})
+                raise serializers.ValidationError({"content": "instagram campaigns can only have 1 content!"})
 
             if attrs['cost_model'] not in [CostModel.CPR, CostModel.CPI]:
                 raise serializers.ValidationError({"cost_model": ["invalid value for cost model"]})
@@ -342,10 +348,10 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                 file = File.objects.filter(pk=files[0]).first()
 
                 if file is not None and file_type(file.__str__()) != 'video':
-                    raise serializers.ValidationError({"campaign": "file format is not valid!"})
+                    raise serializers.ValidationError({"file": "file format is not valid!"})
 
                 if len(files) > 1:
-                    raise serializers.ValidationError({"campaign": "igtv can only have 1 file!"})
+                    raise serializers.ValidationError({"file": "igtv can only have 1 file!"})
 
             elif not is_igtv and files:
                 if len(files) > 10:

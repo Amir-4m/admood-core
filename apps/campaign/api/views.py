@@ -140,17 +140,4 @@ class ContentViewSet(BaseViewSet,
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        campaign_id = self.kwargs['campaign_id']
-        qs = self.queryset.filter(campaign__owner=self.request.user, campaign__id=campaign_id).order_by('pk')
-        return qs
-
-    def get_serializer_context(self):
-        context = super(ContentViewSet, self).get_serializer_context()
-        campaign = get_object_or_404(Campaign, pk=self.kwargs['campaign_id'])
-        context.update({'campaign': campaign})
-        return context
-
-    def perform_create(self, serializer):
-        campaign = get_object_or_404(Campaign, pk=self.kwargs['campaign_id'])
-        serializer.context.update({'campaign': campaign})
-        serializer.save(campaign=campaign)
+        return self.queryset.filter(campaign__owner=self.request.user, campaign__id=self.kwargs['campaign_id'])
