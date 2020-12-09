@@ -68,6 +68,7 @@ class CampaignViewSet(BaseViewSet,
         serializer.save()
         return Response(serializer.data)
 
+    # Evaluate max model price based on campaign's publishers
     @action(detail=True, methods=['get'], url_path=r'cost_model/(?P<cost_model>[^/.]+)')
     def cost_model(self, request, *args, **kwargs):
         campaign = self.get_object()
@@ -75,6 +76,7 @@ class CampaignViewSet(BaseViewSet,
         cp_price_max = CostModelPrice.max_price(campaign.final_publishers.all(), int(cost_model))
         return Response({'value': cp_price_max})
 
+    # Estimate campaign model prices like cpv, cpc and ... based on selected publishers or categories
     @action(detail=False, methods=['post'], url_path='estimate-actions', serializer_class=EstimateActionsSerializer)
     def estimate_actions(self, request):
         serializer = self.get_serializer(data=request.data)

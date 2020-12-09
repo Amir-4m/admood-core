@@ -7,7 +7,7 @@ from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSc
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.medium.consts import Medium
-from apps.medium.models import CostModelPrice, Publisher
+from apps.medium.models import Publisher
 from apps.payments.models import Transaction
 
 
@@ -49,6 +49,9 @@ class CampaignSerializer(serializers.ModelSerializer):
     start_date = serializers.DateField(allow_null=True)
     target_devices = TargetDeviceSerializer(allow_null=True, many=True)
     schedules = CampaignScheduleSerializer(many=True)
+    utm_campaign_default = serializers.SerializerMethodField()
+    utm_medium_default = serializers.SerializerMethodField()
+    utm_content_default = serializers.SerializerMethodField()
 
     class Meta:
         model = Campaign
@@ -65,13 +68,6 @@ class CampaignSerializer(serializers.ModelSerializer):
             extra_kwargs['medium'] = kwargs
 
         return extra_kwargs
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data['utm_campaign_default'] = instance.id
-        data['utm_medium_default'] = instance.get_medium_display()
-        data['utm_content_default'] = 'کانال نمایش دهنده تبلیغ'
-        return data
 
     def validate_schedules(self, value):
         for idx, schedule in enumerate(value):
@@ -184,6 +180,15 @@ class CampaignSerializer(serializers.ModelSerializer):
         instance.final_publishers.add(*final_publishers)
 
         return instance
+
+    def get_utm_campaign_default(self, obj):
+        return obj.id
+
+    def get_utm_medium_default(self, obj):
+        return obj.get_medium_display()
+
+    def get_utm_content_default(self, obj):
+        return 'کانال نمایش دهنده تبلیغ'
 
 
 class CampaignEnableSerializer(serializers.ModelSerializer):
