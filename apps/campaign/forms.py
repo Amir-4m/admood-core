@@ -4,7 +4,7 @@ from django_admin_json_editor import JSONEditorWidget
 
 from apps.campaign.models import CampaignContent, Campaign
 from apps.medium.consts import Medium
-from apps.payments.models import Transaction
+from apps.medium.models import Publisher
 
 DATA_SCHEMA = {
     'type': 'object',
@@ -68,6 +68,17 @@ class CampaignAdminForm(forms.ModelForm):
     class Meta:
         model = Campaign
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        final_publishers = Publisher.objects.filter(
+            is_enable=True,
+            status=Publisher.STATUS_APPROVED,
+        )
+        if self.instance.medium:
+            final_publishers = final_publishers.filter(medium=self.instance.medium)
+
+        self.fields['final_publishers'].queryset = final_publishers
 
     def clean(self):
         if self.instance:
