@@ -2,13 +2,13 @@ import os
 
 
 def file_type(name):
-    image = 'image'
+    photo = 'photo'
     video = 'video'
     audio = 'audio'
     document = 'document'
 
     file_types = {
-        image: ['.jpeg', '.jpg', '.png'],
+        photo: ['.jpeg', '.jpg', '.png'],
         video: ['.mp4', '.gif', '.avi', '.wmv', '.mkv', '.flv', '.mov'],
         audio: ['.mp3', '.wav', '.aac', '.ogg', '.wma'],
     }
