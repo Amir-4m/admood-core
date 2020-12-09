@@ -381,6 +381,7 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                     except File.DoesNotExist:
                         continue
                     file_urls.append({
+                        "id": file_obj.id,
                         "file": self.context['request'].build_absolute_uri(file_obj.file.url),
                         "type": file_type(file_obj.__str__())
                     })
