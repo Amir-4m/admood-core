@@ -63,6 +63,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_admin_json_editor',
+    'django_json_widget'
 ]
 
 if DEVEL:
