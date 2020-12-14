@@ -3,7 +3,7 @@ import datetime
 from django.utils import timezone
 from rest_framework import serializers
 
-from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice
+from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignReference
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.medium.consts import Medium
@@ -392,6 +392,12 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                 return self.context['request'].build_absolute_uri(file.url)
         except Exception as e:
             return None
+
+
+class CampaignReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignReference
+        exclude = ('ref_id',)
 
 
 class EstimateActionsSerializer(serializers.Serializer):

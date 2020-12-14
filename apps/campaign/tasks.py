@@ -97,6 +97,7 @@ def update_telegram_info_task():
             for report in reports:
                 if content["ref_id"] == report["content"]:
                     content["views"] = report["views"]
+                    content["detail"] = report["detail"]
         campaign_ref.report_time = now()
         campaign_ref.save()
 
@@ -142,7 +143,7 @@ def create_instagram_campaign():
             )
             if campaign_ref.ref_id:
                 continue
-            # create telegram service campaign
+            # create instagram service campaign
             ref_id = create_insta_campaign(
                 campaign,
                 datetime.combine(now().date(), schedule.start_time).__str__(),

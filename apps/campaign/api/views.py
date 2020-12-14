@@ -9,8 +9,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
-    CampaignContentSerializer, CampaignDuplicateSerializer, CampaignApproveSerializer, EstimateActionsSerializer)
-from apps.campaign.models import Province, Campaign, CampaignContent
+    CampaignContentSerializer, CampaignDuplicateSerializer, CampaignApproveSerializer, EstimateActionsSerializer,
+    CampaignReferenceSerializer)
+from apps.campaign.models import Province, Campaign, CampaignContent, CampaignReference
 from apps.core.consts import CostModel
 from apps.core.views import BaseViewSet
 from apps.medium.models import Publisher, CostModelPrice
@@ -127,6 +128,12 @@ class CampaignViewSet(BaseViewSet,
 
         return Response(data=data)
 
+    @action(detail=True, methods=['get'], url_path='references', serializer_class=CampaignReferenceSerializer)
+    def references(self, request, *args, **kwargs):
+        campaign = self.get_object()
+        serializer = self.get_serializer(campaign.campaignreference_set.all(), many=True)
+        return Response(serializer.data)
+
 
 class ContentViewSet(BaseViewSet,
                      mixins.ListModelMixin,
@@ -143,3 +150,19 @@ class ContentViewSet(BaseViewSet,
 
     def get_queryset(self):
         return self.queryset.filter(campaign__owner=self.request.user, campaign__id=self.kwargs['campaign_id'])
+
+
+class CampaignReferenceViewSet(viewsets.GenericViewSet):
+    queryset = CampaignReference.objects.all()
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CampaignReferenceSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(owner=self.request.user)
+
+    @action(detail=True, methods=['get'], url_path='report', serializer_class=CampaignReferenceSerializer)
+    def report(self, request, *args, **kwargs):
+        obj = self.get_object()
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
