@@ -1,6 +1,5 @@
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -128,12 +127,6 @@ class CampaignViewSet(BaseViewSet,
 
         return Response(data=data)
 
-    @action(detail=True, methods=['get'], url_path='references', serializer_class=CampaignReferenceSerializer)
-    def references(self, request, *args, **kwargs):
-        campaign = self.get_object()
-        serializer = self.get_serializer(campaign.campaignreference_set.all(), many=True)
-        return Response(serializer.data)
-
 
 class ContentViewSet(BaseViewSet,
                      mixins.ListModelMixin,
@@ -159,7 +152,7 @@ class CampaignReferenceViewSet(viewsets.GenericViewSet):
     serializer_class = CampaignReferenceSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(owner=self.request.user)
+        return self.queryset.filter(campaign__owner=self.request.user)
 
     @action(detail=True, methods=['get'], url_path='report', serializer_class=CampaignReferenceSerializer)
     def report(self, request, *args, **kwargs):

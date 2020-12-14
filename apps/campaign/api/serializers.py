@@ -50,6 +50,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     start_date = serializers.DateField(allow_null=True)
     target_devices = TargetDeviceSerializer(allow_null=True, many=True)
     schedules = CampaignScheduleSerializer(many=True)
+    campaign_references = serializers.SerializerMethodField()
     utm_campaign_default = serializers.SerializerMethodField()
     utm_medium_default = serializers.SerializerMethodField()
     utm_content_default = serializers.SerializerMethodField()
@@ -69,6 +70,9 @@ class CampaignSerializer(serializers.ModelSerializer):
             extra_kwargs['medium'] = kwargs
 
         return extra_kwargs
+
+    def get_campaign_references(self, obj):
+        return obj.campaignreference_set.values('id', 'date', 'start_time')
 
     def validate_schedules(self, value):
         for idx, schedule in enumerate(value):
@@ -395,9 +399,37 @@ class CampaignContentSerializer(serializers.ModelSerializer):
 
 
 class CampaignReferenceSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='campaign.name')
+    contents_detail = serializers.SerializerMethodField()
+    publishers_detail = serializers.SerializerMethodField()
+
     class Meta:
         model = CampaignReference
-        exclude = ('ref_id',)
+        fields = ('id', 'title', 'date', 'start_time', 'contents_detail', 'publishers_detail')
+
+    def get_contents_detail(self, obj):
+        contents_detail = []
+        if obj.campaign.medium == Medium.TELEGRAM:
+            for content in obj.contents:
+                try:
+                    cont = CampaignContent.objects.get(pk=content['content'])
+                except CampaignContent.DoesNotExist:
+                    continue
+                contents_detail.append({'content_title': cont.title, 'content_total_views': content['views']})
+        return contents_detail
+
+    def get_publishers_detail(self, obj):
+        publishers_detail = []
+        if obj.campaign.medium == Medium.TELEGRAM:
+            for content in obj.contents:
+                for detail in content['detail']:
+                    publishers_detail.append({
+                        'publishers': Publisher.objects.filter(ref_id__in=detail['channel_ids']).values('name',
+                                                                                                        'extra_data__tag'),
+                        'posts': detail['posts']
+
+                    })
+        return publishers_detail
 
 
 class EstimateActionsSerializer(serializers.Serializer):
