@@ -59,6 +59,7 @@ class CampaignAdmin(admin.ModelAdmin):
 @admin.register(CampaignContent)
 class CampaignContentAdmin(admin.ModelAdmin):
     list_display = ("campaign", "title", "data")
+    list_filter = ("campaign__name", "campaign__categories")
     search_fields = ("campaign__name", "title",)
     form = ContentAdminForm
 
