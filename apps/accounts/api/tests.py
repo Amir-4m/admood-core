@@ -32,34 +32,23 @@ class AccountsTest(APITestCase):
         self.assertEqual(User.objects.last().email, 'email@gmail.com')
         self.assertEqual(Verification.objects.count(), 1)
 
-    def test_register_verify(self):
         url = reverse('register_verify')
-        data = {}
-
-        user = User.objects.create_user(username='user',
-                                        email='user@example.com',
-                                        password='F3DkePaSs0d')
-        user.is_active = True
-        user.is_verified = True
-        user.save()
-
-        verification = user.verifications.create(verify_code=uuid.uuid4().hex,
-                                                 verify_type=Verification.VERIFY_TYPE_EMAIL)
-
+        verification = Verification.objects.get()
         data['rc'] = verification.verify_code
 
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(Verification.objects.get().verified_time)
 
     def test_register_user_by_phone(self):
         url = reverse('register_user_by_phone')
-        data = {'phone_number': '9121002030'}
+        data = {'phone_number': '9121111111'}
 
         response = self.client.post(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(User.objects.count(), 2)
-        self.assertEqual(User.objects.last().phone_number, 9121002030)
+        self.assertEqual(User.objects.last().phone_number, 9121111111)
         self.assertEqual(Verification.objects.count(), 1)
 
     def test_reset_password(self):
