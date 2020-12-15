@@ -76,3 +76,18 @@ class AccountsTest(APITestCase):
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(User.objects.get().check_password('new_p@ssword'))
+
+    def test_phone_number(self):
+        url = reverse('set_phone_number')
+        data = {'phone_number': 9121111111}
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.access_token)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        verification = Verification.objects.get(user=self.user,
+                                                verify_type=Verification.VERIFY_TYPE_PHONE)
+        verify_url = reverse('verify_phone_number')
+        data = {'phone_number': 9121111111, 'verify_code': verification.verify_code}
+        response = self.client.post(verify_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(User.objects.get().phone_number, 9121111111)

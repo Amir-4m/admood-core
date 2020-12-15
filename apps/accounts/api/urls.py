@@ -24,6 +24,6 @@ urlpatterns = [
                                                  'patch': 'partial_update'}), name='user_profile'),
     path('has_profile/', UserProfileViewSet.as_view({'get': 'has_profile'})),
     path('change-pass/', ChangePasswordAPIView.as_view()),
-    path('phone-number/', SetPhoneNumberAPIView.as_view()),
-    path('phone-number/verify/', VerifyPhoneNumberAPIView.as_view()),
+    path('phone-number/', SetPhoneNumberAPIView.as_view(), name='set_phone_number'),
+    path('phone-number/verify/', VerifyPhoneNumberAPIView.as_view(), name='verify_phone_number'),
 ]
