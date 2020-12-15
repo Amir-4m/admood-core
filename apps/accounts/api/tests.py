@@ -77,7 +77,7 @@ class AccountsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(User.objects.get().check_password('new_p@ssword'))
 
-    def test_phone_number(self):
+    def test_set_phone_number(self):
         url = reverse('set_phone_number')
         data = {'phone_number': 9121111111}
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.access_token)
