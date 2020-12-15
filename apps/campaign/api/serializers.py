@@ -439,6 +439,6 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
 
 
 class EstimateActionsSerializer(serializers.Serializer):
-    publishers = serializers.ListField()
-    categories = serializers.ListField()
+    publishers = serializers.ListField(child=serializers.IntegerField())
+    categories = serializers.ListField(child=serializers.IntegerField())
     budget = serializers.IntegerField()
