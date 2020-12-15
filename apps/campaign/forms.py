@@ -1,63 +1,64 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django_admin_json_editor import JSONEditorWidget
+from django_json_widget.widgets import JSONEditorWidget
 
 from apps.campaign.models import CampaignContent, Campaign
 from apps.medium.consts import Medium
 from apps.medium.models import Publisher
 
-DATA_SCHEMA = {
-    'type': 'object',
-    'title': 'Data',
-    'properties': {
-        'view_type': {
-            'title': 'view type',
-            'type': 'string',
-            'enum': ['partial', 'total'],
-        },
-        'content': {
-            'title': 'Content',
-            'type': 'string',
-            'format': 'textarea',
-        },
-        'links': {
-            'title': 'links',
-            'type': 'array',
-            "items": {
-                "title": "link",
-                "type": "object",
-                "properties": {
-                    "link": {
-                        "title": "link",
-                        "type": "string",
-                    },
-                    "utmTerm":
-                        {
-                            "title": "utm_term",
-                            "type": ["string", "null"]
-                        }
-                }
-            }
-        },
-        'file': {
-            'title': 'file',
-            'type': 'integer',
-        },
-        'mother_channel':
-            {
-                'title': 'mother_channel',
-                'type': 'integer'
-            }
-    },
-}
 
+# DATA_SCHEMA = {
+#     'type': 'object',
+#     'title': 'Data',
+#     'properties': {
+#         'view_type': {
+#             'title': 'view type',
+#             'type': 'string',
+#             'enum': ['partial', 'total'],
+#         },
+#         'content': {
+#             'title': 'Content',
+#             'type': 'string',
+#             'format': 'textarea',
+#         },
+#         'links': {
+#             'title': 'links',
+#             'type': 'array',
+#             "items": {
+#                 "title": "link",
+#                 "type": "object",
+#                 "properties": {
+#                     "link": {
+#                         "title": "link",
+#                         "type": "string",
+#                     },
+#                     "utmTerm":
+#                         {
+#                             "title": "utm_term",
+#                             "type": ["string", "null"]
+#                         }
+#                 }
+#             }
+#         },
+#         'file': {
+#             'title': 'file',
+#             'type': 'integer',
+#         },
+#         'mother_channel':
+#             {
+#                 'title': 'mother_channel',
+#                 'type': 'integer'
+#             }
+#     },
+# }
+#
 
 class ContentAdminForm(forms.ModelForm):
     class Meta:
         model = CampaignContent
         fields = '__all__'
         widgets = {
-            'data': JSONEditorWidget(DATA_SCHEMA, collapsed=False),
+            'data': JSONEditorWidget,
         }
 
 

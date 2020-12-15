@@ -63,6 +63,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_admin_json_editor',
+    'django_json_widget'
 ]
 
 if DEVEL:
@@ -180,7 +181,7 @@ SIMPLE_JWT = {
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Tehran'
 USE_I18N = False
-USE_L10N = True
+USE_L10N = False
 USE_TZ = False
 USE_THOUSAND_SEPARATOR = True
 # Static files (CSS, JavaScript, Images)

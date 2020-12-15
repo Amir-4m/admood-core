@@ -1,6 +1,5 @@
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,8 +8,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
-    CampaignContentSerializer, CampaignDuplicateSerializer, CampaignApproveSerializer, EstimateActionsSerializer)
-from apps.campaign.models import Province, Campaign, CampaignContent
+    CampaignContentSerializer, CampaignDuplicateSerializer, CampaignApproveSerializer, EstimateActionsSerializer,
+    CampaignReferenceSerializer)
+from apps.campaign.models import Province, Campaign, CampaignContent, CampaignReference
 from apps.core.consts import CostModel
 from apps.core.views import BaseViewSet
 from apps.medium.models import Publisher, CostModelPrice
@@ -143,3 +143,19 @@ class ContentViewSet(BaseViewSet,
 
     def get_queryset(self):
         return self.queryset.filter(campaign__owner=self.request.user, campaign__id=self.kwargs['campaign_id'])
+
+
+class CampaignReferenceViewSet(viewsets.GenericViewSet):
+    queryset = CampaignReference.objects.all()
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CampaignReferenceSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(campaign__owner=self.request.user)
+
+    @action(detail=True, methods=['get'], url_path='report')
+    def report(self, request, *args, **kwargs):
+        obj = self.get_object()
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
