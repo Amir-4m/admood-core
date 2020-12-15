@@ -4,6 +4,7 @@ from django.db.models import Value, CharField
 from django.db.models.functions import Concat
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignReference
 from apps.core.consts import CostModel
@@ -408,10 +409,11 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='campaign.name')
     contents_detail = serializers.SerializerMethodField()
     publishers_detail = serializers.SerializerMethodField()
+    excel_export_url = serializers.SerializerMethodField()
 
     class Meta:
         model = CampaignReference
-        fields = ('id', 'title', 'date', 'start_time', 'contents_detail', 'publishers_detail')
+        fields = ('id', 'title', 'date', 'start_time', 'contents_detail', 'publishers_detail', 'excel_export_url')
 
     def get_contents_detail(self, obj):
         contents_detail = []
@@ -423,6 +425,10 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
                     continue
                 contents_detail.append({'content_title': cont.title, 'content_total_views': content['views']})
         return contents_detail
+
+    def get_excel_export_url(self, obj):
+        request = self.context['request']
+        return request.build_absolute_uri(reverse('export-excel', kwargs={'pk': obj.id}))
 
     def get_publishers_detail(self, obj):
         publishers_detail = []

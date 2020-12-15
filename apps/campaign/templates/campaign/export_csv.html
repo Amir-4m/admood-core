@@ -1,0 +1,5 @@
+"عنوان کانال ها","شناسه کانال ها","پست","بازدید","لینک"
+{% for detail in publishers_detail %}{% for post in detail.posts %}{% for publisher in detail.publishers %}{{ publisher.name }}{% if not forloop.last %}-{% endif %}{% endfor %},{% for publisher in detail.publishers %}{{ publisher.extra_data__tag }}{% if not forloop.last %}-{% endif %}{% endfor %},{{ post.title }},{{ post.views }},{{ post.screen_shot }}
+{% endfor %}{% endfor %}
+{#{% for detail in publishers_detail %}{% for publisher in detail.publishers %}{{ publisher.name }}-{{ publisher.extra_data__tag }}{% endfor %},{% for post in detail.posts %}{{ post.title }}-{{ post.views }}-{{ post.screen_shot }}{% if not forloop.last %},{% endif %}{% endfor %}#}
+{#{% endfor %}#}
