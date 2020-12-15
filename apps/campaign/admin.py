@@ -36,7 +36,7 @@ class CampaignAdmin(admin.ModelAdmin):
     change_form_template = 'campaign/change_form.html'
     inlines = [CampaignContentInline, TargetDeviceInline]
     autocomplete_fields = ["owner"]
-    search_fields = ['medium', 'owner__username']
+    search_fields = ['medium', 'owner__username', 'name', 'contents__title']
     list_filter = ['medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
