@@ -1,5 +1,7 @@
 import datetime
 
+from django.db.models import Value, CharField
+from django.db.models.functions import Concat
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -72,7 +74,11 @@ class CampaignSerializer(serializers.ModelSerializer):
         return extra_kwargs
 
     def get_campaign_references(self, obj):
-        return obj.campaignreference_set.values('id', 'date', 'start_time')
+        return obj.campaignreference_set.annotate(
+            display_text=Concat(
+                'date',
+                Value(' - '),
+                'start_time', output_field=CharField())).values('id', 'display_text')
 
     def validate_schedules(self, value):
         for idx, schedule in enumerate(value):

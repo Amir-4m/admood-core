@@ -154,7 +154,7 @@ class CampaignReferenceViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         return self.queryset.filter(campaign__owner=self.request.user)
 
-    @action(detail=True, methods=['get'], url_path='report', serializer_class=CampaignReferenceSerializer)
+    @action(detail=True, methods=['get'], url_path='report')
     def report(self, request, *args, **kwargs):
         obj = self.get_object()
         serializer = self.get_serializer(obj)
