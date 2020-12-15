@@ -16,7 +16,7 @@ urlpatterns = [
     path('register/phone/', RegisterUserByPhoneAPIView.as_view(), name='register_user_by_phone'),
     path('register/verify/', VerifyUserAPIView.as_view(), name='register_verify'),
     path('reset-pass/', PasswordResetAPIView.as_view(), name='reset_pass'),
-    path('reset-pass/confirm/', PasswordResetConfirmAPIView.as_view()),
+    path('reset-pass/confirm/', PasswordResetConfirmAPIView.as_view(), name='reset_pass_confirm'),
     path('set-pass/', SetPasswordAPIView.as_view(), name='set_pass'),
     path('profile/', UserProfileViewSet.as_view({'get': 'retrieve',
                                                  'post': 'create',

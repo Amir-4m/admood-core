@@ -1,8 +1,6 @@
-import uuid
-
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase, APITransactionTestCase
+from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import User
@@ -12,13 +10,14 @@ from apps.accounts.models import Verification
 class AccountsTest(APITestCase):
     def setUp(self):
         self.username = 'test_user'
-        self.user = User.objects.create_user(username='test_user',
-                                             email='test_user@example.com',
-                                             password='F3DkePaSs0d')
+        self.user = User.objects.create_user(
+            username='test_user',
+            email='test_user@example.com',
+            password='F3DkePaSs0d'
+        )
         self.user.is_active = True
         self.user.is_verified = True
         self.user.save()
-
         self.access_token = str(RefreshToken.for_user(user=self.user).access_token)
         super().setUp()
 
@@ -58,6 +57,16 @@ class AccountsTest(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        verification = Verification.objects.get()
+
+        url = reverse('reset_pass_confirm')
+        data = {'password': 'set_p@ssword', 'confirm_password': 'set_p@ssword'}
+
+        response = self.client.put(url + f'?rc={verification.verify_code}', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(Verification.objects.get().verified_time)
+        self.assertTrue(User.objects.get().check_password('set_p@ssword'))
+
     def test_set_pass(self):
         url = reverse('set_pass')
         data = {'password': 'new_p@ssword', 'confirm_password': 'new_p@ssword'}
@@ -66,4 +75,4 @@ class AccountsTest(APITestCase):
 
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(User.objects.get(username='test_user').check_password('new_p@ssword'))
+        self.assertTrue(User.objects.get().check_password('new_p@ssword'))
