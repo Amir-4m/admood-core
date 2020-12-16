@@ -409,7 +409,6 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='campaign.name')
     contents_detail = serializers.SerializerMethodField()
     publishers_detail = serializers.SerializerMethodField()
-    excel_export_url = serializers.SerializerMethodField()
 
     class Meta:
         model = CampaignReference
@@ -425,10 +424,6 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
                     continue
                 contents_detail.append({'content_title': cont.title, 'content_total_views': content['views']})
         return contents_detail
-
-    def get_excel_export_url(self, obj):
-        request = self.context['request']
-        return request.build_absolute_uri(reverse('export-excel', kwargs={'pk': obj.id}))
 
     def get_publishers_detail(self, obj):
         publishers_detail = []
