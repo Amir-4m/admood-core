@@ -25,25 +25,3 @@ def test_campaign(request, pk):
     else:
         messages.warning(request, _("Currently only Telegram medium can be tested."))
     return HttpResponseRedirect(reverse("admin:campaign_campaign_change", args=(pk,)))
-
-
-def export_campaign_report_csv(request, pk):
-    try:
-        campaign_ref = CampaignReference.objects.get(pk=pk)
-    except CampaignReference.DoesNotExist:
-        raise Http404('not found!')
-    publishers_detail = []
-    if campaign_ref.campaign.medium == Medium.TELEGRAM:
-        for content in campaign_ref.contents:
-            for detail in content['detail']:
-                publishers_detail.append({
-                    'publishers': Publisher.objects.filter(ref_id__in=detail['channel_ids']).values('name',
-                                                                                                    'extra_data__tag'),
-                    'posts': detail['posts']
-
-                })
-    response = render(request, 'campaign/export_csv.html', {
-        'publishers_detail': publishers_detail,
-    }, content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = f'attachment; filename="{campaign_ref.date}-{campaign_ref.start_time}.xls"'
-    return response

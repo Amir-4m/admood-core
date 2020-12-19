@@ -26,7 +26,6 @@ urlpatterns = [
     path('admin0e27e/', admin.site.urls, name='admin'),
     path('api/v1/', include('apps.urls_api')),
     path('payment/', include('apps.payments.urls')),
-    path('campaign/', include('apps.campaign.urls'))
 ]
 
 if settings.DEBUG:
