@@ -24,17 +24,18 @@ class TargetDeviceInline(admin.TabularInline):
     extra = 1
 
 
-class CampaignContentInline(admin.TabularInline):
-    model = CampaignContent
-    extra = 0
-
+# class CampaignContentInline(admin.TabularInline):
+#     model = CampaignContent
+#     show_change_link = True
+#     extra = 0
+#
 
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
     form = CampaignAdminForm
     list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
-    inlines = [CampaignContentInline, TargetDeviceInline]
+    # inlines = [CampaignContentInline, TargetDeviceInline]
     autocomplete_fields = ["owner"]
     search_fields = ['medium', 'owner__username', 'name', 'contents__title']
     list_filter = ['medium', 'status', 'is_enable']
