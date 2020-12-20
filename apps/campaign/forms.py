@@ -1,8 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.urls import reverse
-from django_json_widget.widgets import JSONEditorWidget
-from django.utils.safestring import mark_safe
+from django_admin_json_editor import JSONEditorWidget
+
 
 from apps.campaign.models import CampaignContent, Campaign
 from apps.medium.consts import Medium
@@ -61,7 +60,7 @@ class ContentAdminForm(forms.ModelForm):
         model = CampaignContent
         fields = '__all__'
         widgets = {
-            'data': JSONEditorWidget,
+            'data': JSONEditorWidget(schema={}),
         }
 
 
