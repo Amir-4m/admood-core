@@ -56,25 +56,6 @@ from apps.medium.models import Publisher
 #
 
 
-class ContentLinkWidget(forms.Widget):
-    def __init__(self, obj, attrs=None):
-        self.object = obj
-        super(ContentLinkWidget, self).__init__(attrs)
-
-    def render(self, name, value, attrs=None, renderer=None):
-        if self.object.pk:
-            content_links = []
-            for content in self.object.contents.filter(is_hidden=False):
-                content_links.append(
-                    f'<a target="_blank" href="{reverse(f"admin:{content._meta.app_label}_{content._meta.model_name}_change", kwargs={"object_id": content.id})}">{content.title}</a>',
-                )
-            return mark_safe(
-                ', '.join(content_links)
-            )
-        else:
-            return mark_safe(u'')
-
-
 class ContentAdminForm(forms.ModelForm):
     class Meta:
         model = CampaignContent
@@ -87,7 +68,9 @@ class ContentAdminForm(forms.ModelForm):
 class CampaignAdminForm(forms.ModelForm):
     daily_budget = forms.IntegerField(localize=True)
     total_budget = forms.IntegerField(localize=True)
-    contents = forms.CharField(required=False)
+
+    class Media:
+        js = ('campaign/js/numeral.min.js', 'campaign/js/script.js')
 
     class Meta:
         model = Campaign
@@ -101,8 +84,6 @@ class CampaignAdminForm(forms.ModelForm):
         )
         if self.instance.medium:
             final_publishers = final_publishers.filter(medium=self.instance.medium)
-        if self.instance:
-            self.fields['contents'].widget = ContentLinkWidget(self.instance)
         self.fields['final_publishers'].queryset = final_publishers
 
     def clean(self):
