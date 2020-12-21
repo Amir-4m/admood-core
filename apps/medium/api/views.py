@@ -3,10 +3,12 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.throttling import AnonRateThrottle
 
 from apps.medium.api.serializers import MediumSerializer, PublisherSerializer, CategorySerializer
 from apps.medium.models import Publisher, Category
 from ..consts import Medium
+from ..tasks import update_telegram_publishers_task
 
 
 class MediumViewSet(viewsets.ViewSet):
@@ -20,7 +22,6 @@ class MediumViewSet(viewsets.ViewSet):
 
 
 class PublisherViewSet(mixins.ListModelMixin,
-                       mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -55,3 +56,11 @@ class CategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         if medium is not None:
             queryset = queryset.filter(medium=medium)
         return queryset
+
+
+class UpdatePublisherViewSet(viewsets.ViewSet):
+    throttle_classes = (AnonRateThrottle,)
+
+    def list(self, request, *args, **kwargs):
+        update_telegram_publishers_task.delay()
+        return Response()
