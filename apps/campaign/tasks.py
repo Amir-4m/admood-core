@@ -31,7 +31,7 @@ def create_telegram_campaign_task():
     for campaign in campaigns.all():
         if campaign.total_cost >= campaign.total_budget or (
                 campaign.end_date is not None and campaign.end_date > now().date()):
-            with transaction.atomic:
+            with transaction.atomic():
                 # create a deduct transaction
                 if campaign.total_cost > campaign.total_budget:
                     Transaction.objects.create(
