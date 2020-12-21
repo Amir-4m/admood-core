@@ -412,7 +412,7 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CampaignReference
-        fields = ('id', 'title', 'date', 'start_time', 'contents_detail', 'publishers_detail', 'excel_export_url')
+        fields = ('id', 'title', 'date', 'start_time', 'contents_detail', 'publishers_detail')
 
     def get_contents_detail(self, obj):
         contents_detail = []

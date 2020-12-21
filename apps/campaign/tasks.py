@@ -84,7 +84,7 @@ def update_telegram_info_task():
         ref_id__isnull=False,
         date=now().date(),
         end_time__lte=now().time(),
-        report_time__isnull=True,
+        updated_time__isnull=True,
     )
     for campaign_ref in campaign_refs:
 
