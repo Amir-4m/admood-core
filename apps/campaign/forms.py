@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django_json_widget.widgets import JSONEditorWidget
+from django_admin_json_editor import JSONEditorWidget
+
 
 from apps.campaign.models import CampaignContent, Campaign
 from apps.medium.consts import Medium
@@ -53,18 +54,22 @@ from apps.medium.models import Publisher
 # }
 #
 
+
 class ContentAdminForm(forms.ModelForm):
     class Meta:
         model = CampaignContent
         fields = '__all__'
         widgets = {
-            'data': JSONEditorWidget,
+            'data': JSONEditorWidget(schema={}),
         }
 
 
 class CampaignAdminForm(forms.ModelForm):
     daily_budget = forms.IntegerField(localize=True)
     total_budget = forms.IntegerField(localize=True)
+
+    class Media:
+        js = ('campaign/js/numeral.min.js', 'campaign/js/script.js')
 
     class Meta:
         model = Campaign
@@ -78,7 +83,6 @@ class CampaignAdminForm(forms.ModelForm):
         )
         if self.instance.medium:
             final_publishers = final_publishers.filter(medium=self.instance.medium)
-
         self.fields['final_publishers'].queryset = final_publishers
 
     def clean(self):

@@ -1,12 +1,13 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
-from apps.campaign.models import Campaign
+from apps.campaign.models import Campaign, CampaignReference
 from apps.campaign.telegram.telegram import create_telegram_test_campaign
 from apps.medium.consts import Medium
+from apps.medium.models import Publisher
 
 
 def test_campaign(request, pk):

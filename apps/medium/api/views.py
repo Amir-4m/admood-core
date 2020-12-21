@@ -19,7 +19,9 @@ class MediumViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class PublisherViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class PublisherViewSet(mixins.ListModelMixin,
+                       mixins.CreateModelMixin,
+                       viewsets.GenericViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = PublisherSerializer

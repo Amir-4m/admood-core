@@ -4,6 +4,7 @@ from django.db.models import Value, CharField
 from django.db.models.functions import Concat
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignReference
 from apps.core.consts import CostModel
@@ -411,7 +412,7 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CampaignReference
-        fields = ('id', 'title', 'date', 'start_time', 'contents_detail', 'publishers_detail')
+        fields = ('id', 'title', 'date', 'start_time', 'contents_detail', 'publishers_detail', 'excel_export_url')
 
     def get_contents_detail(self, obj):
         contents_detail = []

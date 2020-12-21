@@ -26,7 +26,10 @@ class TargetDeviceInline(admin.TabularInline):
 
 class CampaignContentInline(admin.TabularInline):
     model = CampaignContent
-    extra = 0
+    show_change_link = True
+    fields = ('title', 'cost_model_price', 'cost_model', 'is_hidden')
+    readonly_fields = ('title', 'cost_model_price', 'cost_model', 'is_hidden')
+    can_delete = False
 
 
 @admin.register(Campaign)
@@ -36,7 +39,7 @@ class CampaignAdmin(admin.ModelAdmin):
     change_form_template = 'campaign/change_form.html'
     inlines = [CampaignContentInline, TargetDeviceInline]
     autocomplete_fields = ["owner"]
-    search_fields = ['medium', 'owner__username']
+    search_fields = ['medium', 'owner__username', 'name', 'contents__title']
     list_filter = ['medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
