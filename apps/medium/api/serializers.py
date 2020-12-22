@@ -10,14 +10,15 @@ class MediumSerializer(serializers.Serializer):
         return data
 
 
-class PublisherSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Publisher
-        fields = '__all__'
-        depth = 1
-
-
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'display_text']
+
+
+class PublisherSerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True)
+
+    class Meta:
+        model = Publisher
+        fields = '__all__'
