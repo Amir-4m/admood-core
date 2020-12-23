@@ -7,26 +7,22 @@ from apps.core.utils.get_file import get_file
 from services.telegram import create_campaign, create_content, create_file, enable_campaign, test_campaign
 
 
-def create_telegram_campaign(campaign, date, start_time, end_time):
+def create_telegram_campaign(campaign, lower_datetime, upper_datetime):
     if campaign.error_count >= 5:
         return
     try:
         campaign_ref, created = CampaignReference.objects.get_or_create(
             campaign=campaign,
-            date=date,
+            schedule_range=(lower_datetime, upper_datetime),
             max_view=campaign.remaining_views,
-            defaults={
-                'start_time': start_time,
-                'end_time': end_time
-            }
         )
         if campaign_ref.ref_id:
             return
         # create telegram service
         ref_id = create_campaign(
             campaign,
-            datetime.combine(date, start_time).__str__(),
-            datetime.combine(date, end_time).__str__(),
+            lower_datetime,
+            upper_datetime,
             "approved",
         )
 

@@ -1,10 +1,8 @@
 import datetime
 
-from django.db.models import Value, CharField
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, Lower
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.reverse import reverse
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignReference
 from apps.core.consts import CostModel
@@ -76,10 +74,8 @@ class CampaignSerializer(serializers.ModelSerializer):
 
     def get_campaign_references(self, obj):
         return obj.campaignreference_set.annotate(
-            display_text=Concat(
-                'date',
-                Value(' - '),
-                'start_time', output_field=CharField())).values('id', 'display_text')
+            display_text=Lower('schedule_range')
+        ).values('id', 'display_text')
 
     def validate_schedules(self, value):
         for idx, schedule in enumerate(value):
@@ -409,10 +405,11 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='campaign.name')
     contents_detail = serializers.SerializerMethodField()
     publishers_detail = serializers.SerializerMethodField()
+    display_text = serializers.SerializerMethodField()
 
     class Meta:
         model = CampaignReference
-        fields = ('id', 'title', 'date', 'start_time', 'contents_detail', 'publishers_detail')
+        fields = ('id', 'title', 'display_text', 'contents_detail', 'publishers_detail')
 
     def get_contents_detail(self, obj):
         contents_detail = []
@@ -424,6 +421,9 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
                     continue
                 contents_detail.append({'content_title': cont.title, 'content_total_views': content['views']})
         return contents_detail
+
+    def get_display_text(self, obj):
+        return f"{obj.schedule_range.lower.time()} - {obj.schedule_range.lower.date()}"
 
     def get_publishers_detail(self, obj):
         publishers_detail = []
