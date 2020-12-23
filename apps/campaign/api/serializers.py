@@ -413,6 +413,8 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
 
     def get_contents_detail(self, obj):
         contents_detail = []
+        if self.context['view'].action != 'report':
+            return contents_detail
         if obj.campaign.medium == Medium.TELEGRAM:
             for content in obj.contents:
                 try:
@@ -423,9 +425,13 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
         return contents_detail
 
     def get_display_text(self, obj):
-        return f"{obj.schedule_range.lower.time()} - {obj.schedule_range.lower.date()}"
+        if obj.schedule_range:
+            return f"{obj.schedule_range.lower.time()} - {obj.schedule_range.lower.date()}"
+        return f"{obj.campaign.name} - {obj.id}"
 
     def get_publishers_detail(self, obj):
+        if self.context['view'].action != 'report':
+            return []
         publishers_detail = []
         if obj.campaign.medium == Medium.TELEGRAM:
             for content in obj.contents:

@@ -127,6 +127,13 @@ class CampaignViewSet(BaseViewSet,
 
         return Response(data=data)
 
+    @action(detail=True, methods=['get'], serializer_class=CampaignReferenceSerializer)
+    def references(self, request, *args, **kwargs):
+        instance = self.get_object()
+        campaign_references = instance.campaignreference_set.all()
+        serializer = self.get_serializer(campaign_references, many=True)
+        return Response(serializer.data)
+
 
 class ContentViewSet(BaseViewSet,
                      mixins.ListModelMixin,

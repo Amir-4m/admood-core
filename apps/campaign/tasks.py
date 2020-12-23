@@ -21,10 +21,12 @@ from services.telegram import (
 def create_telegram_campaign_task():
     # filter approved and enable telegram campaigns
     campaigns = Campaign.objects.filter(
+        Q(end_date__gte=now().date()) | Q(end_date__isnull=True),
         is_enable=True,
         status=Campaign.STATUS_APPROVED,
         medium=Medium.TELEGRAM,
         start_date__lte=now().date(),
+
     )
 
     # disable expired and over budget campaigns
@@ -49,7 +51,7 @@ def create_telegram_campaign_task():
             continue
 
     # create scheduled campaigns
-    schedules = CampaignSchedule.ordering.filter(
+    schedules = CampaignSchedule.objects.filter(
         campaign_id__in=campaigns.values_list('id', flat=True),
         week_day=now().date().weekday(),
         start_time__lte=now().time(),
@@ -74,9 +76,9 @@ def create_telegram_campaign_task():
             num_ref=Count('campaignreference')
         ).order_by('num_ref')
         for campaign in campaigns.all()[:ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
-            lower_range = datetime.now()
-            upper_range = lower_range + timedelta(hours=3)
-            telegram.create_telegram_campaign(campaign, lower_range, upper_range)
+            start_datetime = datetime.now()
+            end_datetime = start_datetime + timedelta(hours=3)
+            telegram.create_telegram_campaign(campaign, start_datetime, end_datetime)
 
 
 # update content view in Campaign Reference model and add telegram file hashes
@@ -125,7 +127,8 @@ def create_instagram_campaign():
     today = now().date()
     campaigns = Campaign.objects.filter(
         Q(medium=Medium.INSTAGRAM_POST) | Q(medium=Medium.INSTAGRAM_STORY),
-        start_date__lte=now().date(),
+        Q(end_date__gte=today) | Q(end_date__isnull=True),
+        start_date__lte=today,
         is_enable=True,
         status=Campaign.STATUS_APPROVED,
 

@@ -35,11 +35,11 @@ def create_campaign(campaign, start_time, end_time, status):
         publishers=publishers,
         max_view=campaign.remaining_views,
         agents=campaign.extra_data.get('agents', [ADBOT_AGENTS]) if campaign.extra_data else [ADBOT_AGENTS],
-        start_datetime=start_time,
-        end_datetime=end_time,
+        start_datetime=start_time.__str__(),
+        end_datetime=end_time.__str__(),
     )
     try:
-        r = requests.post(url=CAMPAIGN_URL, headers=JSON_HEADERS, data=json.dumps(data))
+        r = requests.post(url=CAMPAIGN_URL, headers=JSON_HEADERS, json=data)
         r.raise_for_status()
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 400:
