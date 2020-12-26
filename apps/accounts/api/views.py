@@ -85,9 +85,11 @@ class PasswordResetConfirmAPIView(GenericAPIView):
             verify_code=self.request.query_params.get('rc'),
             verify_type=Verification.VERIFY_TYPE_EMAIL
         )
-        if verification:
-            return verification
-        raise NotFound
+
+        if not verification:
+            raise NotFound
+
+        return verification
 
     def get(self, request):
         if self.get_verification():
@@ -104,17 +106,20 @@ class PasswordResetConfirmAPIView(GenericAPIView):
         return Response({'email': user.email})
 
 
-class SetPasswordAPIView(GenericAPIView):
+class SetPasswordAPIView(UpdateModelMixin, GenericAPIView):
     serializer_class = SetPasswordSerializer
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
 
-    def put(self, request):
-        serializer = self.serializer_class(instance=request.user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response()
+    def get_object(self):
+        return self.request.user
+
+    # def put(self, request):
+    #     serializer = self.serializer_class(instance=request.user, data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response()
 
 
 class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
@@ -183,6 +188,10 @@ class VerifyPhoneNumberAPIView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = request.user
+
+        # if user.phone_number is not None:
+        #     raise
+
         phone_number = serializer.validated_data['phone_number']
         verify_code = serializer.validated_data['verify_code']
         verification = Verification.verify_phone_number(
@@ -190,8 +199,13 @@ class VerifyPhoneNumberAPIView(GenericAPIView):
             phone_number=phone_number,
             verify_code=verify_code,
         )
-        if verification:
-            user.phone_number = phone_number
-            user.save()
-            return Response({'phone_number': phone_number})
-        raise NotFound
+
+        if not verification:
+            raise NotFound
+
+        # if User.objects.filter(phone_number=phone_number).exists():
+        #     raise
+
+        user.phone_number = phone_number
+        user.save()
+        return Response({'phone_number': phone_number})

@@ -242,9 +242,9 @@ class ChangePasswordSerializer(serializers.Serializer):
         fields = ('old_password', 'password', 'confirm_password')
 
     def validate_old_password(self, old_password):
-        if self.instance.check_password(old_password):
-            return old_password
-        raise serializers.ValidationError(_('the old password you have entered is incorrect.'))
+        if not self.instance.check_password(old_password):
+            raise serializers.ValidationError(_('the old password you have entered is incorrect.'))
+        return old_password
 
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
