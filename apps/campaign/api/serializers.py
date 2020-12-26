@@ -1,6 +1,7 @@
 import datetime
 
-from django.db.models.functions import Concat, Lower
+from django.db.models.functions import Lower
+from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -33,7 +34,7 @@ class CampaignScheduleSerializer(serializers.ModelSerializer):
         attrs['end_time'] = attrs.get('end_time', datetime.time.max)
         if attrs['start_time'] >= attrs['end_time']:
             raise serializers.ValidationError(
-                {'end_time': 'end_time should be greater than start_time'},
+                {'end_time': _('end_time should be greater than start_time')},
             )
         return attrs
 
@@ -88,7 +89,7 @@ class CampaignSerializer(serializers.ModelSerializer):
                             (start_time > i.get('end_time') and end_time > i.get('end_time'))
                     ):
                         raise serializers.ValidationError(
-                            {'schedules': 'invalid schedule set.'})
+                            {'schedules': _('invalid schedule set.')})
 
         return value
 
@@ -101,7 +102,7 @@ class CampaignSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if value > Transaction.balance(user):
             raise serializers.ValidationError(
-                {'total_budget': 'Ensure total budget is less than or equal to your wallet balance.'})
+                {'total_budget': _('Ensure total budget is less than or equal to your wallet balance.')})
         return value
 
     def validate(self, attrs):
@@ -111,7 +112,7 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         if self.instance:
             if self.instance.status != Campaign.STATUS_DRAFT:
-                raise serializers.ValidationError({"non_field_errors": ["only draft campaigns are editable."]})
+                raise serializers.ValidationError({"non_field_errors": [_("only draft campaigns are editable.")]})
             medium = self.instance.medium
             publishers = attrs.get('publishers', self.instance.publishers.all())
             categories = attrs.get('categories', self.instance.categories.all())
@@ -121,15 +122,15 @@ class CampaignSerializer(serializers.ModelSerializer):
             categories = attrs.get('categories', [])
 
         if len(publishers) == 0 and len(categories) == 0:
-            raise serializers.ValidationError("publishers and categories both can not be empty.")
+            raise serializers.ValidationError(_("publishers and categories both can not be empty."))
 
         for category in categories:
             if category.medium != medium:
-                raise serializers.ValidationError("campaign's medium and category's medium must be the same.")
+                raise serializers.ValidationError(_("campaign's medium and category's medium must be the same."))
 
         for publisher in publishers:
             if publisher.medium != medium:
-                raise serializers.ValidationError("campaign's medium and publisher's medium must be the same.")
+                raise serializers.ValidationError(_("campaign's medium and publisher's medium must be the same."))
 
         return attrs
 
@@ -215,10 +216,10 @@ class CampaignApproveSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if self.instance.status != Campaign.STATUS_DRAFT:
             raise serializers.ValidationError(
-                {'status': 'Ensure this campaign is a draft.'})
+                {'status': _('Ensure this campaign is a draft.')})
         if self.instance.total_budget > Transaction.balance(self.instance.owner):
             raise serializers.ValidationError(
-                {'total_budget': 'Ensure wallet balance more than total budget.'})
+                {'total_budget': _('Ensure wallet balance more than total budget.')})
         return attrs
 
     def update(self, instance, validated_data):
@@ -239,15 +240,15 @@ class CampaignRepeatSerializer(serializers.ModelSerializer):
         publishers = attrs.get('publishers', [])
         categories = attrs.get('categories', [])
         if len(publishers) == 0 and len(categories) == 0:
-            raise serializers.ValidationError("publishers and categories both can not be empty.")
+            raise serializers.ValidationError(_("publishers and categories both can not be empty."))
 
         for category in categories:
             if category.medium != medium:
-                raise serializers.ValidationError("campaign's medium and category's medium must be the same.")
+                raise serializers.ValidationError(_("campaign's medium and category's medium must be the same."))
 
         for publisher in publishers:
             if publisher.medium != medium:
-                raise serializers.ValidationError("campaign's medium and publisher's medium must be the same.")
+                raise serializers.ValidationError(_("campaign's medium and publisher's medium must be the same."))
 
 
 class CampaignDuplicateSerializer(serializers.ModelSerializer):
@@ -269,7 +270,7 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
                             (start_time > i.get('end_time') and end_time > i.get('end_time'))
                     ):
                         raise serializers.ValidationError(
-                            {'schedules': 'invalid schedule set.'})
+                            {'schedules': _('invalid schedule set.')})
 
         return value
 
@@ -281,7 +282,7 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if self.instance.status not in [Campaign.STATUS_APPROVED, Campaign.STATUS_DRAFT]:
             raise serializers.ValidationError({
-                "non_field_errors": ["draft and approved campaigns are just duplicable."]})
+                "non_field_errors": [_("draft and approved campaigns are just duplicable.")]})
         return attrs
 
     def update(self, instance, validated_data):
@@ -350,31 +351,31 @@ class CampaignContentSerializer(serializers.ModelSerializer):
             attrs.update({'campaign': campaign})
 
         except Campaign.DoesNotExist:
-            raise serializers.ValidationError({"campaign": "campaign with this id does not exist!"})
+            raise serializers.ValidationError({"campaign": _("campaign with this id does not exist!")})
 
         if self.instance and self.instance.campaign.status == Campaign.STATUS_APPROVED:
-            raise serializers.ValidationError({"non_field_errors": ["approved campaigns are not editable."]})
+            raise serializers.ValidationError({"non_field_errors": [_("approved campaigns are not editable.")]})
 
         # validating instagram medium type campaign contents
         if campaign.medium in [Medium.INSTAGRAM_STORY, Medium.INSTAGRAM_POST]:
             if not self.instance and campaign.contents.all().count() > 0:
-                raise serializers.ValidationError({"content": "instagram campaigns can only have 1 content!"})
+                raise serializers.ValidationError({"content": _("instagram campaigns can only have 1 content!")})
 
             if attrs['cost_model'] not in [CostModel.CPR, CostModel.CPI]:
-                raise serializers.ValidationError({"cost_model": ["invalid value for cost model"]})
+                raise serializers.ValidationError({"cost_model": [_("invalid value for cost model")]})
 
             if is_igtv and files is not None:
                 file = File.objects.filter(pk=files[0]).first()
 
                 if file is not None and file_type(file.__str__()) != 'video':
-                    raise serializers.ValidationError({"file": "file format is not valid!"})
+                    raise serializers.ValidationError({"file": _("file format is not valid!")})
 
                 if len(files) > 1:
-                    raise serializers.ValidationError({"file": "igtv can only have 1 file!"})
+                    raise serializers.ValidationError({"file": _("igtv can only have 1 file!")})
 
             elif not is_igtv and files:
                 if len(files) > 10:
-                    raise serializers.ValidationError({"campaign": "album posts can not have more 10 files!"})
+                    raise serializers.ValidationError({"campaign": _("album posts can not have more 10 files!")})
         return attrs
 
     def get_file_url(self, obj):
