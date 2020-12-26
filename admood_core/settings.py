@@ -74,6 +74,7 @@ if DEVEL:
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -181,7 +182,7 @@ SIMPLE_JWT = {
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = config("LANGUAGE_CODE", default="en-us")
 TIME_ZONE = 'Asia/Tehran'
 USE_I18N = False
 USE_L10N = False
@@ -217,6 +218,9 @@ MEDIA_URL = '/media/'
 #     )
 
 LOG_DIR = BASE_DIR / 'logs'
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

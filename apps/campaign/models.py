@@ -1,6 +1,6 @@
 import datetime
 
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, DateTimeRangeField
 from django.db import models
 from django.db.models import Max
 from django.db.models.functions import Coalesce
@@ -130,9 +130,10 @@ class CampaignReference(models.Model):
     extra_data = JSONField(default=json_default)
     contents = JSONField(default=list)
     max_view = models.IntegerField()
-    date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    date = models.DateField(null=True, blank=True)
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    schedule_range = DateTimeRangeField(null=True, blank=True)
     updated_time = models.DateTimeField(null=True, blank=True)
 
 

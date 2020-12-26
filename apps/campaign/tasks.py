@@ -7,7 +7,7 @@ from django.utils.timezone import now
 
 from apps.campaign.telegram import telegram
 from admood_core.settings import ADBOT_MAX_CONCURRENT_CAMPAIGN
-from apps.campaign.models import Campaign, CampaignReference, CampaignContent
+from apps.campaign.models import Campaign, CampaignReference, CampaignContent, CampaignSchedule
 from apps.core.utils.get_file import get_file
 from apps.medium.consts import Medium
 from apps.payments.models import Transaction
@@ -21,10 +21,12 @@ from services.telegram import (
 def create_telegram_campaign_task():
     # filter approved and enable telegram campaigns
     campaigns = Campaign.objects.filter(
+        Q(end_date__gte=now().date()) | Q(end_date__isnull=True),
         is_enable=True,
         status=Campaign.STATUS_APPROVED,
         medium=Medium.TELEGRAM,
         start_date__lte=now().date(),
+
     )
 
     # disable expired and over budget campaigns
@@ -49,19 +51,22 @@ def create_telegram_campaign_task():
             continue
 
     # create scheduled campaigns
-    for campaign in campaigns.all():
-        schedules = campaign.schedules.filter(
-            week_day=now().date().weekday(),
-            start_time__lte=now().time(),
-            end_time__gt=now().time(),
-        )
-        for schedule in schedules.all():
-            telegram.create_telegram_campaign(campaign, now().date(), schedule.start_time, schedule.end_time)
+    schedules = CampaignSchedule.objects.filter(
+        campaign_id__in=campaigns.values_list('id', flat=True),
+        week_day=now().date().weekday(),
+        start_time__lte=now().time(),
+        end_time__gt=now().time(),
+    )
+
+    for schedule in schedules.all():
+        schedule_lower_range = datetime.now().replace(hour=schedule.start_time.hour, minute=schedule.start_time.minute)
+        schedule_upper_range = datetime.now().replace(hour=schedule.end_time.hour, minute=schedule.end_time.minute)
+        telegram.create_telegram_campaign(schedule.campaign, schedule_lower_range, schedule_upper_range)
 
     # create non scheduled campaigns if possible
     concurrent_campaign_count = CampaignReference.objects.filter(
         ref_id__isnull=False,
-        date=now().date(),
+        schedule_range__startswith__date=now().date(),
         updated_time__isnull=True
     ).count()
     if concurrent_campaign_count < ADBOT_MAX_CONCURRENT_CAMPAIGN:
@@ -71,9 +76,9 @@ def create_telegram_campaign_task():
             num_ref=Count('campaignreference')
         ).order_by('num_ref')
         for campaign in campaigns.all()[:ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
-            start_time = now().time()
-            end_time = (now() + timedelta(hours=3)).time()
-            telegram.create_telegram_campaign(campaign, now().date(), start_time, end_time)
+            start_datetime = datetime.now()
+            end_datetime = start_datetime + timedelta(hours=3)
+            telegram.create_telegram_campaign(campaign, start_datetime, end_datetime)
 
 
 # update content view in Campaign Reference model and add telegram file hashes
@@ -82,8 +87,8 @@ def update_telegram_info_task():
     # filter appropriate campaigns to save gotten views
     campaign_refs = CampaignReference.objects.filter(
         ref_id__isnull=False,
-        date=now().date(),
-        end_time__lte=now().time(),
+        schedule_range__startswith__date=now().date(),
+        schedule_range__endswith__time__lte=now().time(),
         updated_time__isnull=True,
     )
     for campaign_ref in campaign_refs:
@@ -116,15 +121,17 @@ def update_telegram_info_task():
                             break
 
 
+# TODO: FIX IMPLEMENTATION
 @shared_task
 def create_instagram_campaign():
     today = now().date()
     campaigns = Campaign.objects.filter(
-        Q(is_enable=True),
-        Q(status=Campaign.STATUS_APPROVED),
         Q(medium=Medium.INSTAGRAM_POST) | Q(medium=Medium.INSTAGRAM_STORY),
-        Q(start_date__lte=today),
         Q(end_date__gte=today) | Q(end_date__isnull=True),
+        start_date__lte=today,
+        is_enable=True,
+        status=Campaign.STATUS_APPROVED,
+
     )
     # first try to create scheduled campaigns
     scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
