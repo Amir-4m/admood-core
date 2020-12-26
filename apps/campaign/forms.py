@@ -2,54 +2,57 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django_admin_json_editor import JSONEditorWidget
 
+
 from apps.campaign.models import CampaignContent, Campaign
 from apps.medium.consts import Medium
 from apps.medium.models import Publisher
 
-DATA_SCHEMA = {
-    'type': 'object',
-    'title': 'Data',
-    'properties': {
-        'view_type': {
-            'title': 'view type',
-            'type': 'string',
-            'enum': ['partial', 'total'],
-        },
-        'content': {
-            'title': 'Content',
-            'type': 'string',
-            'format': 'textarea',
-        },
-        'links': {
-            'title': 'links',
-            'type': 'array',
-            "items": {
-                "title": "link",
-                "type": "object",
-                "properties": {
-                    "link": {
-                        "title": "link",
-                        "type": "string",
-                    },
-                    "utmTerm":
-                        {
-                            "title": "utm_term",
-                            "type": ["string", "null"]
-                        }
-                }
-            }
-        },
-        'file': {
-            'title': 'file',
-            'type': 'integer',
-        },
-        'mother_channel':
-            {
-                'title': 'mother_channel',
-                'type': 'integer'
-            }
-    },
-}
+
+# DATA_SCHEMA = {
+#     'type': 'object',
+#     'title': 'Data',
+#     'properties': {
+#         'view_type': {
+#             'title': 'view type',
+#             'type': 'string',
+#             'enum': ['partial', 'total'],
+#         },
+#         'content': {
+#             'title': 'Content',
+#             'type': 'string',
+#             'format': 'textarea',
+#         },
+#         'links': {
+#             'title': 'links',
+#             'type': 'array',
+#             "items": {
+#                 "title": "link",
+#                 "type": "object",
+#                 "properties": {
+#                     "link": {
+#                         "title": "link",
+#                         "type": "string",
+#                     },
+#                     "utmTerm":
+#                         {
+#                             "title": "utm_term",
+#                             "type": ["string", "null"]
+#                         }
+#                 }
+#             }
+#         },
+#         'file': {
+#             'title': 'file',
+#             'type': 'integer',
+#         },
+#         'mother_channel':
+#             {
+#                 'title': 'mother_channel',
+#                 'type': 'integer'
+#             }
+#     },
+# }
+#
 
 
 class ContentAdminForm(forms.ModelForm):
@@ -57,13 +60,16 @@ class ContentAdminForm(forms.ModelForm):
         model = CampaignContent
         fields = '__all__'
         widgets = {
-            'data': JSONEditorWidget(DATA_SCHEMA, collapsed=False),
+            'data': JSONEditorWidget(schema={}),
         }
 
 
 class CampaignAdminForm(forms.ModelForm):
     daily_budget = forms.IntegerField(localize=True)
     total_budget = forms.IntegerField(localize=True)
+
+    class Media:
+        js = ('campaign/js/numeral.min.js', 'campaign/js/script.js')
 
     class Meta:
         model = Campaign
@@ -77,7 +83,6 @@ class CampaignAdminForm(forms.ModelForm):
         )
         if self.instance.medium:
             final_publishers = final_publishers.filter(medium=self.instance.medium)
-
         self.fields['final_publishers'].queryset = final_publishers
 
     def clean(self):

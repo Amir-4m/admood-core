@@ -25,7 +25,7 @@ urlpatterns = [
     path('docs/', include_docs_urls(title='Admood API document')),
     path('admin0e27e/', admin.site.urls, name='admin'),
     path('api/v1/', include('apps.urls_api')),
-    path('payment/', include('apps.payments.urls'))
+    path('payment/', include('apps.payments.urls')),
 ]
 
 if settings.DEBUG:
