@@ -43,7 +43,7 @@ class CampaignAdmin(admin.ModelAdmin):
     list_filter = ['medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
-    readonly_fields = ('name', 'owner', 'locations', 'description',
+    readonly_fields = ('owner', 'locations', 'description',
                        'start_date', 'end_date', 'publishers', 'categories',
                        'utm_campaign', 'utm_content', 'medium', 'utm_medium')
 
@@ -64,6 +64,7 @@ class CampaignContentAdmin(admin.ModelAdmin):
     list_display = ("campaign", "title", "data")
     list_filter = ("campaign__name", "campaign__categories")
     search_fields = ("campaign__name", "title",)
+    ordering = ['-id']
     form = ContentAdminForm
 
 
