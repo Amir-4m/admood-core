@@ -25,13 +25,17 @@ class PublisherAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['title', 'medium', 'display_text', 'ref_id']
+    list_display = ['title', 'medium', 'display_text', 'ref_id', 'created_time', 'updated_time']
     search_fields = ['title']
     list_filter = ('medium',)
 
 
 @admin.register(CostModelPrice)
 class CostModelPriceAdmin(admin.ModelAdmin):
-    list_display = ('medium', 'grade', 'cost_model', 'advertiser_price', 'publisher_price')
+    list_display = (
+        'medium', 'grade', 'cost_model',
+        'advertiser_price', 'publisher_price',
+        'created_time', 'updated_time'
+    )
     search_fields = ('grade',)
     list_filter = ('medium',)
