@@ -221,6 +221,44 @@ LOG_DIR = BASE_DIR / 'logs'
 LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
+
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+CELERY_BROKER_USER = config("CELERY_BROKER_USER")
+CELERY_BROKER_PASSWORD = config("CELERY_BROKER_PASSWORD")
+
+CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB = ast.literal_eval(config("CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB"))
+UPDATE_TELEGRAM_INFO_TASK_CRONTAB = ast.literal_eval(config('UPDATE_TELEGRAM_INFO_TASK_CRONTAB'))
+UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB = ast.literal_eval(config('UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB'))
+
+CELERY_BEAT_SCHEDULE = {
+    "create_telegram_campaign_task": {
+        "task": "apps.campaign.tasks.create_telegram_campaign_task",
+        "schedule": crontab(**CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB),
+    },
+    "update_telegram_info_task": {
+        "task": "apps.campaign.tasks.update_telegram_info_task",
+        "schedule": crontab(**UPDATE_TELEGRAM_INFO_TASK_CRONTAB),
+    },
+    "update_telegram_publishers_task": {
+        "task": "apps.medium.tasks.update_telegram_publishers_task",
+        "schedule": crontab(**UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB)
+    },
+    "create_instagram_campaign_task": {
+        "task": "apps.campaign.tasks.create_instagram_campaign",
+        "schedule": crontab(minute="*/1"),
+    },
+    "update_instagram_publishers_task": {
+        "task": "apps.medium.tasks.update_instagram_publishers",
+        "schedule": crontab(hour=0, minute=0)
+    },
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -265,50 +303,14 @@ LOGGING = {
     'loggers': {
         'django.db.backends': {
             'level': 'DEBUG',
-            'handlers': ['db_queries']
+            'handlers': ['db_queries'],
+            'propagate': False,
+
         },
-        # 'apps.campaign.tasks': {
-        #     'level': 'DEBUG',
-        #     'handlers': ['file', 'console'],
-        #     'propagate': False,
-        # },
-    },
-}
-
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT')
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = config('EMAIL_USE_TLS')
-
-CELERY_BROKER_URL = config("CELERY_BROKER_URL")
-CELERY_BROKER_USER = config("CELERY_BROKER_USER")
-CELERY_BROKER_PASSWORD = config("CELERY_BROKER_PASSWORD")
-
-CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB = ast.literal_eval(config("CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB"))
-UPDATE_TELEGRAM_INFO_TASK_CRONTAB = ast.literal_eval(config('UPDATE_TELEGRAM_INFO_TASK_CRONTAB'))
-UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB = ast.literal_eval(config('UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB'))
-
-CELERY_BEAT_SCHEDULE = {
-    "create_telegram_campaign_task": {
-        "task": "apps.campaign.tasks.create_telegram_campaign_task",
-        "schedule": crontab(**CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB),
-    },
-    "update_telegram_info_task": {
-        "task": "apps.campaign.tasks.update_telegram_info_task",
-        "schedule": crontab(**UPDATE_TELEGRAM_INFO_TASK_CRONTAB),
-    },
-    "update_telegram_publishers_task": {
-        "task": "apps.medium.tasks.update_telegram_publishers_task",
-        "schedule": crontab(**UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB)
-    },
-    "create_instagram_campaign_task": {
-        "task": "apps.campaign.tasks.create_instagram_campaign",
-        "schedule": crontab(minute="*/1"),
-    },
-    "update_instagram_publishers_task": {
-        "task": "apps.medium.tasks.update_instagram_publishers",
-        "schedule": crontab(hour=0, minute=0)
+        'apps.campaign': {
+            'level': 'DEBUG',
+            'handlers': ['file', 'console'],
+        },
     },
 }
 
