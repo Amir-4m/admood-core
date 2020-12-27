@@ -216,6 +216,12 @@ class CampaignApproveSerializer(serializers.ModelSerializer):
         model = Campaign
         fields = ('status',)
 
+    def validate_status(self, value):
+        if not self.instance.contents.exists() and value == Campaign.STATUS_APPROVED:
+            raise serializers.ValidationError(
+                {'status': 'Ensure this campaign has one content at least.'})
+        return value
+
     def validate(self, attrs):
         if self.instance.status != Campaign.STATUS_DRAFT:
             raise serializers.ValidationError(
