@@ -30,7 +30,7 @@ class PublisherViewSet(mixins.ListModelMixin,
     pagination_class = LimitOffsetPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name']
-    ordering_fields = ['name', 'extra_data__member_no', 'extra_data__view_efficiency']
+    ordering_fields = ['name', 'extra_data__member_no', 'extra_data__view_efficiency', 'extra_data__tag']
 
     def get_queryset(self):
         queryset = super(PublisherViewSet, self).get_queryset().prefetch_related('categories')
