@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 from django.utils.timezone import now
@@ -5,6 +6,8 @@ from django.utils.timezone import now
 from apps.campaign.models import CampaignReference, TelegramCampaign
 from apps.core.utils.get_file import get_file
 from services.telegram import create_campaign, create_content, create_file, enable_campaign, test_campaign
+
+logger = logging.getLogger(__name__)
 
 
 def create_telegram_campaign(campaign, start_datetime, end_datetime):
@@ -45,6 +48,7 @@ def create_telegram_campaign(campaign, start_datetime, end_datetime):
             campaign_ref.save()
             return campaign_ref
     except Exception as e:
+        logger.error(f'creating telegram campaign with id {campaign.id} failed due to : {e}')
         campaign.error_count += 1
         campaign.save()
         raise e

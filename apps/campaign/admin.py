@@ -75,7 +75,7 @@ class CampaignScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(CampaignReference)
 class CampaignReferenceAdmin(admin.ModelAdmin):
-    list_display = ("campaign", "ref_id", "date", "start_time", "end_time")
+    list_display = ("campaign", "ref_id", "date", "schedule_range")
     search_fields = ('campaign__name', 'ref_id')
     list_filter = ('date', 'campaign__medium')
 
