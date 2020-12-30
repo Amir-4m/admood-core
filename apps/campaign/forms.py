@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django_admin_json_editor import JSONEditorWidget
+from django.utils.translation import ugettext_lazy as _
 
 
 from apps.campaign.models import CampaignContent, Campaign
@@ -89,8 +90,11 @@ class CampaignAdminForm(forms.ModelForm):
         if self.instance:
             if self.instance.medium == Medium.TELEGRAM:
                 status = self.cleaned_data.get('status')
-                if status == Campaign.STATUS_APPROVED:
-                    if hasattr(self.instance, 'telegramcampaign'):
-                        return self.cleaned_data
-                    raise ValidationError({'status': 'to approve the campaign upload the test screenshot.'})
+                if status == Campaign.STATUS_APPROVED and not hasattr(self.instance, 'telegramcampaign'):
+                    raise ValidationError({'status': _('to approve the campaign upload the test screenshot.')})
+
+            # if status changed to approved, CampaignContent can not be empty
+            if not self.instance.contents.exists() and self.instance.status == Campaign.STATUS_APPROVED:
+                raise ValidationError({'status': _('to approve the campaign, content can not be empty!')})
+
         return self.cleaned_data
