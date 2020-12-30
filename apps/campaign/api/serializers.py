@@ -214,18 +214,19 @@ class CampaignApproveSerializer(serializers.ModelSerializer):
         fields = ('status',)
 
     def validate_status(self, value):
-        if not self.instance.contents.exists() and value == Campaign.STATUS_APPROVED:
-            raise serializers.ValidationError(
-                {'status': 'Ensure this campaign has one content at least.'})
+        if value != Campaign.STATUS_WAITING:
+            raise serializers.ValidationError({'status': (_('invalid value for status!'))})
         return value
 
     def validate(self, attrs):
         if self.instance.status != Campaign.STATUS_DRAFT:
-            raise serializers.ValidationError(
-                {'status': _('Ensure this campaign is a draft.')})
+            raise serializers.ValidationError({'status': _('Ensure this campaign is a draft.')})
+
+        if self.instance.contents.filter(is_hidden=False).count() == 0:
+            raise serializers.ValidationError(_('campaign with 0 content cannot be approved!'))
+
         if self.instance.total_budget > Transaction.balance(self.instance.owner):
-            raise serializers.ValidationError(
-                {'total_budget': _('Ensure wallet balance more than total budget.')})
+            raise serializers.ValidationError({'total_budget': _('Ensure wallet balance more than total budget.')})
         return attrs
 
     def update(self, instance, validated_data):
