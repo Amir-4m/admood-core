@@ -47,9 +47,14 @@ class InstagramCampaignServices(object):
                 return None
             response.raise_for_status()
             return response
-        except Exception as e:
-            logger.error(f'{method} api call {url} got error: {e}')
-            return
+        except requests.exceptions.HTTPError as e:
+            logger.error(f'http error for requesting url {url} occurred: {e}')
+            if e.response.status_code == 400:
+                raise Exception(e.response.text)
+            raise e
+        except requests.exceptions.RequestException as e:
+            logger.error(f'request error for requesting url {url} occurred: {e}')
+            raise e
 
     def create_insta_campaign(self, campaign, start_time, end_time, status):
         publishers = []
@@ -172,10 +177,12 @@ class TelegramCampaignServices(object):
             response.raise_for_status()
             return response
         except requests.exceptions.HTTPError as e:
+            logger.error(f'http error for requesting url {url} occurred: {e}')
             if e.response.status_code == 400:
                 raise Exception(e.response.text)
             raise e
         except requests.exceptions.RequestException as e:
+            logger.error(f'request error for requesting url {url} occurred: {e}')
             raise e
 
     def create_campaign(self, campaign, start_time, end_time, status):
