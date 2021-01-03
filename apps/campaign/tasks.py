@@ -4,9 +4,8 @@ from django.utils.timezone import now
 
 from apps.campaign.models import Campaign, CampaignReference, CampaignContent
 from apps.medium.consts import Medium
-from services.telegram import campaign_report, get_contents, campaign_telegram_file_hash
 
-from .services import CampaignService
+from .services import CampaignService, TelegramCampaignServices
 
 
 @shared_task
@@ -36,10 +35,10 @@ def update_telegram_info_task():
     for campaign_ref in campaign_refs:
 
         # store telegram file hash of screenshot in TelegramCampaign model
-        campaign_ref.campaign.telegramcampaign.telegram_file_hash = campaign_telegram_file_hash(campaign_ref.ref_id)
+        campaign_ref.campaign.telegramcampaign.telegram_file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
 
         # get each content views and store in content json field
-        reports = campaign_report(campaign_ref.ref_id)
+        reports = TelegramCampaignServices().campaign_report(campaign_ref.ref_id)
         for content in campaign_ref.contents:
             for report in reports:
                 if content["ref_id"] == report["content"]:
@@ -53,7 +52,7 @@ def update_telegram_info_task():
         if camp.campaignreference_set.count() == 1:
             for content in campaign_ref.contents:
                 content_id = content["content"]
-                for item in get_contents(campaign_ref.ref_id):
+                for item in TelegramCampaignServices().get_contents(campaign_ref.ref_id):
                     if item["id"] == content["ref_id"]:
                         c = CampaignContent.objects.get(pk=content_id)
                         for file in item["files"]:
