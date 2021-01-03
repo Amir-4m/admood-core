@@ -1,14 +1,9 @@
-import json
-import logging
-
-import requests
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
-from apps.accounts.models import Verification, User
+from apps.accounts.models import Verification
 
 UserModel = get_user_model()
-logger = logging.getLogger('admood_core.accounts')
 
 
 # class GoogleAuthBackend(ModelBackend):

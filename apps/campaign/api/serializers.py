@@ -17,6 +17,9 @@ from services.utils import file_type
 logger = logging.getLogger(__file__)
 
 
+logger = logging.getLogger(__file__)
+
+
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
@@ -382,7 +385,8 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                 file_id = files or obj.data.get('imageId')
                 file = File.objects.get(pk=file_id).file
                 return self.context['request'].build_absolute_uri(file.url)
-        except Exception as e:
+        except Exception:
+            logger.exception(f'CampaignContentSerializer. object: {obj}')
             return None
 
 

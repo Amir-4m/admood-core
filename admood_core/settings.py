@@ -301,6 +301,10 @@ LOGGING = {
         },
     },
     'loggers': {
+        'admood-core': {
+            'level': 'DEBUG',
+            'handlers': ['file'],
+        },
         'django.db.backends': {
             'level': 'DEBUG',
             'handlers': ['db_queries'],
