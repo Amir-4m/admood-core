@@ -1,20 +1,19 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
-from apps.campaign.models import Campaign, CampaignReference
-from apps.campaign.telegram.telegram import create_telegram_test_campaign
+from apps.campaign.models import Campaign
 from apps.medium.consts import Medium
-from apps.medium.models import Publisher
+from .services import TelegramCampaignServices
 
 
 def test_campaign(request, pk):
     campaign = get_object_or_404(Campaign, pk=pk)
     if campaign.medium == Medium.TELEGRAM:
         try:
-            result = create_telegram_test_campaign(campaign)
+            result = TelegramCampaignServices.create_telegram_test_campaign(campaign)
         except Exception as e:
             messages.error(request, _(e.__str__()))
         else:

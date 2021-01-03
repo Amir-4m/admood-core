@@ -1,20 +1,12 @@
-from datetime import datetime, timedelta
-
 from celery import shared_task
-from django.db import transaction
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils.timezone import now
 
-from apps.campaign.telegram import telegram
-from admood_core.settings import ADBOT_MAX_CONCURRENT_CAMPAIGN
-from apps.campaign.models import Campaign, CampaignReference, CampaignContent, CampaignSchedule
-from apps.core.utils.get_file import get_file
+from apps.campaign.models import Campaign, CampaignReference, CampaignContent
 from apps.medium.consts import Medium
-from apps.payments.models import Transaction
-from services.instagram import create_insta_campaign, create_insta_content, create_insta_media, enable_Insta_campaign
-from services.telegram import (
-    campaign_report, get_contents, campaign_telegram_file_hash
-)
+from services.telegram import campaign_report, get_contents, campaign_telegram_file_hash
+
+from .services import CampaignService
 
 
 @shared_task
@@ -28,57 +20,7 @@ def create_telegram_campaign_task():
         start_date__lte=now().date(),
 
     )
-
-    # disable expired and over budget campaigns
-    for campaign in campaigns.all():
-        if campaign.total_cost >= campaign.total_budget or (
-                campaign.end_date is not None and campaign.end_date > now().date()):
-            with transaction.atomic():
-                # create a deduct transaction
-                if campaign.total_cost > campaign.total_budget:
-                    Transaction.objects.create(
-                        user=campaign.owner,
-                        value=campaign.total_cost - campaign.total_budget,
-                        campaign=campaign,
-                        transaction_type=Transaction.TYPE_DEDUCT,
-                    )
-                campaign.is_enable = False
-                campaign.save()
-                continue
-
-        # if campaign doesn't have remaining views for today or at all
-        if campaign.remaining_views <= 0:
-            continue
-
-    # create scheduled campaigns
-    schedules = CampaignSchedule.objects.filter(
-        campaign_id__in=campaigns.values_list('id', flat=True),
-        week_day=now().date().weekday(),
-        start_time__lte=now().time(),
-        end_time__gt=now().time(),
-    )
-
-    for schedule in schedules.all():
-        schedule_lower_range = datetime.now().replace(hour=schedule.start_time.hour, minute=schedule.start_time.minute)
-        schedule_upper_range = datetime.now().replace(hour=schedule.end_time.hour, minute=schedule.end_time.minute)
-        telegram.create_telegram_campaign(schedule.campaign, schedule_lower_range, schedule_upper_range)
-
-    # create non scheduled campaigns if possible
-    concurrent_campaign_count = CampaignReference.objects.filter(
-        ref_id__isnull=False,
-        schedule_range__startswith__date=now().date(),
-        updated_time__isnull=True
-    ).count()
-    if concurrent_campaign_count < ADBOT_MAX_CONCURRENT_CAMPAIGN:
-        campaigns = campaigns.filter(
-            schedules__isnull=True
-        ).annotate(
-            num_ref=Count('campaignreference')
-        ).order_by('num_ref')
-        for campaign in campaigns.all()[:ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
-            start_datetime = datetime.now()
-            end_datetime = start_datetime + timedelta(hours=3)
-            telegram.create_telegram_campaign(campaign, start_datetime, end_datetime)
+    CampaignService.create_campaign_by_medium(campaigns, 'telegram')
 
 
 # update content view in Campaign Reference model and add telegram file hashes
@@ -121,7 +63,6 @@ def update_telegram_info_task():
                             break
 
 
-# TODO: FIX IMPLEMENTATION
 @shared_task
 def create_instagram_campaign():
     today = now().date()
@@ -133,39 +74,4 @@ def create_instagram_campaign():
         status=Campaign.STATUS_APPROVED,
 
     )
-    # first try to create scheduled campaigns
-    scheduled_campaigns = campaigns.filter(schedules__week_day=today.weekday())
-    for campaign in scheduled_campaigns:
-        if campaign.remaining_views <= 0:
-            continue
-        schedules = campaign.schedules.filter(week_day=today.weekday())
-
-        for schedule in schedules:
-            campaign_ref, created = CampaignReference.objects.get_or_create(
-                campaign=campaign,
-                date=today,
-                max_view=campaign.remaining_views,
-                start_time=schedule.start_time,
-                end_time=schedule.end_time
-            )
-            if campaign_ref.ref_id:
-                continue
-            # create instagram service campaign
-            ref_id = create_insta_campaign(
-                campaign,
-                datetime.combine(now().date(), schedule.start_time).__str__(),
-                datetime.combine(now().date(), schedule.end_time).__str__(),
-                "approved",
-            )
-
-            content = campaign.contents.first()
-            content_ref_id = create_insta_content(content, ref_id)
-            file = get_file(content.data.get('file', None))
-
-            if file:
-                create_insta_media(file, content_ref_id)
-            campaign_ref.contents.append({'content': content.pk, 'ref_id': content_ref_id, 'views': 0})
-
-            if enable_Insta_campaign(ref_id):
-                campaign_ref.ref_id = ref_id
-                campaign_ref.save()
+    CampaignService.create_campaign_by_medium(campaigns, 'instagram')
