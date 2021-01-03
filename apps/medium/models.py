@@ -1,4 +1,6 @@
 from django.contrib.postgres.fields import JSONField
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.db.models import Max, Min
 from django.db.models.functions import Coalesce
@@ -8,11 +10,12 @@ from ..core.consts import CostModel
 
 
 class Category(models.Model):
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     ref_id = models.PositiveIntegerField(null=True, blank=True)
     title = models.CharField(max_length=50, db_index=True)
     display_text = models.CharField(max_length=50)
-    created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -25,15 +28,22 @@ class Category(models.Model):
 
 
 class CostModelPrice(models.Model):
-    medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
-    cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
-    grade = models.CharField(max_length=32)
-    publisher_price = models.PositiveIntegerField()
-    advertiser_price = models.PositiveIntegerField()
-    created_time = models.DateTimeField(auto_now_add=True)
+    created_time = models.DateTimeField(_("created time"), auto_now_add=True)
+    updated_time = models.DateTimeField(_("updated time"), auto_now=True)
+    medium = models.PositiveSmallIntegerField(_("medium"), choices=Medium.MEDIUM_CHOICES)
+    cost_model = models.PositiveSmallIntegerField(_("cost model"), choices=CostModel.COST_MODEL_CHOICES)
+    grade = models.CharField(_("grade"), max_length=32)
+    publisher_price = models.PositiveIntegerField(_("publisher price"))
+    advertiser_price = models.PositiveIntegerField(_("advertiser price"))
 
     class Meta:
+        verbose_name = 'Grade'
+        verbose_name_plural = 'Grades'
         unique_together = ('medium', 'cost_model', 'grade',)
+
+    def clean(self):
+        if self.publisher_price >= self.advertiser_price:
+            raise ValidationError(_('publisher price must be lower than advertiser price!'))
 
     def __str__(self):
         return f'{self.grade}-{self.get_medium_display()}'

@@ -208,25 +208,6 @@ class CampaignEnableSerializer(serializers.ModelSerializer):
         fields = ["is_enable"]
 
 
-class CampaignApproveSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Campaign
-        fields = ('status',)
-
-    def validate(self, attrs):
-        if self.instance.status != Campaign.STATUS_DRAFT:
-            raise serializers.ValidationError(
-                {'status': _('Ensure this campaign is a draft.')})
-        if self.instance.total_budget > Transaction.balance(self.instance.owner):
-            raise serializers.ValidationError(
-                {'total_budget': _('Ensure wallet balance more than total budget.')})
-        return attrs
-
-    def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
-        return instance
-
-
 class CampaignRepeatSerializer(serializers.ModelSerializer):
     start_date = serializers.DateField(allow_null=True)
     schedules = CampaignScheduleSerializer(many=True)

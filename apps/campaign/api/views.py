@@ -1,19 +1,23 @@
+from django.forms import model_to_dict
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.utils.translation import ugettext_lazy as _
 
 from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
-    CampaignContentSerializer, CampaignDuplicateSerializer, CampaignApproveSerializer, EstimateActionsSerializer,
+    CampaignContentSerializer, CampaignDuplicateSerializer, EstimateActionsSerializer,
     CampaignReferenceSerializer)
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignReference
 from apps.core.consts import CostModel
 from apps.core.views import BaseViewSet
 from apps.medium.models import Publisher, CostModelPrice
+from apps.payments.models import Transaction
 
 
 class ProvinceViewSet(BaseViewSet,
@@ -52,13 +56,21 @@ class CampaignViewSet(BaseViewSet,
         self.perform_update(serializer)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['patch'], serializer_class=CampaignApproveSerializer)
+    @action(detail=True, methods=['get'])
     def approve(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data={'status': Campaign.STATUS_WAITING}, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        if instance.status != Campaign.STATUS_DRAFT:
+            raise ValidationError({'status': _('Ensure this campaign is a draft.')})
+        if instance.contents.filter(is_hidden=False).count() == 0:
+            raise ValidationError(
+                {'status': _('At least one content for campaign must be existed to approve campaign!')}
+            )
+        if instance.total_budget > Transaction.balance(instance.owner):
+            raise ValidationError({'status': _('Ensure this campaign is a draft.')})
+
+        instance.status = Campaign.STATUS_WAITING
+        instance.save()
+        return Response(model_to_dict(instance))
 
     @action(detail=True, methods=['post'], serializer_class=CampaignDuplicateSerializer)
     def duplicate(self, request, *args, **kwargs):

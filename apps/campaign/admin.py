@@ -43,9 +43,15 @@ class CampaignAdmin(admin.ModelAdmin):
     list_filter = ['medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
-    readonly_fields = ('name', 'owner', 'locations', 'description',
-                       'start_date', 'end_date', 'publishers', 'categories',
-                       'utm_campaign', 'utm_content', 'medium', 'utm_medium')
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = (
+            'owner', 'locations', 'description', 'start_date', 'end_date', 'publishers', 'categories', 'utm_campaign',
+            'utm_content', 'medium', 'utm_medium'
+        )
+        if obj and obj.status == Campaign.STATUS_DRAFT:  # name field editable
+            return readonly_fields
+        return readonly_fields + ('name',)
 
     def render_change_form(self, request, context, **kwargs):
         return super().render_change_form(request, context, **kwargs)
@@ -64,6 +70,7 @@ class CampaignContentAdmin(admin.ModelAdmin):
     list_display = ("campaign", "title", "data")
     list_filter = ("campaign__name", "campaign__categories")
     search_fields = ("campaign__name", "title",)
+    ordering = ['-id']
     form = ContentAdminForm
 
 
@@ -75,7 +82,7 @@ class CampaignScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(CampaignReference)
 class CampaignReferenceAdmin(admin.ModelAdmin):
-    list_display = ("campaign", "ref_id", "date", "start_time", "end_time")
+    list_display = ("campaign", "ref_id", "date", "schedule_range")
     search_fields = ('campaign__name', 'ref_id')
     list_filter = ('date', 'campaign__medium')
 

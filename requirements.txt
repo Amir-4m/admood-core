@@ -7,6 +7,7 @@ psycopg2-binary
 
 djangorestframework>=3.11,<3.12
 djangorestframework-simplejwt==4.4.0
+PyJWT==1.7.1
 drf-yasg==1.17.1
 python-memcached
 

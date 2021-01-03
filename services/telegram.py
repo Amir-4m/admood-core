@@ -23,7 +23,9 @@ def create_campaign(campaign, start_time, end_time, status):
     publishers = []
     for publisher in campaign.final_publishers.all():
         try:
-            publisher_price = publisher.cost_models.get(publisher=publisher, cost_model=CostModel.CPV).publisher_price
+            publisher_price = publisher.cost_models.filter(
+                cost_model=CostModel.CPV
+            ).order_by('-publisher_price').first().publisher_price
         except:
             publisher_price = 0
         publishers.append((publisher.ref_id, publisher_price))
