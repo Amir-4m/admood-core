@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 
 from celery import shared_task
 from django.db import transaction
@@ -15,6 +16,8 @@ from services.instagram import create_insta_campaign, create_insta_content, crea
 from services.telegram import (
     campaign_report, get_contents, campaign_telegram_file_hash
 )
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task

@@ -1,9 +1,7 @@
 import json
 
-import requests
-
 from admood_core.settings import ADINSTA_API_TOKEN, ADINSTA_API_URL
-from services.utils import file_type
+from services.utils import file_type, custom_request
 
 JSON_HEADERS = {
     'Authorization': ADINSTA_API_TOKEN,
@@ -33,16 +31,7 @@ def create_insta_campaign(campaign, start_time, end_time, status):
         start_datetime=start_time,
         end_datetime=end_time,
     )
-    try:
-        r = requests.post(url=CAMPAIGN_URL, headers=JSON_HEADERS, data=json.dumps(data))
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
-
+    r = custom_request(url=CAMPAIGN_URL, headers=JSON_HEADERS, data=json.dumps(data))
     return r.json()['id']
 
 
@@ -53,16 +42,7 @@ def create_insta_content(content, campaign_id):
         caption=content.data.get('content'),
         description=content.description
     )
-    try:
-        r = requests.post(url=CONTENT_URL, headers=JSON_HEADERS, data=json.dumps(data))
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
-
+    r = custom_request(url=CONTENT_URL, headers=JSON_HEADERS, data=json.dumps(data))
     return r.json()['id']
 
 
@@ -71,55 +51,23 @@ def create_insta_media(file, content_id):
         file_type=file_type(file.name),
         content=content_id,
     )
-    try:
-        r = requests.post(url=MEDIA_URL, headers=HEADERS, data=data, files={'file': file})
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+    custom_request(url=MEDIA_URL, headers=HEADERS, data=data, files={'file': file})
 
 
 def enable_Insta_campaign(campaign_id):
-    try:
-        r = requests.patch(url=f'{CAMPAIGN_URL}{campaign_id}/', headers=HEADERS, data={'is_enable': True})
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+    custom_request(url=f'{CAMPAIGN_URL}{campaign_id}/', method='patch', headers=HEADERS, data={'is_enable': True})
     return True
 
 
 def get_insta_publishers():
-    headers = {'Authorization': ADINSTA_API_TOKEN, }
+    headers = {'Authorization': ADINSTA_API_TOKEN}
     pages_url = f'{ADINSTA_API_URL}/api/v1/instagram/pages/'
-    try:
-        r = requests.get(url=f'{pages_url}', headers=headers)
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+    r = custom_request(url=f'{pages_url}', method='get', headers=headers)
     return r.json()
 
 
 def get_insta_campaign(campaign_id):
-    try:
-        r = requests.get(url=f'{CAMPAIGN_URL}{campaign_id}/', headers=HEADERS)
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+    r = custom_request(url=f'{CAMPAIGN_URL}{campaign_id}/', method='get', headers=HEADERS)
     return r.json()
 
 

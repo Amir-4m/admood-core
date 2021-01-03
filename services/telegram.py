@@ -1,10 +1,11 @@
+import logging
 import json
-
-import requests
 
 from admood_core.settings import ADBOT_API_TOKEN, ADBOT_API_URL, ADBOT_AGENTS
 from apps.core.consts import CostModel
-from services.utils import file_type
+from services.utils import file_type, custom_request
+
+logger = logging.getLogger(__name__)
 
 JSON_HEADERS = {
     'Authorization': ADBOT_API_TOKEN,
@@ -40,16 +41,8 @@ def create_campaign(campaign, start_time, end_time, status):
         start_datetime=start_time.__str__(),
         end_datetime=end_time.__str__(),
     )
-    try:
-        r = requests.post(url=CAMPAIGN_URL, headers=JSON_HEADERS, json=data)
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
 
+    r = custom_request(url=CAMPAIGN_URL, headers=JSON_HEADERS, json=data)
     return r.json()['id']
 
 
@@ -105,16 +98,8 @@ def create_content(content, campaign_id):
             mother_channel=content.data.get('mother_channel', None),
             view_type=content.data.get('view_type'),
         )
-    try:
-        r = requests.post(url=CONTENT_URL, headers=JSON_HEADERS, data=json.dumps(data))
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
 
+    r = custom_request(url=CONTENT_URL, headers=JSON_HEADERS, data=json.dumps(data))
     return r.json()['id']
 
 
@@ -128,71 +113,32 @@ def create_file(file, campaign_id=None, content_id=None, telegram_file_hash=None
         data['campaign'] = campaign_id
     if content_id:
         data['campaign_content'] = content_id
-    try:
-        if telegram_file_hash:
-            r = requests.post(url=FILE_URL, headers=HEADERS, data=data)
-        else:
-            r = requests.post(url=FILE_URL, headers=HEADERS, data=data, files={'file': file})
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+
+    if telegram_file_hash:
+        custom_request(url=FILE_URL, headers=HEADERS, data=data)
+    else:
+        custom_request(url=FILE_URL, headers=HEADERS, data=data, files={'file': file})
 
 
 def enable_campaign(campaign_id):
-    try:
-        r = requests.patch(url=f'{CAMPAIGN_URL}{campaign_id}/', headers=HEADERS, data={'is_enable': True})
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+    r = custom_request(url=f'{CAMPAIGN_URL}{campaign_id}/', method='patch', headers=HEADERS, data={'is_enable': True})
     return True
 
 
 def campaign_report(campaign_id):
-    try:
-        r = requests.get(url=f'{CAMPAIGN_URL}{campaign_id}/report', headers=HEADERS)
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+    r = custom_request(url=f'{CAMPAIGN_URL}{campaign_id}/report', method='get', headers=HEADERS)
     return r.json()
 
 
 def get_publishers():
     headers = {'Authorization': ADBOT_API_TOKEN, }
     channels_url = f'{ADBOT_API_URL}/api/v1/channels/'
-    try:
-        r = requests.get(url=f'{channels_url}', headers=headers)
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+    r = custom_request(url=f'{channels_url}', method='get', headers=headers)
     return r.json()
 
 
 def get_campaign(campaign_id):
-    try:
-        r = requests.get(url=f'{CAMPAIGN_URL}{campaign_id}/', headers=HEADERS)
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
+    r = custom_request(url=f'{CAMPAIGN_URL}{campaign_id}/', method='get', headers=HEADERS)
     return r.json()
 
 
@@ -209,14 +155,5 @@ def campaign_telegram_file_hash(campaign_id):
 
 
 def test_campaign(campaign_id):
-    try:
-        r = requests.get(url=f'{CAMPAIGN_URL}{campaign_id}/test/', headers=HEADERS, timeout=120)
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 400:
-            raise Exception(e.response.text)
-        raise e
-    except requests.exceptions.RequestException as e:
-        raise e
-
+    r = custom_request(url=f'{CAMPAIGN_URL}{campaign_id}/test/', method='get', headers=HEADERS, timeout=120)
     return r.json()["detail"]

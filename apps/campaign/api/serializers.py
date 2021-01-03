@@ -1,3 +1,4 @@
+import logging
 import datetime
 
 from django.db.models.functions import Lower
@@ -12,6 +13,9 @@ from apps.medium.consts import Medium
 from apps.medium.models import Publisher
 from apps.payments.models import Transaction
 from services.utils import file_type
+
+
+logger = logging.getLogger(__file__)
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -404,7 +408,8 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                 file_id = files or obj.data.get('imageId')
                 file = File.objects.get(pk=file_id).file
                 return self.context['request'].build_absolute_uri(file.url)
-        except Exception as e:
+        except Exception:
+            logger.exception(f'CampaignContentSerializer. object: {obj}')
             return None
 
 

@@ -88,13 +88,13 @@ class CampaignAdminForm(forms.ModelForm):
 
     def clean(self):
         if self.instance:
+            status = self.cleaned_data.get('status')
             if self.instance.medium == Medium.TELEGRAM:
-                status = self.cleaned_data.get('status')
                 if status == Campaign.STATUS_APPROVED and not hasattr(self.instance, 'telegramcampaign'):
                     raise ValidationError({'status': _('to approve the campaign upload the test screenshot.')})
 
             # if status changed to approved, CampaignContent can not be empty
-            if not self.instance.contents.exists() and self.instance.status == Campaign.STATUS_APPROVED:
+            if not self.instance.contents.exists() and status == Campaign.STATUS_APPROVED:
                 raise ValidationError({'status': _('to approve the campaign, content can not be empty!')})
 
         return self.cleaned_data
