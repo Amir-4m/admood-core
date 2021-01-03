@@ -1,9 +1,10 @@
 from celery import shared_task
 
+from apps.campaign.services import InstagramCampaignServices
+
 from apps.medium.consts import Medium
 from apps.medium.models import Publisher
 from services.telegram import get_publishers
-from services.instagram import get_insta_publishers
 
 
 @shared_task
@@ -26,7 +27,7 @@ def update_telegram_publishers_task():
 
 @shared_task
 def update_instagram_publishers():
-    pages = get_insta_publishers()
+    pages = InstagramCampaignServices().get_insta_publishers()
     for page in pages:
         if page['medium'] is None:
             # update or create publisher for both post and story
