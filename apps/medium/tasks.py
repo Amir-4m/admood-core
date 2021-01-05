@@ -4,12 +4,12 @@ from apps.campaign.services import InstagramCampaignServices
 
 from apps.medium.consts import Medium
 from apps.medium.models import Publisher
-from services.telegram import get_publishers
+from apps.campaign.services import TelegramCampaignServices
 
 
 @shared_task
 def update_telegram_publishers_task():
-    channels = get_publishers()
+    channels = TelegramCampaignServices().get_publishers()
     for channel in channels:
         Publisher.objects.update_or_create(
             ref_id=channel['id'],

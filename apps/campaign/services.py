@@ -8,13 +8,13 @@ from django.db.models import Count, Q
 from django.utils.timezone import now
 
 from admood_core.settings import (
-    ADBOT_MAX_CONCURRENT_CAMPAIGN, ADINSTA_API_TOKEN, ADINSTA_API_URL
+    ADBOT_MAX_CONCURRENT_CAMPAIGN, ADINSTA_API_TOKEN, ADINSTA_API_URL,
+    ADBOT_API_TOKEN, ADBOT_API_URL, ADBOT_AGENTS
 )
 from apps.core.consts import CostModel
 from apps.core.utils.get_file import get_file
 from apps.campaign.models import CampaignSchedule, CampaignReference, TelegramCampaign
 from apps.payments.models import Transaction
-from services.telegram import create_campaign, create_content, create_file, enable_campaign, test_campaign
 from services.utils import file_type
 
 logger = logging.getLogger(__name__)
@@ -35,19 +35,26 @@ class InstagramCampaignServices(object):
     MEDIA_URL = f'{ADINSTA_API_URL}/api/v1/medias/'
     PAGES_URL = f'{ADINSTA_API_URL}/api/v1/instagram/pages/'
 
-    def api_call(self, method, url, data=None, params=None, files=None):
+    def api_call(self, method, url, data=None, params=None, files=None, **kwargs):
         try:
             if method.lower() == 'get':
-                response = requests.get(url=url, headers=self.HEADERS, params=params)
+                response = requests.get(url=url, headers=self.HEADERS, params=params, **kwargs)
             elif method.lower() == 'post':
-                response = requests.post(url=url, headers=self.HEADERS, json=data, files=files)
+                response = requests.post(url=url, headers=self.HEADERS, json=data, files=files, **kwargs)
+            elif method.lower() == 'patch':
+                response = requests.patch(url=url, headers=self.HEADERS, json=data, files=files, **kwargs)
             else:
                 return None
             response.raise_for_status()
             return response
-        except Exception as e:
-            logger.error(f'{method} api call {url} got error: {e}')
-            return
+        except requests.exceptions.HTTPError as e:
+            logger.error(f'http error for requesting url {url} occurred: {e}')
+            if e.response.status_code == 400:
+                raise Exception(e.response.text)
+            raise e
+        except requests.exceptions.RequestException as e:
+            logger.error(f'request error for requesting url {url} occurred: {e}')
+            raise e
 
     def create_insta_campaign(self, campaign, start_time, end_time, status):
         publishers = []
@@ -91,7 +98,7 @@ class InstagramCampaignServices(object):
         self.api_call('post', url=self.MEDIA_URL, data=data, files={'file': file})
 
     def enable_Insta_campaign(self, campaign_id):
-        self.api_call('post', url=f'{self.CAMPAIGN_URL}{campaign_id}/', data={'is_enable': True})
+        self.api_call('patch', url=f'{self.CAMPAIGN_URL}{campaign_id}/', data={'is_enable': True})
         return True
 
     def get_insta_publishers(self):
@@ -148,6 +155,163 @@ class InstagramCampaignServices(object):
 
 
 class TelegramCampaignServices(object):
+    HEADERS = {
+        'Authorization': ADBOT_API_TOKEN,
+    }
+
+    CAMPAIGN_URL = f'{ADBOT_API_URL}/api/v1/campaigns/'
+    CONTENT_URL = f'{ADBOT_API_URL}/api/v1/contents/'
+    FILE_URL = f'{ADBOT_API_URL}/api/v1/files/'
+    CHANNELS_URL = f'{ADBOT_API_URL}/api/v1/channels/'
+
+    def api_call(self, method, url, data=None, params=None, files=None, **kwargs):
+        try:
+            if method.lower() == 'get':
+                response = requests.get(url=url, headers=self.HEADERS, params=params, **kwargs)
+            elif method.lower() == 'post':
+                response = requests.post(url=url, headers=self.HEADERS, json=data, files=files, **kwargs)
+            elif method.lower() == 'patch':
+                response = requests.patch(url=url, headers=self.HEADERS, json=data, files=files, **kwargs)
+            else:
+                return None
+            response.raise_for_status()
+            return response
+        except requests.exceptions.HTTPError as e:
+            logger.error(f'http error for requesting url {url} occurred: {e}')
+            if e.response.status_code == 400:
+                raise Exception(e.response.text)
+            raise e
+        except requests.exceptions.RequestException as e:
+            logger.error(f'request error for requesting url {url} occurred: {e}')
+            raise e
+
+    def create_campaign(self, campaign, start_time, end_time, status):
+        publishers = []
+        for publisher in campaign.final_publishers.all():
+            try:
+                publisher_price = publisher.cost_models.filter(
+                    cost_model=CostModel.CPV
+                ).order_by('-publisher_price').first().publisher_price
+            except:
+                publisher_price = 0
+            publishers.append((publisher.ref_id, publisher_price))
+
+        data = dict(
+            title=campaign.name,
+            status=status,
+            is_enable=False,
+            publishers=publishers,
+            max_view=campaign.remaining_views,
+            agents=campaign.extra_data.get('agents', [ADBOT_AGENTS]) if campaign.extra_data else [ADBOT_AGENTS],
+            start_datetime=start_time.__str__(),
+            end_datetime=end_time.__str__(),
+        )
+        response = self.api_call('post', url=self.CAMPAIGN_URL, data=data)
+
+        return response.json()['id']
+
+    def create_content(self, content, campaign_id):
+        if 'post_link' in content.data:
+            data = dict(
+                campaign=campaign_id,
+                display_text=content.title,
+                post_link=content.data.get('post_link'),
+                view_type=content.data.get('view_type'),
+            )
+        else:
+            utm_source = "admood"
+            utm_campaign = content.campaign.utm_campaign
+            utm_medium = content.campaign.utm_medium
+            utm_content = content.campaign.utm_content
+
+            if utm_campaign is None:
+                utm_campaign = content.campaign.pk
+            if utm_medium is None:
+                utm_medium = content.campaign.get_medium_display()
+
+            links = content.data.get('links', [])
+            for i, link in enumerate(links, 1):
+                link['utm_source'] = utm_source
+                link["utm_campaign"] = utm_campaign
+                link["utm_medium"] = utm_medium
+                if utm_content is not None:
+                    link['utm_content'] = utm_content
+                if link.get('utm_term') is None:
+                    link['utm_term'] = i
+
+            inlines = content.data.get('inlines', [])
+            for i, inline in enumerate(inlines, 1):
+                if inline.get('has_tracker'):
+                    inline['utm_source'] = utm_source
+                    inline["utm_campaign"] = utm_campaign
+                    inline["utm_medium"] = utm_medium
+                    if utm_content is not None:
+                        inline['utm_content'] = utm_content
+                    if inline.get('utm_term') is None:
+                        inline['utm_term'] = i
+                else:
+                    inline.pop('utm_term')
+
+            data = dict(
+                campaign=campaign_id,
+                display_text=content.title,
+                content=content.data.get('content'),
+                links=links,
+                inlines=inlines,
+                is_sticker=content.data.get('is_sticker', False),
+                mother_channel=content.data.get('mother_channel', None),
+                view_type=content.data.get('view_type'),
+            )
+
+        response = self.api_call('post', url=self.CONTENT_URL, data=data)
+        return response.json()['id']
+
+    def create_file(self, file, campaign_id=None, content_id=None, telegram_file_hash=None):
+        data = dict(
+            name=file.name,
+            file_type=file_type(file.name),
+            telegram_file_hash=telegram_file_hash
+        )
+        if campaign_id:
+            data['campaign'] = campaign_id
+        if content_id:
+            data['campaign_content'] = content_id
+
+        if telegram_file_hash:
+            self.api_call('post', url=self.FILE_URL, data=data)
+        else:
+            self.api_call('post', url=self.FILE_URL, data=data, files={'file': file})
+
+    def enable_campaign(self, campaign_id):
+        self.api_call('patch', url=f'{self.CAMPAIGN_URL}{campaign_id}/', data={'is_enable': True})
+        return True
+
+    def campaign_report(self, campaign_id):
+        response = self.api_call('get', url=f'{self.CAMPAIGN_URL}{campaign_id}/report/')
+        return response.json()
+
+    def get_publishers(self):
+        response = self.api_call('get', url=self.CHANNELS_URL)
+        return response.json()
+
+    def get_campaign(self, campaign_id):
+        response = self.api_call('get', url=f'{self.CAMPAIGN_URL}{campaign_id}/')
+        return response.json()
+
+    def get_contents(self, campaign_id):
+        campaign = self.get_campaign(campaign_id)
+        contents = campaign.get('contents', None)
+        return contents
+
+    def campaign_telegram_file_hash(self, campaign_id):
+        campaign = self.get_campaign(campaign_id)
+        file = campaign.get('file')['telegram_file_hash']
+        return file
+
+    def test_campaign(self, campaign_id):
+        response = self.api_call('get', url=f'{self.CAMPAIGN_URL}{campaign_id}/test/', timeout=120)
+        return response.json()["detail"]
+
     @staticmethod
     def create_telegram_campaign(campaign, start_datetime, end_datetime):
         if campaign.error_count >= 5:
@@ -161,7 +325,7 @@ class TelegramCampaignServices(object):
             if campaign_ref.ref_id:
                 return
             # create telegram service
-            ref_id = create_campaign(
+            ref_id = TelegramCampaignServices().create_campaign(
                 campaign,
                 start_datetime,
                 end_datetime,
@@ -171,18 +335,25 @@ class TelegramCampaignServices(object):
             telegram_campaign = TelegramCampaign.objects.get(campaign=campaign)
             telegram_file_hash = telegram_campaign.telegram_file_hash
             screenshot = TelegramCampaign.objects.get(campaign=campaign).screenshot.file
-            create_file(file=screenshot, campaign_id=ref_id, telegram_file_hash=telegram_file_hash)
+            TelegramCampaignServices().create_file(
+                file=screenshot, campaign_id=ref_id,
+                telegram_file_hash=telegram_file_hash
+            )
 
             contents = campaign.contents.all()
             for content in contents:
-                content_ref_id = create_content(content, ref_id)
+                content_ref_id = TelegramCampaignServices().create_content(content, ref_id)
                 file = get_file(content.data.get('file', None))
                 telegram_file_hash = content.data.get('telegram_file_hash', None)
                 if file:
-                    create_file(file, content_id=content_ref_id, telegram_file_hash=telegram_file_hash)
+                    TelegramCampaignServices().create_file(
+                        file,
+                        content_id=content_ref_id,
+                        telegram_file_hash=telegram_file_hash
+                    )
                 campaign_ref.contents.append({'content': content.pk, 'ref_id': content_ref_id, 'views': 0})
 
-            if enable_campaign(ref_id):
+            if TelegramCampaignServices().enable_campaign(ref_id):
                 campaign_ref.ref_id = ref_id
                 campaign_ref.save()
                 return campaign_ref
@@ -194,7 +365,7 @@ class TelegramCampaignServices(object):
 
     @staticmethod
     def create_telegram_test_campaign(campaign):
-        ref_id = create_campaign(
+        ref_id = TelegramCampaignServices().create_campaign(
             campaign,
             now().__str__(),
             (now() + timedelta(hours=1)).__str__(),
@@ -202,13 +373,16 @@ class TelegramCampaignServices(object):
         )
         contents = campaign.contents.all()
         for content in contents:
-            content_ref_id = create_content(content, ref_id)
+            content_ref_id = TelegramCampaignServices().create_content(content, ref_id)
             file = get_file(content.data.get('file', None))
             telegram_file_hash = content.data.get('telegram_file_hash', None)
             if file:
-                create_file(file, content_id=content_ref_id, telegram_file_hash=telegram_file_hash)
+                TelegramCampaignServices().create_file(
+                    file, content_id=content_ref_id,
+                    telegram_file_hash=telegram_file_hash
+                )
 
-        return test_campaign(ref_id)
+        return TelegramCampaignServices().test_campaign(ref_id)
 
 
 class CampaignService(object):
