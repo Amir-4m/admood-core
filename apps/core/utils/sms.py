@@ -1,10 +1,8 @@
 import json
-import logging
 
 from services.utils import custom_request
 from admood_core.settings import SMS_API_URL, SMS_API_TOKEN
 
-logger = logging.getLogger(__file__)
 
 SMS_API_URL = SMS_API_URL
 SMS_API_TOKEN = SMS_API_TOKEN

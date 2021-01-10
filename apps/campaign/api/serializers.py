@@ -385,8 +385,8 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                 file_id = files or obj.data.get('imageId')
                 file = File.objects.get(pk=file_id).file
                 return self.context['request'].build_absolute_uri(file.url)
-        except Exception:
-            logger.exception(f'CampaignContentSerializer. object: {obj}')
+        except Exception as e:
+            logger.error(f'[getting file url for campaign content failed]-[exc: {e}]-[campaing content id: {obj.id}]')
             return None
 
 

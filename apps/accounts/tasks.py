@@ -14,7 +14,7 @@ logger = logging.getLogger(__file__)
 
 @shared_task
 def send_verification_email(email_address, code):
-    logger.info(f'sending verification email {email_address}')
+    logger.debug(f'[sending verification email]-[email: {email_address}]')
 
     verify_url = f'{SITE_URL}/{USER_VERIFICATION_URL}/?rc={code}'
     context = {
@@ -38,14 +38,14 @@ def send_verification_email(email_address, code):
 
 @shared_task
 def send_reset_password(email_address, code):
-    logger.info(f'Sending reset password {email_address}')
+    logger.debug(f'[sending reset password]-[email: {email_address}]')
 
     url = f'{SITE_URL}/{USER_RESET_PASSWORD_URL}/?rc={code}'
     message = EmailMessage('reset password', url, to=[email_address], from_email=settings.EMAIL_HOST_USER)
 
     with mail.get_connection() as connection:
         connection.send_messages([message])
-        logger.info(f'Reset password sent url: {url}')
+        logger.debug(f'[reset password sent]-[URL: {url}]')
 
 
 @shared_task
