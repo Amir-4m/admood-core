@@ -65,7 +65,7 @@ class CampaignViewSet(BaseViewSet,
                 {'status': _('At least one content for campaign must be existed to approve campaign!')}
             )
         if instance.total_budget > Transaction.balance(instance.owner):
-            raise ValidationError({'status': _('Ensure this campaign is a draft.')})
+            raise ValidationError({'total_budget': _('wallet balance is lower than total budget!')})
 
         instance.status = Campaign.STATUS_WAITING
         instance.save()
