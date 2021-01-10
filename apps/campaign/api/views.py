@@ -70,7 +70,7 @@ class CampaignViewSet(BaseViewSet,
 
         instance.status = Campaign.STATUS_WAITING
         instance.save()
-        return Response(model_to_dict(instance))
+        return Response(model_to_dict(instance, exclude=['publishers', 'categories', 'final_publishers']))
 
     @action(detail=True, methods=['post'], serializer_class=CampaignDuplicateSerializer)
     def duplicate(self, request, *args, **kwargs):
