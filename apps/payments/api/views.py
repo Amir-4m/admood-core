@@ -69,7 +69,7 @@ class DepositViewSet(ListModelMixin,
             transaction_id = order_response.json().get('transaction_id')
         except Exception as e:
             logger.error(
-                f'[message: error calling payment with endpoint orders and action post {e}]-[payment: {obj.id}]'
+                f'[error calling payment with endpoint orders and action post]-[payment id: {obj.id}]-[exc: {e}]'
             )
             raise ParseError('error occurred in creating order')
 
@@ -98,7 +98,7 @@ class DepositViewSet(ListModelMixin,
             )
         except Exception as e:
             logger.error(
-                f'[message: error calling payment with endpoint purchase/gateway and action post {e}]-[payment: {payment.id}]'
+                f'[error calling payment with endpoint purchase/gateway and action post]-[payment: {payment.id}]-[exc: {e}]'
             )
             raise ParseError('error occurred in setting gateway')
         return Response(data=response.json())

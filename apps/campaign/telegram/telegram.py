@@ -48,7 +48,7 @@ def create_telegram_campaign(campaign, start_datetime, end_datetime):
             campaign_ref.save()
             return campaign_ref
     except Exception as e:
-        logger.exception(f'creating telegram campaign with id {campaign.id} failed due to: {e}')
+        logger.error(f'[creating telegram campaign failed]-[exc: {e}]-[campaign id: {campaign.id}]')
         campaign.error_count += 1
         campaign.save()
         raise e

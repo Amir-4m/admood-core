@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Campaign)
 def create_transaction(sender, instance, created, **kwargs):
-    logger.info(f'Create transaction signal fired. Campaign: {instance} created: {created}')
+    logger.debug(
+        f'[create transaction signal received]-[campaign id: {instance.id}]-[created: {created}]'
+        f'-[previous status: {instance._b_status}]-[current status: {instance.status}]'
+    )
 
     if created:
         # when duplicate a campaign, create a deduct transaction

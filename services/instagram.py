@@ -1,7 +1,10 @@
+import logging
 import json
 
 from admood_core.settings import ADINSTA_API_TOKEN, ADINSTA_API_URL
 from services.utils import file_type, custom_request
+
+logger = logging.getLogger(__name__)
 
 JSON_HEADERS = {
     'Authorization': ADINSTA_API_TOKEN,
@@ -18,6 +21,9 @@ MEDIA_URL = f'{ADINSTA_API_URL}/api/v1/medias/'
 
 
 def create_insta_campaign(campaign, start_time, end_time, status):
+    logger.debug(
+        f"[creating instagram campaign]-[obj: {campaign}]-[start time: {start_time}]-[end time: {end_time}]-[status: {status}]"
+    )
     publishers = campaign.final_publishers.select_related('publisher').values_list(
         'publisher__ref_id', 'publisher_price'
     )
@@ -36,6 +42,8 @@ def create_insta_campaign(campaign, start_time, end_time, status):
 
 
 def create_insta_content(content, campaign_id):
+    logger.debug(f"[creating instagram content]-[content id: {content.id}]-[campaign id: {campaign_id}]")
+
     data = dict(
         campaign=campaign_id,
         title=content.title,
@@ -47,6 +55,8 @@ def create_insta_content(content, campaign_id):
 
 
 def create_insta_media(file, content_id):
+    logger.debug(f"[creating instagram media]-[file: {file.name}]-[content id: {content_id}]")
+
     data = dict(
         file_type=file_type(file.name),
         content=content_id,
@@ -55,11 +65,15 @@ def create_insta_media(file, content_id):
 
 
 def enable_Insta_campaign(campaign_id):
+    logger.debug(f"[enabling instagram campaign]-[campaign id: {campaign_id}]")
+
     custom_request(url=f'{CAMPAIGN_URL}{campaign_id}/', method='patch', headers=HEADERS, data={'is_enable': True})
     return True
 
 
 def get_insta_publishers():
+    logger.debug(f'[getting instagram publishers]')
+
     headers = {'Authorization': ADINSTA_API_TOKEN}
     pages_url = f'{ADINSTA_API_URL}/api/v1/instagram/pages/'
     r = custom_request(url=f'{pages_url}', method='get', headers=headers)
@@ -67,11 +81,15 @@ def get_insta_publishers():
 
 
 def get_insta_campaign(campaign_id):
+    logger.debug(f'[getting instagram campaign]-[campaign id: {campaign_id}]')
+
     r = custom_request(url=f'{CAMPAIGN_URL}{campaign_id}/', method='get', headers=HEADERS)
     return r.json()
 
 
 def get_contents(campaign_id):
+    logger.debug(f'[getting contents]-[campaign id: {campaign_id}]')
+
     campaign = get_insta_campaign(campaign_id)
     contents = campaign.get('contents', None)
     return contents

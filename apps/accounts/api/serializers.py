@@ -45,10 +45,10 @@ class MyTokenRefreshSerializer(serializers.Serializer):
                 try:
                     # Attempt to blacklist the given refresh token
                     refresh.blacklist()
-                except AttributeError:
+                except AttributeError as e:
                     # If blacklist app not installed, `blacklist` method will
                     # not be present
-                    logger.exception('RefreshSerializer:')
+                    logger.error(f'[refresh token failed]-[exc: {e}]')
 
             refresh.set_jti()
             refresh.set_exp()
