@@ -1,5 +1,4 @@
-from django.forms import model_to_dict
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
@@ -70,7 +69,7 @@ class CampaignViewSet(BaseViewSet,
 
         instance.status = Campaign.STATUS_WAITING
         instance.save()
-        return Response(model_to_dict(instance))
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post'], serializer_class=CampaignDuplicateSerializer)
     def duplicate(self, request, *args, **kwargs):

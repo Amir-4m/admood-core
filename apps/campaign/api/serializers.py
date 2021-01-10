@@ -1,3 +1,4 @@
+import logging
 import datetime
 
 from django.db.models.functions import Lower
@@ -12,6 +13,8 @@ from apps.medium.consts import Medium
 from apps.medium.models import Publisher
 from apps.payments.models import Transaction
 from services.utils import file_type
+
+logger = logging.getLogger(__file__)
 
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -388,10 +391,11 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
     contents_detail = serializers.SerializerMethodField()
     publishers_detail = serializers.SerializerMethodField()
     display_text = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
 
     class Meta:
         model = CampaignReference
-        fields = ('id', 'title', 'display_text', 'contents_detail', 'publishers_detail')
+        fields = ('id', 'title', 'date', 'display_text', 'contents_detail', 'publishers_detail')
 
     def get_contents_detail(self, obj):
         contents_detail = []
@@ -405,6 +409,9 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
                     continue
                 contents_detail.append({'content_title': cont.title, 'content_total_views': content['views']})
         return contents_detail
+
+    def get_date(self, obj):
+        return f"{obj.schedule_range.lower.date()}"
 
     def get_display_text(self, obj):
         if obj.schedule_range:
