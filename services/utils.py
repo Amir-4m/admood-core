@@ -32,18 +32,18 @@ def custom_request(url, method='post', **kwargs):
         logger.debug(f"[making request]-[method: {method}]-[URL: {url}]-[kwargs: {kwargs}]")
         req = requests.request(method, url, **kwargs)
         req.raise_for_status()
-        return req
-    
     except requests.exceptions.HTTPError as e:
-        logger.critical(
-            f'[request failed]-[exc: {e}]-[response err: {e.response.text}]-[status code: {e.response.status_code}]'
-            f'-[URL: {url}]'
+        logger.warning(
+            f'[making request failed]-[response err: {e.response.text}]-[status code: {e.response.status_code}]'
+            f'-[URL: {url}]-[exc: {e}]'
         )
         raise Exception(e.response.text)
-    except requests.exceptions.RequestException as e:
-        logger.critical(f'[request failed]-[exc: {e}]-[URL: {url}]')
-        raise
     except requests.exceptions.ConnectTimeout as e:
-        logger.critical(f'[request failed]-[exc: {e}]-[URL: {url}]')
+        logger.critical(f'[request failed]-[URL: {url}]-[exc: {e}]')
         raise
+    except Exception as e:
+        logger.error(f'[request failed]-[URL: {url}]-[exc: {e}]')
+        raise
+    return req
+
 

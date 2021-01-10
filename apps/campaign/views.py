@@ -19,7 +19,7 @@ def test_campaign(request, pk):
         try:
             result = create_telegram_test_campaign(campaign)
         except Exception as e:
-            logger.error(f"[testing campaign failed]-[exc: {e}]-[campaign id: {campaign.id}]")
+            logger.error(f"[testing campaign failed]-[campaign id: {campaign.id}]-[exc: {e}]")
             messages.error(request, _(e.__str__()))
         else:
             if result is True:
