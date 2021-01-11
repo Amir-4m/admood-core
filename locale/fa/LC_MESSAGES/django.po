@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-11 14:27+0330\n"
+"POT-Creation-Date: 2021-01-11 14:40+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,344 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: apps/accounts/admin.py:12
+msgid "Personal info"
+msgstr ""
+
+#: apps/accounts/admin.py:13
+msgid "Permissions"
+msgstr ""
+
+#: apps/accounts/admin.py:15
+msgid "Important dates"
+msgstr ""
+
+#: apps/accounts/api/serializers.py:73
+msgid "password mismatch."
+msgstr "رمز عبور اشتباه است"
+
+#: apps/accounts/api/serializers.py:78
+msgid "user with this email already exists."
+msgstr "کاربر با این ایمیل قبلا وجود دارد"
+
+#: apps/accounts/api/serializers.py:103 apps/accounts/models.py:96
+#: apps/accounts/models.py:250
+msgid "Enter a valid phone number."
+msgstr "شماره موبایل معتبر وارد کنید"
+
+#: apps/accounts/api/serializers.py:247
+msgid "the old password you have entered is incorrect."
+msgstr "رمز عبور قبلی اشتباه است"
+
+#: apps/accounts/api/serializers.py:265
+msgid "user with this phone number is already exists."
+msgstr "کاربر با این شماره قبلا وجود دارد"
+
+#: apps/accounts/models.py:29
+msgid "at least one of username or email or phone_number must be set"
+msgstr ""
+
+#: apps/accounts/models.py:72 apps/accounts/models.py:198
+#: apps/campaign/models.py:39
+msgid "waiting"
+msgstr ""
+
+#: apps/accounts/models.py:73 apps/accounts/models.py:200
+#: apps/campaign/models.py:40
+msgid "approved"
+msgstr ""
+
+#: apps/accounts/models.py:74 apps/accounts/models.py:199
+#: apps/campaign/models.py:41
+msgid "rejected"
+msgstr ""
+
+#: apps/accounts/models.py:77 apps/accounts/models.py:205
+#: apps/medium/models.py:31 apps/payments/models.py:73
+msgid "created time"
+msgstr ""
+
+#: apps/accounts/models.py:78 apps/accounts/models.py:206
+#: apps/medium/models.py:32 apps/payments/models.py:74
+msgid "updated time"
+msgstr ""
+
+#: apps/accounts/models.py:81
+msgid "username"
+msgstr ""
+
+#: apps/accounts/models.py:84
+msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+msgstr ""
+
+#: apps/accounts/models.py:87
+msgid "A user with that username already exists."
+msgstr ""
+
+#: apps/accounts/models.py:91
+msgid "phone number"
+msgstr ""
+
+#: apps/accounts/models.py:99
+msgid "A user with this phone number already exists."
+msgstr ""
+
+#: apps/accounts/models.py:102
+msgid "email"
+msgstr ""
+
+#: apps/accounts/models.py:104
+msgid "staff status"
+msgstr ""
+
+#: apps/accounts/models.py:106
+msgid "Designates whether the user can log into this admin site."
+msgstr ""
+
+#: apps/accounts/models.py:109
+msgid "active"
+msgstr ""
+
+#: apps/accounts/models.py:112
+msgid ""
+"Designates whether this user should be treated as active. Unselect this "
+"instead of deleting accounts."
+msgstr ""
+
+#: apps/accounts/models.py:117
+msgid "verified"
+msgstr ""
+
+#: apps/accounts/models.py:120 apps/accounts/models.py:209
+msgid "user status"
+msgstr ""
+
+#: apps/accounts/models.py:122
+msgid "date joined"
+msgstr ""
+
+#: apps/accounts/models.py:130
+#: venv/lib/python3.8/site-packages/rest_framework_simplejwt/token_blacklist/admin.py:77
+msgid "user"
+msgstr ""
+
+#: apps/accounts/models.py:131
+msgid "users"
+msgstr ""
+
+#: apps/accounts/models.py:189
+msgid "real"
+msgstr ""
+
+#: apps/accounts/models.py:190
+msgid "legal"
+msgstr ""
+
+#: apps/accounts/models.py:224
+msgid "profile"
+msgstr ""
+
+#: apps/accounts/models.py:225
+msgid "profiles"
+msgstr ""
+
+#: apps/campaign/api/serializers.py:40
+msgid "end_time should be greater than start_time"
+msgstr "زمان پایان باید بزرگ تر از زمان شوع باشد"
+
+#: apps/campaign/api/serializers.py:95 apps/campaign/api/serializers.py:257
+msgid "invalid schedule set."
+msgstr "زمانبندی معتبر نیست"
+
+#: apps/campaign/api/serializers.py:108
+msgid "Ensure total budget is less than or equal to your wallet balance."
+msgstr ""
+"از کمتر بودن یا یکسان بودن بودجه کلی نسبت به موجودی کیف پول خود اطمینان حاصل "
+"فرمایید."
+
+#: apps/campaign/api/serializers.py:118
+msgid "only draft campaigns are editable."
+msgstr "فقط کمپین هایی که در وضعیت پیش نویس قرار دارند، قابل تغییر می باشند."
+
+#: apps/campaign/api/serializers.py:128 apps/campaign/api/serializers.py:227
+msgid "publishers and categories both can not be empty."
+msgstr "نمایش دهنده و دسته بندی هر دو نمی توانند خالی باشند."
+
+#: apps/campaign/api/serializers.py:132 apps/campaign/api/serializers.py:231
+msgid "campaign's medium and category's medium must be the same."
+msgstr "مدیوم های کمپین و دسته بندی باید یکسان باشند."
+
+#: apps/campaign/api/serializers.py:136 apps/campaign/api/serializers.py:235
+msgid "campaign's medium and publisher's medium must be the same."
+msgstr "مدیوم های کمپین و نشان دهنده تبلیغ باید یکسان باشند."
+
+#: apps/campaign/api/serializers.py:269
+msgid "draft and approved campaigns are just duplicable."
+msgstr "فقط کمپین های در وضعیت پیش نویس و یا تایید شده، قابل تکرار می باشند"
+
+#: apps/campaign/api/serializers.py:338
+msgid "campaign with this id does not exist!"
+msgstr "کمپینی با این شناس وجود ندارد"
+
+#: apps/campaign/api/serializers.py:341
+msgid "approved campaigns are not editable."
+msgstr "کمپین با وضعیت تایید شده قابل تغییر نیست"
+
+#: apps/campaign/api/serializers.py:346
+msgid "instagram campaigns can only have 1 content!"
+msgstr "کمپین های اینستاگرامی فقط می توانند 1 محتوا داشته باشند"
+
+#: apps/campaign/api/serializers.py:349
+msgid "invalid value for cost model"
+msgstr "مقدار نامعتبر برای کاست مدل"
+
+#: apps/campaign/api/serializers.py:355
+msgid "file format is not valid!"
+msgstr "فرمت فایل معتبر نیست"
+
+#: apps/campaign/api/serializers.py:358
+msgid "igtv can only have 1 file!"
+msgstr ""
+
+#: apps/campaign/api/serializers.py:362
+msgid "album posts can not have more 10 files!"
+msgstr ""
+
+#: apps/campaign/api/views.py:63
+msgid "Ensure this campaign is a draft."
+msgstr "از پیش نویس بودن وضعیت کمپین مطمئن شوید."
+
+#: apps/campaign/api/views.py:66
+msgid "At least one content for campaign must be existed to approve campaign!"
+msgstr ""
+
+#: apps/campaign/api/views.py:69
+msgid "wallet balance is lower than total budget!"
+msgstr "موجودی کیف پول کمتر از بودجه کل می باشد"
+
+#: apps/campaign/forms.py:94
+msgid "to approve the campaign upload the test screenshot."
+msgstr ""
+
+#: apps/campaign/forms.py:98
+msgid "to approve the campaign, content can not be empty!"
+msgstr ""
+
+#: apps/campaign/models.py:38
+msgid "draft"
+msgstr ""
+
+#: apps/campaign/models.py:42
+msgid "blocked"
+msgstr ""
+
+#: apps/campaign/models.py:203
+#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
+msgid "Monday"
+msgstr ""
+
+#: apps/campaign/models.py:204
+#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
+msgid "Tuesday"
+msgstr ""
+
+#: apps/campaign/models.py:205
+#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
+msgid "Wednesday"
+msgstr ""
+
+#: apps/campaign/models.py:206
+#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
+msgid "Thursday"
+msgstr ""
+
+#: apps/campaign/models.py:207
+#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
+msgid "Friday"
+msgstr ""
+
+#: apps/campaign/models.py:208
+#: venv/lib/python3.8/site-packages/django/utils/dates.py:7
+msgid "Saturday"
+msgstr ""
+
+#: apps/campaign/models.py:209
+#: venv/lib/python3.8/site-packages/django/utils/dates.py:7
+msgid "Sunday"
+msgstr ""
+
+#: apps/campaign/views.py:21
+msgid "The test was performed correctly."
+msgstr ""
+
+#: apps/campaign/views.py:25
+msgid "Currently only Telegram medium can be tested."
+msgstr ""
+
+#: apps/medium/models.py:33
+msgid "medium"
+msgstr ""
+
+#: apps/medium/models.py:34
+msgid "cost model"
+msgstr ""
+
+#: apps/medium/models.py:35
+msgid "grade"
+msgstr ""
+
+#: apps/medium/models.py:36
+msgid "publisher price"
+msgstr ""
+
+#: apps/medium/models.py:37
+msgid "advertiser price"
+msgstr ""
+
+#: apps/medium/models.py:46
+msgid "publisher price must be lower than advertiser price!"
+msgstr ""
+
+#: apps/payments/models.py:48
+msgid "Deposit"
+msgstr ""
+
+#: apps/payments/models.py:49
+msgid "Withdraw"
+msgstr ""
+
+#: apps/payments/models.py:50
+msgid "Deduct"
+msgstr ""
+
+#: apps/payments/models.py:51
+msgid "Refund"
+msgstr ""
+
+#: apps/payments/models.py:52
+msgid "Gift"
+msgstr ""
+
+#: apps/payments/models.py:53
+msgid "Penalty"
+msgstr ""
+
+#: apps/payments/models.py:75
+msgid "uuid"
+msgstr ""
+
+#: apps/payments/models.py:76
+msgid "transaction id"
+msgstr ""
+
+#: apps/payments/models.py:78
+msgid "is paid"
+msgstr ""
+
+#: apps/payments/models.py:79
+msgid "price"
+msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/contrib/messages/apps.py:7
 msgid "Messages"
@@ -47,21 +385,29 @@ msgid "That page contains no results"
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:32
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid value."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:103
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:659
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid URL."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:155
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid integer."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:166
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid email address."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #. Translators: "letters" means latin letters: a-z and A-Z.
 #: venv/lib/python3.8/site-packages/django/core/validators.py:240
@@ -77,13 +423,17 @@ msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:256
 #: venv/lib/python3.8/site-packages/django/core/validators.py:276
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid IPv4 address."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:261
 #: venv/lib/python3.8/site-packages/django/core/validators.py:277
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid IPv6 address."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:271
 #: venv/lib/python3.8/site-packages/django/core/validators.py:275
@@ -100,14 +450,20 @@ msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:343
-#, python-format
+#, fuzzy, python-format
+#| msgid "Ensure total budget is less than or equal to your wallet balance."
 msgid "Ensure this value is less than or equal to %(limit_value)s."
 msgstr ""
+"از کمتر بودن یا یکسان بودن بودجه کلی نسبت به موجودی کیف پول خود اطمینان حاصل "
+"فرمایید."
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:352
-#, python-format
+#, fuzzy, python-format
+#| msgid "Ensure total budget is less than or equal to your wallet balance."
 msgid "Ensure this value is greater than or equal to %(limit_value)s."
 msgstr ""
+"از کمتر بودن یا یکسان بودن بودجه کلی نسبت به موجودی کیف پول خود اطمینان حاصل "
+"فرمایید."
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:362
 #, python-format
@@ -134,8 +490,10 @@ msgstr[1] ""
 #: venv/lib/python3.8/site-packages/django/core/validators.py:396
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:291
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:326
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a number."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/core/validators.py:398
 #, python-format
@@ -177,9 +535,10 @@ msgid "and"
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/db/models/base.py:1186
-#, python-format
+#, fuzzy, python-format
+#| msgid "user with this email already exists."
 msgid "%(model_name)s with this %(field_labels)s already exists."
-msgstr ""
+msgstr "کاربر با این ایمیل قبلا وجود دارد"
 
 #: venv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:104
 #, python-format
@@ -195,9 +554,10 @@ msgid "This field cannot be blank."
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/db/models/fields/__init__.py:107
-#, python-format
+#, fuzzy, python-format
+#| msgid "user with this email already exists."
 msgid "%(model_name)s with this %(field_label)s already exists."
-msgstr ""
+msgstr "کاربر با این ایمیل قبلا وجود دارد"
 
 #. Translators: The 'lookup_type' is one of 'date', 'year' or 'month'.
 #. Eg: "Title must be unique for pub_date year"
@@ -442,26 +802,36 @@ msgid "This field is required."
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:246
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a whole number."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:397
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:1127
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid date."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:421
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:1128
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid time."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:443
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid date/time."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:472
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid duration."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:473
 #, python-brace-format
@@ -508,16 +878,20 @@ msgstr ""
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:854
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:969
 #: venv/lib/python3.8/site-packages/django/forms/models.py:1274
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a list of values."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:970
 msgid "Enter a complete value."
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/forms/fields.py:1186
+#, fuzzy
+#| msgid "Enter a valid phone number."
 msgid "Enter a valid UUID."
-msgstr ""
+msgstr "شماره موبایل معتبر وارد کنید"
 
 #. Translators: This is the default suffix added to form field labels
 #: venv/lib/python3.8/site-packages/django/forms/forms.py:81
@@ -680,34 +1054,6 @@ msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/utils/dateformat.py:152
 msgid "noon"
-msgstr ""
-
-#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Monday"
-msgstr ""
-
-#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Tuesday"
-msgstr ""
-
-#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Wednesday"
-msgstr ""
-
-#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Thursday"
-msgstr ""
-
-#: venv/lib/python3.8/site-packages/django/utils/dates.py:6
-msgid "Friday"
-msgstr ""
-
-#: venv/lib/python3.8/site-packages/django/utils/dates.py:7
-msgid "Saturday"
-msgstr ""
-
-#: venv/lib/python3.8/site-packages/django/utils/dates.py:7
-msgid "Sunday"
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/utils/dates.py:10
@@ -1133,9 +1479,10 @@ msgid "Directory indexes are not allowed here."
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/django/views/static.py:42
-#, python-format
+#, fuzzy, python-format
+#| msgid "campaign with this id does not exist!"
 msgid "“%(path)s” does not exist"
-msgstr ""
+msgstr "کمپینی با این شناس وجود ندارد"
 
 #: venv/lib/python3.8/site-packages/django/views/static.py:80
 #, python-format
@@ -1248,10 +1595,6 @@ msgstr ""
 
 #: venv/lib/python3.8/site-packages/rest_framework_simplejwt/token_blacklist/admin.py:72
 msgid "jti"
-msgstr ""
-
-#: venv/lib/python3.8/site-packages/rest_framework_simplejwt/token_blacklist/admin.py:77
-msgid "user"
 msgstr ""
 
 #: venv/lib/python3.8/site-packages/rest_framework_simplejwt/token_blacklist/admin.py:82
