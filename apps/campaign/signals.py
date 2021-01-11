@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
@@ -5,8 +7,16 @@ from apps.campaign.models import Campaign
 from apps.payments.models import Transaction
 
 
+logger = logging.getLogger(__name__)
+
+
 @receiver(post_save, sender=Campaign)
 def create_transaction(sender, instance, created, **kwargs):
+    logger.debug(
+        f'[create transaction signal received]-[campaign id: {instance.id}]-[created: {created}]'
+        f'-[previous status: {instance._b_status}]-[current status: {instance.status}]'
+    )
+
     if created:
         # when duplicate a campaign, create a deduct transaction
         if instance.status == Campaign.STATUS_APPROVED:

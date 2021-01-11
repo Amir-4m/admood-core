@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
@@ -10,6 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from apps.accounts.models import UserProfile, Verification
 
 User = get_user_model()
+logger = logging.getLogger(__file__)
 
 
 class MyTokenObtainPairSerializer(TokenObtainSerializer):
@@ -42,10 +45,10 @@ class MyTokenRefreshSerializer(serializers.Serializer):
                 try:
                     # Attempt to blacklist the given refresh token
                     refresh.blacklist()
-                except AttributeError:
+                except AttributeError as e:
                     # If blacklist app not installed, `blacklist` method will
                     # not be present
-                    pass
+                    logger.error(f'[refresh token failed]-[exc: {e}]')
 
             refresh.set_jti()
             refresh.set_exp()

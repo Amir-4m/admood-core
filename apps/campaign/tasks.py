@@ -1,4 +1,6 @@
 from celery import shared_task
+import logging
+
 from django.db.models import Q
 from django.utils.timezone import now
 
@@ -6,6 +8,8 @@ from apps.campaign.models import Campaign, CampaignReference, CampaignContent
 from apps.medium.consts import Medium
 
 from .services import CampaignService, TelegramCampaignServices
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task

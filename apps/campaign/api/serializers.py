@@ -17,6 +17,9 @@ from services.utils import file_type
 logger = logging.getLogger(__file__)
 
 
+logger = logging.getLogger(__file__)
+
+
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
@@ -383,6 +386,7 @@ class CampaignContentSerializer(serializers.ModelSerializer):
                 file = File.objects.get(pk=file_id).file
                 return self.context['request'].build_absolute_uri(file.url)
         except Exception as e:
+            logger.error(f'[getting file url for campaign content failed]-[campaing content id: {obj.id}]-[exc: {e}]')
             return None
 
 
