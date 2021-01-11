@@ -38,7 +38,8 @@ class InstagramCampaignServices(object):
 
     def create_insta_campaign(self, campaign, start_time, end_time, status):
         logger.debug(
-            f"[creating instagram campaign]-[obj: {campaign}]-[start time: {start_time}]-[end time: {end_time}]-[status: {status}]"
+            f"[creating instagram campaign]-[obj: {campaign}]-[start time: {start_time}]-[end time: {end_time}]"
+            f"-[status: {status}]-[URL: {self.CAMPAIGN_URL}]"
         )
         publishers = []
         for publisher in campaign.final_publishers.all():
@@ -62,7 +63,10 @@ class InstagramCampaignServices(object):
         return response.json()['id']
 
     def create_insta_content(self, content, campaign_id):
-        logger.debug(f"[creating instagram content]-[content id: {content.id}]-[campaign id: {campaign_id}]")
+        logger.debug(
+            f"[creating instagram content]-[content id: {content.id}]-[campaign id: {campaign_id}]"
+            f"-[URL: {self.CONTENT_URL}]"
+        )
         data = dict(
             campaign=campaign_id,
             title=content.title,
@@ -73,7 +77,9 @@ class InstagramCampaignServices(object):
         return response.json()['id']
 
     def create_insta_media(self, file, content_id):
-        logger.debug(f"[creating instagram media]-[file: {file.name}]-[content id: {content_id}]")
+        logger.debug(
+            f"[creating instagram media]-[file: {file.name}]-[content id: {content_id}]-[URL: {self.MEDIA_URL}]"
+        )
 
         data = dict(
             file_type=file_type(file.name),
@@ -82,9 +88,10 @@ class InstagramCampaignServices(object):
         custom_request(self.MEDIA_URL, data=data, files={'file': file})
 
     def enable_Insta_campaign(self, campaign_id):
-        logger.debug(f"[enabling instagram campaign]-[campaign id: {campaign_id}]")
+        url = f'{self.CAMPAIGN_URL}{campaign_id}/'
+        logger.debug(f"[enabling instagram campaign]-[campaign id: {campaign_id}]-[URL: url]")
 
-        custom_request(f'{self.CAMPAIGN_URL}{campaign_id}/', 'patch', data={'is_enable': True})
+        custom_request(url, 'patch', data={'is_enable': True})
         return True
 
     def get_insta_publishers(self):
@@ -94,9 +101,10 @@ class InstagramCampaignServices(object):
         return response.json()
 
     def get_insta_campaign(self, campaign_id):
-        logger.debug(f'[getting instagram campaign]-[campaign id: {campaign_id}]')
+        url = f'{self.CAMPAIGN_URL}{campaign_id}/'
+        logger.debug(f'[getting instagram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
 
-        response = custom_request(f'{self.CAMPAIGN_URL}{campaign_id}/', 'get')
+        response = custom_request(url, 'get')
         return response.json()
 
     def get_contents(self, campaign_id):
