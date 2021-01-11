@@ -8,307 +8,342 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-26 12:25+0330\n"
+"POT-Creation-Date: 2021-01-11 14:27+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\apps\accounts\admin.py:12
+#: apps/accounts/admin.py:12
 msgid "Personal info"
 msgstr ""
 
-#: .\apps\accounts\admin.py:13
+#: apps/accounts/admin.py:13
 msgid "Permissions"
 msgstr ""
 
-#: .\apps\accounts\admin.py:15
+#: apps/accounts/admin.py:15
 msgid "Important dates"
 msgstr ""
 
-#: .\apps\accounts\api\serializers.py:73
+#: apps/accounts/api/serializers.py:73
 msgid "password mismatch."
 msgstr "رمز عبور اشتباه است"
 
-#: .\apps\accounts\api\serializers.py:78
+#: apps/accounts/api/serializers.py:78
 msgid "user with this email already exists."
 msgstr "کاربر با این ایمیل قبلا وجود دارد"
 
-#: .\apps\accounts\api\serializers.py:103 .\apps\accounts\models.py:96
-#: .\apps\accounts\models.py:250
+#: apps/accounts/api/serializers.py:103 apps/accounts/models.py:96
+#: apps/accounts/models.py:250
 msgid "Enter a valid phone number."
 msgstr "شماره موبایل معتبر وارد کنید"
 
-#: .\apps\accounts\api\serializers.py:247
+#: apps/accounts/api/serializers.py:247
 msgid "the old password you have entered is incorrect."
 msgstr "رمز عبور قبلی اشتباه است"
 
-#: .\apps\accounts\api\serializers.py:265
+#: apps/accounts/api/serializers.py:265
 msgid "user with this phone number is already exists."
 msgstr "کاربر با این شماره قبلا وجود دارد"
 
-#: .\apps\accounts\models.py:29
+#: apps/accounts/models.py:29
 msgid "at least one of username or email or phone_number must be set"
 msgstr ""
 
-#: .\apps\accounts\models.py:72 .\apps\accounts\models.py:198
-#: .\apps\campaign\models.py:39
+#: apps/accounts/models.py:72 apps/accounts/models.py:198
+#: apps/campaign/models.py:39
 msgid "waiting"
 msgstr ""
 
-#: .\apps\accounts\models.py:73 .\apps\accounts\models.py:200
-#: .\apps\campaign\models.py:40
+#: apps/accounts/models.py:73 apps/accounts/models.py:200
+#: apps/campaign/models.py:40
 msgid "approved"
 msgstr ""
 
-#: .\apps\accounts\models.py:74 .\apps\accounts\models.py:199
-#: .\apps\campaign\models.py:41
+#: apps/accounts/models.py:74 apps/accounts/models.py:199
+#: apps/campaign/models.py:41
 msgid "rejected"
 msgstr ""
 
-#: .\apps\accounts\models.py:77 .\apps\accounts\models.py:205
-#: .\apps\payments\models.py:73
+#: apps/accounts/models.py:77 apps/accounts/models.py:205
+#: apps/medium/models.py:31 apps/payments/models.py:73
 msgid "created time"
 msgstr ""
 
-#: .\apps\accounts\models.py:78 .\apps\accounts\models.py:206
-#: .\apps\payments\models.py:74
+#: apps/accounts/models.py:78 apps/accounts/models.py:206
+#: apps/medium/models.py:32 apps/payments/models.py:74
 msgid "updated time"
 msgstr ""
 
-#: .\apps\accounts\models.py:81
+#: apps/accounts/models.py:81
 msgid "username"
 msgstr ""
 
-#: .\apps\accounts\models.py:84
+#: apps/accounts/models.py:84
 msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
 msgstr ""
 
-#: .\apps\accounts\models.py:87
+#: apps/accounts/models.py:87
 msgid "A user with that username already exists."
 msgstr ""
 
-#: .\apps\accounts\models.py:91
+#: apps/accounts/models.py:91
 msgid "phone number"
 msgstr ""
 
-#: .\apps\accounts\models.py:99
+#: apps/accounts/models.py:99
 msgid "A user with this phone number already exists."
 msgstr ""
 
-#: .\apps\accounts\models.py:102
+#: apps/accounts/models.py:102
 msgid "email"
 msgstr ""
 
-#: .\apps\accounts\models.py:104
+#: apps/accounts/models.py:104
 msgid "staff status"
 msgstr ""
 
-#: .\apps\accounts\models.py:106
+#: apps/accounts/models.py:106
 msgid "Designates whether the user can log into this admin site."
 msgstr ""
 
-#: .\apps\accounts\models.py:109
+#: apps/accounts/models.py:109
 msgid "active"
 msgstr ""
 
-#: .\apps\accounts\models.py:112
+#: apps/accounts/models.py:112
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
 
-#: .\apps\accounts\models.py:117
+#: apps/accounts/models.py:117
 msgid "verified"
 msgstr ""
 
-#: .\apps\accounts\models.py:120 .\apps\accounts\models.py:209
+#: apps/accounts/models.py:120 apps/accounts/models.py:209
 msgid "user status"
 msgstr ""
 
-#: .\apps\accounts\models.py:122
+#: apps/accounts/models.py:122
 msgid "date joined"
 msgstr ""
 
-#: .\apps\accounts\models.py:130
+#: apps/accounts/models.py:130
 msgid "user"
 msgstr ""
 
-#: .\apps\accounts\models.py:131
+#: apps/accounts/models.py:131
 msgid "users"
 msgstr ""
 
-#: .\apps\accounts\models.py:189
+#: apps/accounts/models.py:189
 msgid "real"
 msgstr ""
 
-#: .\apps\accounts\models.py:190
+#: apps/accounts/models.py:190
 msgid "legal"
 msgstr ""
 
-#: .\apps\accounts\models.py:224
+#: apps/accounts/models.py:224
 msgid "profile"
 msgstr ""
 
-#: .\apps\accounts\models.py:225
+#: apps/accounts/models.py:225
 msgid "profiles"
 msgstr ""
 
-#: .\apps\campaign\api\serializers.py:37
+#: apps/campaign/api/serializers.py:40
 msgid "end_time should be greater than start_time"
 msgstr "زمان پایان باید بزرگ تر از زمان شوع باشد"
 
-#: .\apps\campaign\api\serializers.py:92
-#: .\apps\campaign\api\serializers.py:273
+#: apps/campaign/api/serializers.py:95 apps/campaign/api/serializers.py:257
 msgid "invalid schedule set."
 msgstr "زمانبندی معتبر نیست"
 
-#: .\apps\campaign\api\serializers.py:105
+#: apps/campaign/api/serializers.py:108
 msgid "Ensure total budget is less than or equal to your wallet balance."
-msgstr "از کمتر بودن یا یکسان بودن بودجه کلی نسبت به موجودی کیف پول خود اطمینان حاصل فرمایید."
+msgstr ""
+"از کمتر بودن یا یکسان بودن بودجه کلی نسبت به موجودی کیف پول خود اطمینان حاصل "
+"فرمایید."
 
-#: .\apps\campaign\api\serializers.py:115
+#: apps/campaign/api/serializers.py:118
 msgid "only draft campaigns are editable."
 msgstr "فقط کمپین هایی که در وضعیت پیش نویس قرار دارند، قابل تغییر می باشند."
 
-#: .\apps\campaign\api\serializers.py:125
-#: .\apps\campaign\api\serializers.py:243
+#: apps/campaign/api/serializers.py:128 apps/campaign/api/serializers.py:227
 msgid "publishers and categories both can not be empty."
 msgstr "نمایش دهنده و دسته بندی هر دو نمی توانند خالی باشند."
 
-#: .\apps\campaign\api\serializers.py:129
-#: .\apps\campaign\api\serializers.py:247
+#: apps/campaign/api/serializers.py:132 apps/campaign/api/serializers.py:231
 msgid "campaign's medium and category's medium must be the same."
 msgstr "مدیوم های کمپین و دسته بندی باید یکسان باشند."
 
-#: .\apps\campaign\api\serializers.py:133
-#: .\apps\campaign\api\serializers.py:251
+#: apps/campaign/api/serializers.py:136 apps/campaign/api/serializers.py:235
 msgid "campaign's medium and publisher's medium must be the same."
 msgstr "مدیوم های کمپین و نشان دهنده تبلیغ باید یکسان باشند."
 
-#: .\apps\campaign\api\serializers.py:219
-msgid "Ensure this campaign is a draft."
-msgstr "از پیش نویس بودن وضعیت کمپین مطمئن شوید."
-
-#: .\apps\campaign\api\serializers.py:222
-msgid "Ensure wallet balance more than total budget."
-msgstr "موجودی کیف پول باید بیشتر از بودجه کل باشد"
-
-#: .\apps\campaign\api\serializers.py:285
+#: apps/campaign/api/serializers.py:269
 msgid "draft and approved campaigns are just duplicable."
 msgstr "فقط کمپین های در وضعیت پیش نویس و یا تایید شده، قابل تکرار می باشند"
 
-#: .\apps\campaign\api\serializers.py:354
+#: apps/campaign/api/serializers.py:338
 msgid "campaign with this id does not exist!"
 msgstr "کمپینی با این شناس وجود ندارد"
 
-#: .\apps\campaign\api\serializers.py:357
+#: apps/campaign/api/serializers.py:341
 msgid "approved campaigns are not editable."
 msgstr "کمپین با وضعیت تایید شده قابل تغییر نیست"
 
-#: .\apps\campaign\api\serializers.py:362
+#: apps/campaign/api/serializers.py:346
 msgid "instagram campaigns can only have 1 content!"
 msgstr "کمپین های اینستاگرامی فقط می توانند 1 محتوا داشته باشند"
 
-#: .\apps\campaign\api\serializers.py:365
+#: apps/campaign/api/serializers.py:349
 msgid "invalid value for cost model"
 msgstr "مقدار نامعتبر برای کاست مدل"
 
-#: .\apps\campaign\api\serializers.py:371
+#: apps/campaign/api/serializers.py:355
 msgid "file format is not valid!"
 msgstr "فرمت فایل معتبر نیست"
 
-#: .\apps\campaign\api\serializers.py:374
+#: apps/campaign/api/serializers.py:358
 msgid "igtv can only have 1 file!"
 msgstr ""
 
-#: .\apps\campaign\api\serializers.py:378
+#: apps/campaign/api/serializers.py:362
 msgid "album posts can not have more 10 files!"
 msgstr ""
 
-#: .\apps\campaign\models.py:38
+#: apps/campaign/api/views.py:62
+msgid "Ensure this campaign is a draft."
+msgstr "از پیش نویس بودن وضعیت کمپین مطمئن شوید."
+
+#: apps/campaign/api/views.py:65
+msgid "At least one content for campaign must be existed to approve campaign!"
+msgstr ""
+
+#: apps/campaign/api/views.py:68
+msgid "wallet balance is lower than total budget!"
+msgstr "موجودی کیف پول کمتر از بودجه کل می باشد"
+
+#: apps/campaign/forms.py:94
+msgid "to approve the campaign upload the test screenshot."
+msgstr ""
+
+#: apps/campaign/forms.py:98
+msgid "to approve the campaign, content can not be empty!"
+msgstr ""
+
+#: apps/campaign/models.py:38
 msgid "draft"
 msgstr ""
 
-#: .\apps\campaign\models.py:42
+#: apps/campaign/models.py:42
 msgid "blocked"
 msgstr ""
 
-#: .\apps\campaign\models.py:203
+#: apps/campaign/models.py:203
 msgid "Monday"
 msgstr ""
 
-#: .\apps\campaign\models.py:204
+#: apps/campaign/models.py:204
 msgid "Tuesday"
 msgstr ""
 
-#: .\apps\campaign\models.py:205
+#: apps/campaign/models.py:205
 msgid "Wednesday"
 msgstr ""
 
-#: .\apps\campaign\models.py:206
+#: apps/campaign/models.py:206
 msgid "Thursday"
 msgstr ""
 
-#: .\apps\campaign\models.py:207
+#: apps/campaign/models.py:207
 msgid "Friday"
 msgstr ""
 
-#: .\apps\campaign\models.py:208
+#: apps/campaign/models.py:208
 msgid "Saturday"
 msgstr ""
 
-#: .\apps\campaign\models.py:209
+#: apps/campaign/models.py:209
 msgid "Sunday"
 msgstr ""
 
-#: .\apps\campaign\views.py:22
+#: apps/campaign/views.py:21
 msgid "The test was performed correctly."
 msgstr ""
 
-#: .\apps\campaign\views.py:26
+#: apps/campaign/views.py:25
 msgid "Currently only Telegram medium can be tested."
 msgstr ""
 
-#: .\apps\payments\models.py:48
+#: apps/medium/models.py:33
+msgid "medium"
+msgstr ""
+
+#: apps/medium/models.py:34
+msgid "cost model"
+msgstr ""
+
+#: apps/medium/models.py:35
+msgid "grade"
+msgstr ""
+
+#: apps/medium/models.py:36
+msgid "publisher price"
+msgstr ""
+
+#: apps/medium/models.py:37
+msgid "advertiser price"
+msgstr ""
+
+#: apps/medium/models.py:46
+msgid "publisher price must be lower than advertiser price!"
+msgstr ""
+
+#: apps/payments/models.py:48
 msgid "Deposit"
 msgstr ""
 
-#: .\apps\payments\models.py:49
+#: apps/payments/models.py:49
 msgid "Withdraw"
 msgstr ""
 
-#: .\apps\payments\models.py:50
+#: apps/payments/models.py:50
 msgid "Deduct"
 msgstr ""
 
-#: .\apps\payments\models.py:51
+#: apps/payments/models.py:51
 msgid "Refund"
 msgstr ""
 
-#: .\apps\payments\models.py:52
+#: apps/payments/models.py:52
 msgid "Gift"
 msgstr ""
 
-#: .\apps\payments\models.py:53
+#: apps/payments/models.py:53
 msgid "Penalty"
 msgstr ""
 
-#: .\apps\payments\models.py:75
+#: apps/payments/models.py:75
 msgid "uuid"
 msgstr ""
 
-#: .\apps\payments\models.py:76
+#: apps/payments/models.py:76
 msgid "transaction id"
 msgstr ""
 
-#: .\apps\payments\models.py:78
+#: apps/payments/models.py:78
 msgid "is paid"
 msgstr ""
 
-#: .\apps\payments\models.py:79
+#: apps/payments/models.py:79
 msgid "price"
 msgstr ""
