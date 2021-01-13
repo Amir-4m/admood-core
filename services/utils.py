@@ -47,3 +47,11 @@ def custom_request(url, method='post', **kwargs):
     return req
 
 
+class AutoFilter:
+    """
+    `admin.ModelAdmin` classes that has a filter field by `admin_auto_filters.filters.AutocompleteFilter`
+     should extends from this class.
+    """
+    class Media:
+        pass
+
