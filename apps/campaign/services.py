@@ -59,7 +59,7 @@ class InstagramCampaignServices(object):
             start_datetime=start_time,
             end_datetime=end_time,
         )
-        response = custom_request(self.CAMPAIGN_URL, data=data)
+        response = custom_request(self.CAMPAIGN_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
 
     def create_insta_content(self, content, campaign_id):
@@ -73,7 +73,7 @@ class InstagramCampaignServices(object):
             caption=content.data.get('content'),
             description=content.description
         )
-        response = custom_request(self.CONTENT_URL, data=data)
+        response = custom_request(self.CONTENT_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
 
     def create_insta_media(self, file, content_id):
@@ -85,26 +85,26 @@ class InstagramCampaignServices(object):
             file_type=file_type(file.name),
             content=content_id,
         )
-        custom_request(self.MEDIA_URL, data=data, files={'file': file})
+        custom_request(self.MEDIA_URL, json=data, files={'file': file}, headers=self.HEADERS)
 
     def enable_Insta_campaign(self, campaign_id):
         url = f'{self.CAMPAIGN_URL}{campaign_id}/'
         logger.debug(f"[enabling instagram campaign]-[campaign id: {campaign_id}]-[URL: url]")
 
-        custom_request(url, 'patch', data={'is_enable': True})
+        custom_request(url, 'patch', json={'is_enable': True}, headers=self.HEADERS)
         return True
 
     def get_insta_publishers(self):
         logger.debug(f'[getting instagram publishers]')
 
-        response = custom_request(self.PAGES_URL, 'get')
+        response = custom_request(self.PAGES_URL, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_insta_campaign(self, campaign_id):
         url = f'{self.CAMPAIGN_URL}{campaign_id}/'
         logger.debug(f'[getting instagram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
 
-        response = custom_request(url, 'get')
+        response = custom_request(url, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_contents(self, campaign_id):
@@ -192,7 +192,7 @@ class TelegramCampaignServices(object):
             start_datetime=start_time.__str__(),
             end_datetime=end_time.__str__(),
         )
-        response = custom_request(self.CAMPAIGN_URL, data=data)
+        response = custom_request(self.CAMPAIGN_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
 
     def create_content(self, content, campaign_id):
@@ -253,7 +253,7 @@ class TelegramCampaignServices(object):
                 view_type=content.data.get('view_type'),
             )
 
-        response = custom_request(self.CONTENT_URL, data=data)
+        response = custom_request(self.CONTENT_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
 
     def create_file(self, file, campaign_id=None, content_id=None, telegram_file_hash=None):
@@ -274,35 +274,35 @@ class TelegramCampaignServices(object):
             data['campaign_content'] = content_id
 
         if telegram_file_hash:
-            custom_request(self.FILE_URL, data=data)
+            custom_request(self.FILE_URL, json=data, headers=self.HEADERS)
         else:
-            custom_request(self.FILE_URL, data=data, files={'file': file})
+            custom_request(self.FILE_URL, data=data, files={'file': file}, headers=self.HEADERS)
 
     def enable_campaign(self, campaign_id):
         url = f'{self.CAMPAIGN_URL}{campaign_id}/'
         logger.debug(f'[enabling telegram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
 
-        custom_request(url, 'patch', data={'is_enable': True})
+        custom_request(url, 'patch', json={'is_enable': True}, headers=self.HEADERS)
         return True
 
     def campaign_report(self, campaign_id):
         url = f'{self.CAMPAIGN_URL}{campaign_id}/report/'
         logger.debug(f'[getting telegram report]-[campaign id: {campaign_id}]-[URL: {url}]')
 
-        response = custom_request(url, 'get')
+        response = custom_request(url, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_publishers(self):
         logger.debug(f'[getting telegram publishers]-[URL: {self.CHANNELS_URL}]')
 
-        response = custom_request(self.CHANNELS_URL, 'get')
+        response = custom_request(self.CHANNELS_URL, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_campaign(self, campaign_id):
         url = f'{self.CAMPAIGN_URL}{campaign_id}/'
         logger.debug(f'[getting telegram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
 
-        response = custom_request(url, 'get')
+        response = custom_request(url, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_contents(self, campaign_id):
@@ -319,7 +319,7 @@ class TelegramCampaignServices(object):
         url = f'{self.CAMPAIGN_URL}{campaign_id}/test/'
         logger.debug(f'[testing telegram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
 
-        response = custom_request(url, 'get', timeout=120)
+        response = custom_request(url, 'get', timeout=120, headers=self.HEADERS)
         return response.json()["detail"]
 
     @staticmethod
