@@ -1,6 +1,10 @@
 from django.contrib import admin
 
+from apps.accounts.admin_filter import OwnerFilter
+from services.utils import AutoFilter
 from .forms import ContentAdminForm, CampaignAdminForm
+from .admin_filter import CampaignFilter
+
 from .models import (
     Province,
     Campaign,
@@ -33,14 +37,14 @@ class CampaignContentInline(admin.TabularInline):
 
 
 @admin.register(Campaign)
-class CampaignAdmin(admin.ModelAdmin):
+class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     form = CampaignAdminForm
     list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
     inlines = [CampaignContentInline, TargetDeviceInline]
     autocomplete_fields = ["owner"]
-    search_fields = ['medium', 'owner__username', 'name', 'contents__title']
-    list_filter = ['medium', 'status', 'is_enable']
+    search_fields = ['medium', 'name', 'contents__title']
+    list_filter = [OwnerFilter, 'medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
 
@@ -66,28 +70,31 @@ class CampaignAdmin(admin.ModelAdmin):
 
 
 @admin.register(CampaignContent)
-class CampaignContentAdmin(admin.ModelAdmin):
+class CampaignContentAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "title", "data")
-    list_filter = ("campaign__name", "campaign__categories")
-    search_fields = ("campaign__name", "title",)
+    list_filter = (CampaignFilter, "campaign__categories")
+    raw_id_fields = ['campaign']
+    search_fields = ("title",)
     ordering = ['-id']
     form = ContentAdminForm
 
 
 @admin.register(CampaignSchedule)
-class CampaignScheduleAdmin(admin.ModelAdmin):
+class CampaignScheduleAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "week_day", "start_time", "end_time")
-    search_fields = ("campaign__name",)
+    raw_id_fields = ['campaign']
+    list_filter = [CampaignFilter]
 
 
 @admin.register(CampaignReference)
-class CampaignReferenceAdmin(admin.ModelAdmin):
+class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "ref_id", "date", "schedule_range")
-    search_fields = ('campaign__name', 'ref_id')
-    list_filter = ('date', 'campaign__medium')
+    raw_id_fields = ['campaign']
+    search_fields = ('ref_id',)
+    list_filter = (CampaignFilter, 'date', 'campaign__medium')
 
 
 @admin.register(TelegramCampaign)
-class TelegramCampaignAdmin(admin.ModelAdmin):
+class TelegramCampaignAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "screenshot")
-    search_fields = ("campaign__name",)
+    list_filter = [CampaignFilter]
