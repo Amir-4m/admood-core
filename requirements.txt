@@ -20,3 +20,4 @@ khayyam
 
 django-admin-json-editor
 django-json-widget
+django-admin-autocomplete-filter==0.6.1
