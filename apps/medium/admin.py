@@ -1,6 +1,8 @@
 from django.contrib import admin
 
+from services.utils import AutoFilter
 from .forms import PublisherForm
+from .admin_filter import CategoriesFilter, CostModelPriceFilter
 from .models import (
     Category,
     Publisher,
@@ -9,10 +11,10 @@ from .models import (
 
 
 @admin.register(Publisher)
-class PublisherAdmin(admin.ModelAdmin):
+class PublisherAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ['name', 'medium', 'status', 'is_enable', 'created_time', 'updated_time']
-    list_filter = ['medium', 'status', 'is_enable', 'categories']
-    search_fields = ['name', 'medium']
+    list_filter = [CategoriesFilter, CostModelPriceFilter, 'medium', 'status', 'is_enable']
+    search_fields = ['name']
     fields = ['name', 'medium', 'is_enable', 'status', 'categories', 'cost_models',
               'extra_data', 'description', 'url', 'ref_id']
     filter_horizontal = ['cost_models', 'categories']
@@ -26,7 +28,7 @@ class PublisherAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['title', 'medium', 'display_text', 'ref_id', 'created_time', 'updated_time']
-    search_fields = ['title']
+    search_fields = ['title', 'display_text']
     list_filter = ('medium',)
 
 

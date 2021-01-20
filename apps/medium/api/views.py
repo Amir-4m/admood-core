@@ -33,7 +33,10 @@ class PublisherViewSet(mixins.ListModelMixin,
     ordering_fields = ['name', 'extra_data__member_no', 'extra_data__view_efficiency', 'extra_data__tag']
 
     def get_queryset(self):
-        queryset = super(PublisherViewSet, self).get_queryset().prefetch_related('categories')
+        queryset = super().get_queryset().filter(
+            cost_models__isnull=False
+        ).prefetch_related('categories')
+
         medium = self.request.query_params.get('medium', '')
         if medium.isdigit():
             queryset = queryset.filter(medium=medium)

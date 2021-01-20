@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -6,7 +8,10 @@ from django.utils.translation import ugettext_lazy as _
 
 from apps.campaign.models import Campaign
 from apps.medium.consts import Medium
+
 from .services import TelegramCampaignServices
+
+logger = logging.getLogger(__name__)
 
 
 def test_campaign(request, pk):
@@ -15,6 +20,7 @@ def test_campaign(request, pk):
         try:
             result = TelegramCampaignServices.create_telegram_test_campaign(campaign)
         except Exception as e:
+            logger.error(f"[testing campaign failed]-[campaign id: {campaign.id}]-[exc: {e}]")
             messages.error(request, _(e.__str__()))
         else:
             if result is True:

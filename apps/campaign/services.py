@@ -15,7 +15,8 @@ from apps.core.consts import CostModel
 from apps.core.utils.get_file import get_file
 from apps.campaign.models import CampaignSchedule, CampaignReference, TelegramCampaign
 from apps.payments.models import Transaction
-from services.utils import file_type
+from services.utils import file_type, custom_request
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,28 +36,11 @@ class InstagramCampaignServices(object):
     MEDIA_URL = f'{ADINSTA_API_URL}/api/v1/medias/'
     PAGES_URL = f'{ADINSTA_API_URL}/api/v1/instagram/pages/'
 
-    def api_call(self, method, url, data=None, params=None, files=None, **kwargs):
-        try:
-            if method.lower() == 'get':
-                response = requests.get(url=url, headers=self.HEADERS, params=params, **kwargs)
-            elif method.lower() == 'post':
-                response = requests.post(url=url, headers=self.HEADERS, json=data, files=files, **kwargs)
-            elif method.lower() == 'patch':
-                response = requests.patch(url=url, headers=self.HEADERS, json=data, files=files, **kwargs)
-            else:
-                return None
-            response.raise_for_status()
-            return response
-        except requests.exceptions.HTTPError as e:
-            logger.error(f'http error for requesting url {url} occurred: {e}')
-            if e.response.status_code == 400:
-                raise Exception(e.response.text)
-            raise e
-        except requests.exceptions.RequestException as e:
-            logger.error(f'request error for requesting url {url} occurred: {e}')
-            raise e
-
     def create_insta_campaign(self, campaign, start_time, end_time, status):
+        logger.debug(
+            f"[creating instagram campaign]-[obj: {campaign}]-[start time: {start_time}]-[end time: {end_time}]"
+            f"-[status: {status}]-[URL: {self.CAMPAIGN_URL}]"
+        )
         publishers = []
         for publisher in campaign.final_publishers.all():
             try:
@@ -75,47 +59,66 @@ class InstagramCampaignServices(object):
             start_datetime=start_time,
             end_datetime=end_time,
         )
-        response = self.api_call('post', url=self.CAMPAIGN_URL, data=data)
+        response = custom_request(self.CAMPAIGN_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
 
     def create_insta_content(self, content, campaign_id):
+        logger.debug(
+            f"[creating instagram content]-[content id: {content.id}]-[campaign id: {campaign_id}]"
+            f"-[URL: {self.CONTENT_URL}]"
+        )
         data = dict(
             campaign=campaign_id,
             title=content.title,
             caption=content.data.get('content'),
             description=content.description
         )
-        response = self.api_call('post', url=self.CONTENT_URL, data=data)
-
+        response = custom_request(self.CONTENT_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
 
     def create_insta_media(self, file, content_id):
+        logger.debug(
+            f"[creating instagram media]-[file: {file.name}]-[content id: {content_id}]-[URL: {self.MEDIA_URL}]"
+        )
+
         data = dict(
             file_type=file_type(file.name),
             content=content_id,
         )
-
-        self.api_call('post', url=self.MEDIA_URL, data=data, files={'file': file})
+        custom_request(self.MEDIA_URL, json=data, files={'file': file}, headers=self.HEADERS)
 
     def enable_Insta_campaign(self, campaign_id):
-        self.api_call('patch', url=f'{self.CAMPAIGN_URL}{campaign_id}/', data={'is_enable': True})
+        url = f'{self.CAMPAIGN_URL}{campaign_id}/'
+        logger.debug(f"[enabling instagram campaign]-[campaign id: {campaign_id}]-[URL: url]")
+
+        custom_request(url, 'patch', json={'is_enable': True}, headers=self.HEADERS)
         return True
 
     def get_insta_publishers(self):
-        response = self.api_call('get', url=self.PAGES_URL)
+        logger.debug(f'[getting instagram publishers]')
+
+        response = custom_request(self.PAGES_URL, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_insta_campaign(self, campaign_id):
-        response = self.api_call('get', url=f'{self.CAMPAIGN_URL}{campaign_id}/')
+        url = f'{self.CAMPAIGN_URL}{campaign_id}/'
+        logger.debug(f'[getting instagram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
+
+        response = custom_request(url, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_contents(self, campaign_id):
+        logger.debug(f'[getting contents]-[campaign id: {campaign_id}]')
+
         campaign = self.get_insta_campaign(campaign_id)
         contents = campaign.get('contents', None)
         return contents
 
     @staticmethod
     def create_instagram_campaign(campaign, start_datetime, end_datetime):
+        logger.debug(
+            f"[creating instagram campaign]-[campaign id: {campaign.id}]-[start time: {start_datetime}]-[end time: {end_datetime}]"
+        )
         if campaign.error_count >= 5:
             return
 
@@ -148,7 +151,7 @@ class InstagramCampaignServices(object):
                 campaign_ref.save()
                 return campaign_ref
         except Exception as e:
-            logger.error(f'creating instagram campaign with id {campaign.id} failed due to : {e}')
+            logger.error(f'[creating instagram campaign failed]-[campaign id: {campaign.id}]-[exc: {e}]')
             campaign.error_count += 1
             campaign.save()
             raise e
@@ -164,28 +167,11 @@ class TelegramCampaignServices(object):
     FILE_URL = f'{ADBOT_API_URL}/api/v1/files/'
     CHANNELS_URL = f'{ADBOT_API_URL}/api/v1/channels/'
 
-    def api_call(self, method, url, data=None, params=None, files=None, **kwargs):
-        try:
-            if method.lower() == 'get':
-                response = requests.get(url=url, headers=self.HEADERS, params=params, **kwargs)
-            elif method.lower() == 'post':
-                response = requests.post(url=url, headers=self.HEADERS, json=data, files=files, **kwargs)
-            elif method.lower() == 'patch':
-                response = requests.patch(url=url, headers=self.HEADERS, json=data, files=files, **kwargs)
-            else:
-                return None
-            response.raise_for_status()
-            return response
-        except requests.exceptions.HTTPError as e:
-            logger.error(f'http error for requesting url {url} occurred: {e}')
-            if e.response.status_code == 400:
-                raise Exception(e.response.text)
-            raise e
-        except requests.exceptions.RequestException as e:
-            logger.error(f'request error for requesting url {url} occurred: {e}')
-            raise e
-
     def create_campaign(self, campaign, start_time, end_time, status):
+        logger.debug(
+            f"[creating telegram campaign]-[campaign id: {campaign.id}]-[start time: {start_time}]-"
+            f"[end time: {end_time}]-[status: {status}]-[URL: {self.CAMPAIGN_URL}]"
+        )
         publishers = []
         for publisher in campaign.final_publishers.all():
             try:
@@ -206,11 +192,15 @@ class TelegramCampaignServices(object):
             start_datetime=start_time.__str__(),
             end_datetime=end_time.__str__(),
         )
-        response = self.api_call('post', url=self.CAMPAIGN_URL, data=data)
-
+        response = custom_request(self.CAMPAIGN_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
 
     def create_content(self, content, campaign_id):
+        logger.debug(
+            f"[creating telegram content]-[content id: {content.id}]-[campaign id: {campaign_id}]"
+            f"-[URL: {self.CONTENT_URL}]"
+        )
+
         if 'post_link' in content.data:
             data = dict(
                 campaign=campaign_id,
@@ -263,13 +253,19 @@ class TelegramCampaignServices(object):
                 view_type=content.data.get('view_type'),
             )
 
-        response = self.api_call('post', url=self.CONTENT_URL, data=data)
+        response = custom_request(self.CONTENT_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
 
     def create_file(self, file, campaign_id=None, content_id=None, telegram_file_hash=None):
+        filetype = file_type(file.name)
+
+        logger.debug(
+            f"[creating telegram file]-[file: {file.name}]-[file type: {filetype}]-[content id: {content_id}]"
+            f"-[telegram file hash: {telegram_file_hash}]-[URL: {self.FILE_URL}]"
+        )
         data = dict(
             name=file.name,
-            file_type=file_type(file.name),
+            file_type=filetype,
             telegram_file_hash=telegram_file_hash
         )
         if campaign_id:
@@ -278,24 +274,35 @@ class TelegramCampaignServices(object):
             data['campaign_content'] = content_id
 
         if telegram_file_hash:
-            self.api_call('post', url=self.FILE_URL, data=data)
+            custom_request(self.FILE_URL, json=data, headers=self.HEADERS)
         else:
-            self.api_call('post', url=self.FILE_URL, data=data, files={'file': file})
+            custom_request(self.FILE_URL, data=data, files={'file': file}, headers=self.HEADERS)
 
     def enable_campaign(self, campaign_id):
-        self.api_call('patch', url=f'{self.CAMPAIGN_URL}{campaign_id}/', data={'is_enable': True})
+        url = f'{self.CAMPAIGN_URL}{campaign_id}/'
+        logger.debug(f'[enabling telegram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
+
+        custom_request(url, 'patch', json={'is_enable': True}, headers=self.HEADERS)
         return True
 
     def campaign_report(self, campaign_id):
-        response = self.api_call('get', url=f'{self.CAMPAIGN_URL}{campaign_id}/report/')
+        url = f'{self.CAMPAIGN_URL}{campaign_id}/report/'
+        logger.debug(f'[getting telegram report]-[campaign id: {campaign_id}]-[URL: {url}]')
+
+        response = custom_request(url, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_publishers(self):
-        response = self.api_call('get', url=self.CHANNELS_URL)
+        logger.debug(f'[getting telegram publishers]-[URL: {self.CHANNELS_URL}]')
+
+        response = custom_request(self.CHANNELS_URL, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_campaign(self, campaign_id):
-        response = self.api_call('get', url=f'{self.CAMPAIGN_URL}{campaign_id}/')
+        url = f'{self.CAMPAIGN_URL}{campaign_id}/'
+        logger.debug(f'[getting telegram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
+
+        response = custom_request(url, 'get', headers=self.HEADERS)
         return response.json()
 
     def get_contents(self, campaign_id):
@@ -309,7 +316,10 @@ class TelegramCampaignServices(object):
         return file
 
     def test_campaign(self, campaign_id):
-        response = self.api_call('get', url=f'{self.CAMPAIGN_URL}{campaign_id}/test/', timeout=120)
+        url = f'{self.CAMPAIGN_URL}{campaign_id}/test/'
+        logger.debug(f'[testing telegram campaign]-[campaign id: {campaign_id}]-[URL: {url}]')
+
+        response = custom_request(url, 'get', timeout=120, headers=self.HEADERS)
         return response.json()["detail"]
 
     @staticmethod
@@ -358,7 +368,7 @@ class TelegramCampaignServices(object):
                 campaign_ref.save()
                 return campaign_ref
         except Exception as e:
-            logger.error(f'creating telegram campaign with id {campaign.id} failed due to : {e}')
+            logger.error(f'[creating telegram campaign failed]-[campaign id: {campaign.id}]-[exc: {e}]')
             campaign.error_count += 1
             campaign.save()
             raise e
@@ -388,12 +398,14 @@ class TelegramCampaignServices(object):
 class CampaignService(object):
     @staticmethod
     def create_campaign_by_medium(campaigns, medium):
+        logger.debug(f'[creating campaing by medium]-[medium: {medium}]')
         try:
             create_campaign_func = {
                 'instagram': InstagramCampaignServices.create_instagram_campaign,
                 'telegram': TelegramCampaignServices.create_telegram_campaign
             }[medium]
-        except KeyError:
+        except KeyError as e:
+            logger.error(f'[creating campaign by medium failed]-[medium: {medium}]-[exc: {e}]')
             raise Exception('invalid medium. choices are: instagram, telegram')
 
         # disable expired and over budget campaigns

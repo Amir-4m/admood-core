@@ -78,12 +78,15 @@ class CampaignAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        final_publishers = Publisher.objects.filter(
+        query_params = dict(
             is_enable=True,
             status=Publisher.STATUS_APPROVED,
+            cost_models__isnull=False
         )
         if self.instance.medium:
-            final_publishers = final_publishers.filter(medium=self.instance.medium)
+            query_params['medium'] = self.instance.medium
+        final_publishers = Publisher.objects.filter(**query_params)
+
         self.fields['final_publishers'].queryset = final_publishers
 
     def clean(self):
