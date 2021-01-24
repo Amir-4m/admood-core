@@ -2,7 +2,6 @@ import logging
 
 from datetime import datetime, timedelta
 
-import requests
 from django.db import transaction
 from django.db.models import Count, Q
 from django.utils.timezone import now
@@ -16,7 +15,6 @@ from apps.core.utils.get_file import get_file
 from apps.campaign.models import CampaignSchedule, CampaignReference, TelegramCampaign
 from apps.payments.models import Transaction
 from services.utils import file_type, custom_request
-
 
 logger = logging.getLogger(__name__)
 
@@ -453,7 +451,8 @@ class CampaignService(object):
         # create non scheduled campaigns if possible
         concurrent_campaign_count = CampaignReference.objects.filter(
             ref_id__isnull=False,
-            schedule_range__startswith__date=now().date(),
+            schedule_range__startswith__lte=now(),
+            schedule_range__endswith__gte=now(),
             updated_time__isnull=True
         ).count()
         if concurrent_campaign_count < ADBOT_MAX_CONCURRENT_CAMPAIGN:
