@@ -18,16 +18,20 @@ logger = logging.getLogger(__name__)
 
 @periodic_task(run_every=crontab(minute="*"))
 def disable_finished_campaigns():
-    campaigns = Campaign.live.select_for_update()
+    campaigns = Campaign.objects.select_for_update().filter(
+        Q(end_date__gte=timezone.now().date()) | Q(end_date__isnull=True),
+        is_enable=True,
+        status=Campaign.STATUS_APPROVED,
+    )
 
     # disable expired and over budget campaigns
-    for campaign in campaigns:
-        if campaign.total_cost >= campaign.total_budget:
-            with transaction.atomic():
+    with transaction.atomic():
+        for campaign in campaigns:
+            if campaign.total_cost >= campaign.total_budget:
                 # create a deduct transaction
                 Transaction.objects.create(
                     user=campaign.owner,
-                    value=campaign.total_cost - campaign.total_budget,
+                    value=campaign.total_cost,
                     campaign=campaign,
                     transaction_type=Transaction.TYPE_DEDUCT,
                 )
