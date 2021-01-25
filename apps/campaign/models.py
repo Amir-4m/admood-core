@@ -1,10 +1,11 @@
 import datetime
 
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField
+from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.db.models.functions import Coalesce
-from django.utils.timezone import now
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from admood_core import settings
@@ -20,6 +21,30 @@ def json_default():
     return {'': ''}
 
 
+# --- Custom Managers ---
+class LiveCampaignManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            Q(end_date__gte=timezone.now().date()) | Q(end_date__isnull=True),
+            is_enable=True,
+            status=Campaign.STATUS_APPROVED,
+            start_date__lte=timezone.now().date(),
+        )
+
+
+class NonScheduledCampaignReferenceManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            ref_id__isnull=False,
+            schedule_range__startswith__date=timezone.now().date(),
+            schedule_range__endswith__time__lte=timezone.now().time(),
+            updated_time__isnull=True
+        )
+
+
+# --- Models ---
 class Province(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -69,6 +94,9 @@ class Campaign(models.Model):
 
     error_count = models.PositiveSmallIntegerField(default=0)
 
+    objects = models.Manager()
+    live = LiveCampaignManager()
+
     class Meta:
         ordering = ('-created_time',)
 
@@ -97,7 +125,7 @@ class Campaign(models.Model):
     @property
     def total_cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(updated_time__isnull=False):
+        for campaign_reference in self.campaignreference_set.filter(created_time__isnull=False):
             if isinstance(campaign_reference.contents, list):
                 for obj in campaign_reference.contents:
                     try:
@@ -110,7 +138,7 @@ class Campaign(models.Model):
     @property
     def today_cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(updated_time__date=now().date()):
+        for campaign_reference in self.campaignreference_set.filter(created_time__date=timezone.now().date()):
             if isinstance(campaign_reference.contents, list):
                 for obj in campaign_reference.contents:
                     try:
@@ -135,6 +163,8 @@ class CampaignReference(models.Model):
     end_time = models.TimeField(null=True, blank=True)
     schedule_range = DateTimeRangeField(null=True, blank=True)
     updated_time = models.DateTimeField(null=True, blank=True)
+
+    non_scheduled = NonScheduledCampaignReferenceManager()
 
 
 class TargetDevice(models.Model):
@@ -163,7 +193,7 @@ class CampaignContent(models.Model):
     utm_term = models.CharField(max_length=100, blank=True, null=True)
 
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
-    cost_model_price = models.IntegerField()
+    cost_model_price = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
 
     is_hidden = models.BooleanField(default=False)
 

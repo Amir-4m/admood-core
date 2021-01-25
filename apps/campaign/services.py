@@ -2,9 +2,8 @@ import logging
 
 from datetime import datetime, timedelta
 
-from django.db import transaction
 from django.db.models import Count, Q
-from django.utils.timezone import now
+from django.utils import timezone
 
 from admood_core.settings import (
     ADBOT_MAX_CONCURRENT_CAMPAIGN, ADINSTA_API_TOKEN, ADINSTA_API_URL,
@@ -13,7 +12,6 @@ from admood_core.settings import (
 from apps.core.consts import CostModel
 from apps.core.utils.get_file import get_file
 from apps.campaign.models import CampaignSchedule, CampaignReference, TelegramCampaign
-from apps.payments.models import Transaction
 from services.utils import file_type, custom_request
 
 logger = logging.getLogger(__name__)
@@ -118,6 +116,10 @@ class InstagramCampaignServices(object):
             f"[creating instagram campaign]-[campaign id: {campaign.id}]-[start time: {start_datetime}]-[end time: {end_datetime}]"
         )
         if campaign.error_count >= 5:
+            logger.critical(
+                f"[creating instagram campaign failed]-[campaign id: {campaign.id}]-[start time: {start_datetime}]"
+                f"-[end time: {end_datetime}]-[error_count: {campaign.error_count}]"
+            )
             return
 
         try:
@@ -149,9 +151,10 @@ class InstagramCampaignServices(object):
                 campaign_ref.save()
                 return campaign_ref
         except Exception as e:
-            logger.error(f'[creating instagram campaign failed]-[campaign id: {campaign.id}]-[exc: {e}]')
             campaign.error_count += 1
             campaign.save()
+            logger.error(f'[creating instagram campaign failed]-[campaign id: {campaign.id}]-'
+                         f'[error count:{campaign.error_count}]-[exc: {e}]')
             raise e
 
 
@@ -375,8 +378,8 @@ class TelegramCampaignServices(object):
     def create_telegram_test_campaign(campaign):
         ref_id = TelegramCampaignServices().create_campaign(
             campaign,
-            now().__str__(),
-            (now() + timedelta(hours=1)).__str__(),
+            timezone.now().__str__(),
+            (timezone.now() + timedelta(hours=1)).__str__(),
             "test",
         )
         contents = campaign.contents.all()
@@ -404,38 +407,17 @@ class CampaignService(object):
             }[medium]
         except KeyError as e:
             logger.error(f'[creating campaign by medium failed]-[medium: {medium}]-[exc: {e}]')
-            raise Exception('invalid medium. choices are: instagram, telegram')
-
-        # disable expired and over budget campaigns
-        for campaign in campaigns.all():
-            if campaign.total_cost >= campaign.total_budget or (
-                    campaign.end_date is not None and campaign.end_date > now().date()):
-                with transaction.atomic():
-                    # create a deduct transaction
-                    if campaign.total_cost > campaign.total_budget:
-                        Transaction.objects.create(
-                            user=campaign.owner,
-                            value=campaign.total_cost - campaign.total_budget,
-                            campaign=campaign,
-                            transaction_type=Transaction.TYPE_DEDUCT,
-                        )
-                    campaign.is_enable = False
-                    campaign.save()
-                    continue
-
-            # if campaign doesn't have remaining views for today or at all
-            if campaign.remaining_views <= 0:
-                continue
+            return
 
         # create scheduled campaigns
         schedules = CampaignSchedule.objects.filter(
             campaign_id__in=campaigns.values_list('id', flat=True),
-            week_day=now().date().weekday(),
-            start_time__lte=now().time(),
-            end_time__gt=now().time(),
+            week_day=timezone.now().date().weekday(),
+            start_time__lte=timezone.now().time(),
+            end_time__gt=timezone.now().time(),
         )
 
-        for schedule in schedules.all():
+        for schedule in schedules:
             schedule_lower_range = datetime.now().replace(
                 hour=schedule.start_time.hour,
                 minute=schedule.start_time.minute
@@ -449,19 +431,14 @@ class CampaignService(object):
             create_campaign_func(schedule.campaign, schedule_lower_range, schedule_upper_range)
 
         # create non scheduled campaigns if possible
-        concurrent_campaign_count = CampaignReference.objects.filter(
-            ref_id__isnull=False,
-            schedule_range__startswith__lte=now(),
-            schedule_range__endswith__gte=now(),
-            updated_time__isnull=True
-        ).count()
+        concurrent_campaign_count = CampaignReference.non_scheduled.all().count()
         if concurrent_campaign_count < ADBOT_MAX_CONCURRENT_CAMPAIGN:
             campaigns = campaigns.filter(
                 schedules__isnull=True
             ).annotate(
                 num_ref=Count('campaignreference')
             ).order_by('num_ref')
-            for campaign in campaigns.all()[:ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
+            for campaign in campaigns[:ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
                 start_datetime = datetime.now()
                 end_datetime = start_datetime + timedelta(hours=3)
                 create_campaign_func(campaign, start_datetime, end_datetime)
