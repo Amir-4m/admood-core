@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 @periodic_task(run_every=crontab(minute="*"))
 def disable_finished_campaigns():
-    campaigns = Campaign.objects.select_for_update().filter(
+    campaigns = Campaign.objects.select_for_update(skip_locked=True).filter(
         is_enable=True,
         status=Campaign.STATUS_APPROVED,
         start_date__lte=timezone.now().date(),
