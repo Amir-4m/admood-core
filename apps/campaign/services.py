@@ -116,10 +116,7 @@ class InstagramCampaignServices(object):
             f"[creating instagram campaign]-[campaign id: {campaign.id}]-[start time: {start_datetime}]-[end time: {end_datetime}]"
         )
         if campaign.error_count >= 5:
-            logger.critical(
-                f"[creating instagram campaign failed]-[campaign id: {campaign.id}]-[start time: {start_datetime}]"
-                f"-[end time: {end_datetime}]-[error_count: {campaign.error_count}]"
-            )
+            logger.critical(f"[creating instagram campaign failed]-[campaign id: {campaign.id}]")
             return
 
         try:
@@ -326,6 +323,7 @@ class TelegramCampaignServices(object):
     @staticmethod
     def create_telegram_campaign(campaign, start_datetime, end_datetime):
         if campaign.error_count >= 5:
+            logger.critical(f"[creating telegram campaign failed]-[campaign id: {campaign.id}]")
             return
         try:
             campaign_ref, created = CampaignReference.objects.get_or_create(
@@ -431,7 +429,7 @@ class CampaignService(object):
             create_campaign_func(schedule.campaign, schedule_lower_range, schedule_upper_range)
 
         # create non scheduled campaigns if possible
-        concurrent_campaign_count = CampaignReference.non_scheduled.all().count()
+        concurrent_campaign_count = CampaignReference.live.all().count()
         if concurrent_campaign_count < ADBOT_MAX_CONCURRENT_CAMPAIGN:
             campaigns = campaigns.filter(
                 schedules__isnull=True

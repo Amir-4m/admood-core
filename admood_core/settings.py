@@ -251,7 +251,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(**UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB)
     },
     "create_instagram_campaign_task": {
-        "task": "apps.campaign.tasks.create_instagram_campaign",
+        "task": "apps.campaign.tasks.create_instagram_campaign_task",
         "schedule": crontab(minute="*/1"),
     },
     "update_instagram_publishers_task": {

@@ -19,15 +19,15 @@ logger = logging.getLogger(__name__)
 @periodic_task(run_every=crontab(minute="*"))
 def disable_finished_campaigns():
     campaigns = Campaign.objects.select_for_update().filter(
-        Q(end_date__gte=timezone.now().date()) | Q(end_date__isnull=True),
         is_enable=True,
         status=Campaign.STATUS_APPROVED,
+        start_date__lte=timezone.now().date(),
     )
 
     # disable expired and over budget campaigns
     with transaction.atomic():
         for campaign in campaigns:
-            if campaign.total_cost >= campaign.total_budget:
+            if campaign.is_finished():
                 # create a deduct transaction
                 Transaction.objects.create(
                     user=campaign.owner,
@@ -47,7 +47,7 @@ def create_telegram_campaign_task():
 
 
 @shared_task
-def create_instagram_campaign():
+def create_instagram_campaign_task():
     campaigns = Campaign.live.filter(
         Q(medium=Medium.INSTAGRAM_POST) |
         Q(medium=Medium.INSTAGRAM_STORY)
@@ -59,7 +59,7 @@ def create_instagram_campaign():
 @shared_task
 def update_telegram_info_task():
     # filter appropriate campaigns to save gotten views
-    campaign_refs = CampaignReference.non_scheduled.all()
+    campaign_refs = CampaignReference.live.all()
 
     for campaign_ref in campaign_refs:
 

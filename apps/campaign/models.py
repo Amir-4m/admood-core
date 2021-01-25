@@ -33,7 +33,7 @@ class LiveCampaignManager(models.Manager):
         )
 
 
-class NonScheduledCampaignReferenceManager(models.Manager):
+class LiveCampaignReferenceManager(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(
@@ -107,6 +107,9 @@ class Campaign(models.Model):
     def __str__(self):
         return self.name
 
+    def is_finished(self):
+        return (self.end_date and self.end_date < timezone.now().date()) or (self.total_cost >= self.total_budget)
+
     @property
     def max_cost_model_price(self):
         return self.contents.aggregate(
@@ -125,7 +128,10 @@ class Campaign(models.Model):
     @property
     def total_cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(created_time__isnull=False):
+        for campaign_reference in self.campaignreference_set.filter(
+                updated_time__isnull=False,
+                ref_id__isnull=False
+        ):
             if isinstance(campaign_reference.contents, list):
                 for obj in campaign_reference.contents:
                     try:
@@ -138,7 +144,10 @@ class Campaign(models.Model):
     @property
     def today_cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(created_time__date=timezone.now().date()):
+        for campaign_reference in self.campaignreference_set.filter(
+                created_time__date=timezone.now().date(),
+                ref_id__isnull=False
+        ):
             if isinstance(campaign_reference.contents, list):
                 for obj in campaign_reference.contents:
                     try:
@@ -164,7 +173,7 @@ class CampaignReference(models.Model):
     schedule_range = DateTimeRangeField(null=True, blank=True)
     updated_time = models.DateTimeField(null=True, blank=True)
 
-    non_scheduled = NonScheduledCampaignReferenceManager()
+    live = LiveCampaignReferenceManager()
 
 
 class TargetDevice(models.Model):
@@ -193,7 +202,7 @@ class CampaignContent(models.Model):
     utm_term = models.CharField(max_length=100, blank=True, null=True)
 
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
-    cost_model_price = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
+    cost_model_price = models.PositiveIntegerField(validators=[MinValueValidator(1)])
 
     is_hidden = models.BooleanField(default=False)
 
