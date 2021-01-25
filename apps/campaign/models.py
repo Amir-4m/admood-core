@@ -128,10 +128,7 @@ class Campaign(models.Model):
     @property
     def total_cost(self):
         cost = 0
-        for campaign_reference in self.campaignreference_set.filter(
-                updated_time__isnull=False,
-                ref_id__isnull=False
-        ):
+        for campaign_reference in self.campaignreference_set.filter(ref_id__isnull=False):
             if isinstance(campaign_reference.contents, list):
                 for obj in campaign_reference.contents:
                     try:
