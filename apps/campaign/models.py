@@ -170,6 +170,7 @@ class CampaignReference(models.Model):
     schedule_range = DateTimeRangeField(null=True, blank=True)
     updated_time = models.DateTimeField(null=True, blank=True)
 
+    objects = models.Manager()
     live = LiveCampaignReferenceManager()
 
 
