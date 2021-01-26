@@ -115,6 +115,21 @@ class Campaign(models.Model):
     def is_finished(self):
         return (self.end_date and self.end_date < timezone.now().date()) or (self.total_cost >= self.total_budget)
 
+    def update_final_publishers(self):
+        self.finalpublisher_set.all().delete()
+
+        publishers_by_categories = Publisher.get_by_categories(
+            categories=self.categories.all()
+        )
+        for publisher in publishers_by_categories:
+            try:
+                price = publisher.cost_models.filter(
+                        cost_model=CostModel.CPV
+                    ).order_by('-publisher_price').first().publisher_price
+            except:
+                price = 0
+            self.finalpublisher_set.create(publisher=publisher, tariff=price)
+
     @property
     def max_cost_model_price(self):
         return self.contents.aggregate(

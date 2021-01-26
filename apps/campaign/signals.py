@@ -76,17 +76,4 @@ def create_transaction(sender, instance, created, **kwargs):
         # deleting_publisher_ids = set(publishers_by_categories_ids) - set(current_publisher_ids)
         # instance.publisher_price.filter(publisher_id__in=deleting_publisher_ids).delete()
 
-        instance.finalpublisher_set.all().delete()
-
-        publishers_by_categories = Publisher.get_by_categories(
-            categories=instance.categories.all()
-        )
-        for publisher in publishers_by_categories:
-            try:
-                price = publisher.cost_models.filter(
-                        cost_model=CostModel.CPV
-                    ).order_by('-publisher_price').first().publisher_price
-            except:
-                price = 0
-            instance.finalpublisher_set.create(publisher=publisher, tariff=price)
-
+        instance.update_final_publishers()
