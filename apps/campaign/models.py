@@ -154,6 +154,17 @@ class Campaign(models.Model):
                         continue
         return cost
 
+    def approve_validate(self, status):
+        if self.medium == Medium.TELEGRAM:
+            if status == Campaign.STATUS_APPROVED and not hasattr(self, 'telegramcampaign'):
+                return False, _('to approve the campaign upload the test screenshot.')
+
+        # if status changed to approved, CampaignContent can not be empty
+        if not self.contents.exists() and status == Campaign.STATUS_APPROVED:
+            return False, _('to approve the campaign, content can not be empty!')
+
+        return True, ''
+
     def create_publisher_list(self):
         pass
 

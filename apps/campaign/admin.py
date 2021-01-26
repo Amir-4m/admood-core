@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 
 from apps.accounts.admin_filter import OwnerFilter
 from services.utils import AutoFilter
@@ -17,12 +17,7 @@ from .models import (
 from .views import test_campaign
 
 
-@admin.register(Province)
-class ProvinceAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ["name"]
-
-
+# --- Inlines ---
 class TargetDeviceInline(admin.TabularInline):
     model = TargetDevice
     extra = 1
@@ -34,6 +29,23 @@ class CampaignContentInline(admin.TabularInline):
     fields = ('title', 'cost_model_price', 'cost_model', 'is_hidden')
     readonly_fields = ('title', 'cost_model_price', 'cost_model', 'is_hidden')
     can_delete = False
+    extra = 0
+
+
+class CampaignScheduleInline(admin.TabularInline):
+    model = CampaignSchedule
+    fields = ('week_day', 'start_time', 'end_time')
+    readonly_fields = ('week_day', 'start_time', 'end_time')
+    can_delete = False
+    show_change_link = True
+    extra = 0
+
+
+# --- Model Admins ---
+@admin.register(Province)
+class ProvinceAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ["name"]
 
 
 @admin.register(Campaign)
@@ -41,8 +53,9 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     form = CampaignAdminForm
     list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
-    inlines = [CampaignContentInline, TargetDeviceInline]
+    inlines = [CampaignContentInline, TargetDeviceInline, CampaignScheduleInline]
     autocomplete_fields = ["owner"]
+    actions = ['make_approve_campaigns']
     search_fields = ['medium', 'name', 'contents__title']
     list_filter = [OwnerFilter, 'medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
@@ -67,6 +80,18 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
         ]
         url_patterns += super().get_urls()
         return url_patterns
+
+    def make_approve_campaigns(self, request, queryset):
+        valid_objs = []
+        for q in queryset.filter(status=Campaign.STATUS_WAITING):
+            valid, msg_err = q.approve_validate(status=Campaign.STATUS_APPROVED)
+            if valid:
+                q.status = Campaign.STATUS_APPROVED
+                valid_objs.append(q)
+            else:
+                messages.error(request, f"{msg_err}, campaign id: {q.id} - name: {q.name}")
+        Campaign.objects.bulk_update(valid_objs, fields=['status'])
+        messages.info(request, f'{len(valid_objs)} Campaign updated!')
 
 
 @admin.register(CampaignContent)
@@ -97,4 +122,6 @@ class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
 @admin.register(TelegramCampaign)
 class TelegramCampaignAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "screenshot")
+    raw_id_fields = 'screenshot',
+    readonly_fields = ['campaign']
     list_filter = [CampaignFilter]
