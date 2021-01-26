@@ -83,7 +83,7 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
 
     def make_approve_campaigns(self, request, queryset):
         valid_objs = []
-        for q in queryset:
+        for q in queryset.filter(status=Campaign.STATUS_WAITING):
             valid, msg_err = q.approve_validate(status=Campaign.STATUS_APPROVED)
             if valid:
                 q.status = Campaign.STATUS_APPROVED
