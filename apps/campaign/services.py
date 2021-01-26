@@ -38,14 +38,8 @@ class InstagramCampaignServices(object):
             f"-[status: {status}]-[URL: {self.CAMPAIGN_URL}]"
         )
         publishers = []
-        for publisher in campaign.final_publishers.all():
-            try:
-                publisher_price = publisher.cost_models.filter(
-                    Q(cost_model=CostModel.CPI) | Q(cost_model=CostModel.CPR)
-                ).order_by('-publisher_price').first().publisher_price
-            except:
-                publisher_price = 0
-            publishers.append((publisher.ref_id, publisher_price))
+        for final_publisher in campaign.finalpublisher_set.all():
+            publishers.append((final_publisher.publisher.ref_id, final_publisher.tariff))
         data = dict(
             title=campaign.name,
             status=status,
@@ -171,14 +165,8 @@ class TelegramCampaignServices(object):
             f"[end time: {end_time}]-[status: {status}]-[URL: {self.CAMPAIGN_URL}]"
         )
         publishers = []
-        for publisher in campaign.final_publishers.all():
-            try:
-                publisher_price = publisher.cost_models.filter(
-                    cost_model=CostModel.CPV
-                ).order_by('-publisher_price').first().publisher_price
-            except:
-                publisher_price = 0
-            publishers.append((publisher.ref_id, publisher_price))
+        for final_publisher in campaign.finalpublisher_set.all():
+            publishers.append((final_publisher.publisher.ref_id, final_publisher.tariff))
 
         data = dict(
             title=campaign.name,

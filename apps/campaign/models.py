@@ -71,7 +71,12 @@ class Campaign(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     publishers = models.ManyToManyField(Publisher, blank=True)
     categories = models.ManyToManyField(Category, blank=True)
-    final_publishers = models.ManyToManyField(Publisher, blank=True, related_name='final_campaigns')
+    final_publishers = models.ManyToManyField(
+        Publisher,
+        through='FinalPublisher',
+        blank=True,
+        related_name='final_campaigns'
+    )
 
     name = models.CharField(max_length=50)
     locations = models.ManyToManyField(Province, blank=True)
@@ -156,6 +161,15 @@ class Campaign(models.Model):
 
     def create_publisher_list(self):
         pass
+
+
+class FinalPublisher(models.Model):
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
+    tariff = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.publisher.name} - {self.tariff}"
 
 
 class CampaignReference(models.Model):

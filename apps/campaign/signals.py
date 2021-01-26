@@ -4,6 +4,8 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from apps.campaign.models import Campaign
+from apps.core.consts import CostModel
+from apps.medium.models import Publisher
 from apps.payments.models import Transaction
 
 
@@ -48,3 +50,43 @@ def create_transaction(sender, instance, created, **kwargs):
                                        transaction_type=Transaction.TYPE_DEDUCT,
                                        campaign=instance,
                                        )
+    # Updating Final Publisher field
+    if instance._b_status == Campaign.STATUS_DRAFT and instance.status == Campaign.STATUS_WAITING:
+        # TODO Implement This
+        # publishers_by_categories_ids = Publisher.get_by_categories(
+        #     categories=instance.categories.all()
+        # ).values_list('id', flat=True)
+        # print(publishers_by_categories_ids)
+        # current_publisher_ids = instance.publisher_price.all().values_list('publisher_id')
+        # inserting_publisher = set(current_publisher_ids) - set(publishers_by_categories_ids)
+        #
+        # for publisher in Publisher.objects.filter(id__in=inserting_publisher):
+        #     try:
+        #         price = publisher.cost_models.filter(
+        #                 cost_model=CostModel.CPV
+        #             ).order_by('-publisher_price').first().publisher_price
+        #     except:
+        #         price = 0
+        #     instance.publisher_price.create(
+        #         publisher=publisher,
+        #         publisher_price=price
+        #     )
+        #
+        # current_publisher_ids = instance.publisher_price.all().values_list('publisher_id')
+        # deleting_publisher_ids = set(publishers_by_categories_ids) - set(current_publisher_ids)
+        # instance.publisher_price.filter(publisher_id__in=deleting_publisher_ids).delete()
+
+        instance.finalpublisher_set.all().delete()
+
+        publishers_by_categories = Publisher.get_by_categories(
+            categories=instance.categories.all()
+        )
+        for publisher in publishers_by_categories:
+            try:
+                price = publisher.cost_models.filter(
+                        cost_model=CostModel.CPV
+                    ).order_by('-publisher_price').first().publisher_price
+            except:
+                price = 0
+            instance.finalpublisher_set.create(publisher=publisher, tariff=price)
+

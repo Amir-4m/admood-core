@@ -85,9 +85,9 @@ class CampaignAdminForm(forms.ModelForm):
         )
         if self.instance.medium:
             query_params['medium'] = self.instance.medium
-        final_publishers = Publisher.objects.filter(**query_params)
 
-        self.fields['final_publishers'].queryset = final_publishers
+        # final_publishers = Publisher.objects.filter(**query_params)
+        # self.fields['final_publishers'].queryset = final_publishers
 
     def clean(self):
         if self.instance:

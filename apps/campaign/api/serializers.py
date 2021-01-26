@@ -152,17 +152,11 @@ class CampaignSerializer(serializers.ModelSerializer):
         for schedule_data in schedules:
             CampaignSchedule.objects.create(campaign=campaign, **schedule_data)
 
-        publishers_by_categories = Publisher.get_by_categories(categories=campaign.categories.all())
-        final_publishers = (*campaign.publishers.all(), *publishers_by_categories)
-        campaign.final_publishers.add(*final_publishers)
-
         return campaign
 
     def update(self, instance, validated_data):
         target_devices = validated_data.pop("target_devices", None)
         schedules = validated_data.pop("schedules", None)
-        publishers = instance.publishers.all()
-
         instance = super().update(instance, validated_data)
 
         if target_devices is not None:
@@ -189,10 +183,6 @@ class CampaignSerializer(serializers.ModelSerializer):
                     ).update(**schedule_data)
                 else:
                     CampaignSchedule.objects.create(campaign=instance, **schedule_data)
-
-        publishers_by_categories = Publisher.get_by_categories(categories=instance.categories.all())
-        final_publishers = (*publishers, *publishers_by_categories)
-        instance.final_publishers.add(*final_publishers)
 
         return instance
 
@@ -281,7 +271,6 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         if hasattr(instance, 'telegramcampaign'):
             telegram_campaign = instance.telegramcampaign
         target_devices = instance.target_devices.all()
-        final_publishers = instance.final_publishers.all()
         schedules = validated_data.pop("schedules", None)
 
         instance.pk = None
@@ -290,7 +279,6 @@ class CampaignDuplicateSerializer(serializers.ModelSerializer):
         instance.locations.set(locations)
         instance.publishers.set(publishers)
         instance.categories.set(categories)
-        instance.final_publishers.set(final_publishers)
 
         for schedule_data in schedules:
             CampaignSchedule.objects.create(
