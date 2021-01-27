@@ -17,9 +17,6 @@ from services.utils import file_type
 logger = logging.getLogger(__file__)
 
 
-logger = logging.getLogger(__file__)
-
-
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
@@ -62,6 +59,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     utm_campaign_default = serializers.SerializerMethodField()
     utm_medium_default = serializers.SerializerMethodField()
     utm_content_default = serializers.SerializerMethodField()
+    status_label = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = Campaign
@@ -401,17 +399,25 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
         model = CampaignReference
         fields = ('id', 'title', 'date', 'display_text', 'contents_detail', 'publishers_detail')
 
+    def contents_detail_handler(self, obj):
+        campaign_contents = CampaignContent.objects.filter(
+            id__in=[item['content'] for item in obj.contents],
+            cost_model_price__gt=0
+        ).values('id', 'title')
+        result = []
+        for content in obj.contents:
+            for cc in campaign_contents:
+                if cc['id'] == content['content']:
+                    result.append({'content_title': cc['title'], 'content_total_views': content['views']})
+        return result
+
     def get_contents_detail(self, obj):
         contents_detail = []
         if self.context['view'].action != 'report':
             return contents_detail
         if obj.campaign.medium == Medium.TELEGRAM:
-            for content in obj.contents:
-                try:
-                    cont = CampaignContent.objects.get(pk=content['content'])
-                except CampaignContent.DoesNotExist:
-                    continue
-                contents_detail.append({'content_title': cont.title, 'content_total_views': content['views']})
+            contents_detail = self.contents_detail_handler(obj)
+
         return contents_detail
 
     def get_date(self, obj):
@@ -429,12 +435,12 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
         if obj.campaign.medium == Medium.TELEGRAM:
             for content in obj.contents:
                 for detail in content['detail']:
-                    publishers_detail.append({
-                        'publishers': Publisher.objects.filter(ref_id__in=detail['channel_ids']).values('name',
-                                                                                                        'extra_data__tag'),
-                        'posts': detail['posts']
-
-                    })
+                    publishers_detail.append(dict(
+                        publishers=Publisher.objects.filter(ref_id__in=detail['channel_ids']).values(
+                            'name', 'extra_data__tag'
+                        ),
+                        posts=detail['posts'])
+                    )
         return publishers_detail
 
 

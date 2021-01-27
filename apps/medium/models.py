@@ -71,13 +71,13 @@ class Publisher(models.Model):
     STATUS_WAITING = 0
     STATUS_APPROVED = 1
     STATUS_REJECTED = 2
-    STATUS_BLOCKED = 3
+    # STATUS_BLOCKED = 3
 
     STATUS_CHOICES = (
         (STATUS_WAITING, 'waiting'),
         (STATUS_APPROVED, 'approved'),
         (STATUS_REJECTED, 'rejected'),
-        (STATUS_BLOCKED, 'blocked'),
+        # (STATUS_BLOCKED, 'blocked'),
     )
 
     cost_models = models.ManyToManyField(CostModelPrice, blank=True)

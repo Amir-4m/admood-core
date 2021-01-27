@@ -1,7 +1,6 @@
 import datetime
 
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Max, Q
 from django.db.models.functions import Coalesce
@@ -57,14 +56,14 @@ class Campaign(models.Model):
     STATUS_WAITING = 1
     STATUS_APPROVED = 2
     STATUS_REJECTED = 3
-    STATUS_BLOCKED = 4
+    # STATUS_BLOCKED = 4
 
     STATUS_CHOICES = (
         (STATUS_DRAFT, _("draft")),
         (STATUS_WAITING, _("waiting")),
         (STATUS_APPROVED, _("approved")),
         (STATUS_REJECTED, _("rejected")),
-        (STATUS_BLOCKED, _("blocked")),
+        # (STATUS_BLOCKED, _("blocked")),
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -209,7 +208,7 @@ class CampaignContent(models.Model):
     utm_term = models.CharField(max_length=100, blank=True, null=True)
 
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
-    cost_model_price = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    cost_model_price = models.PositiveIntegerField()
 
     is_hidden = models.BooleanField(default=False)
 
