@@ -60,13 +60,18 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     list_filter = [OwnerFilter, 'medium', 'status', 'is_enable']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
+    readonly_fields = (
+        'owner', 'locations', 'description', 'start_date', 'end_date', 'publishers', 'categories', 'utm_campaign',
+        'utm_content', 'medium', 'utm_medium'
+    )
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = (
-            'owner', 'locations', 'description', 'start_date', 'end_date', 'publishers', 'categories', 'utm_campaign',
-            'utm_content', 'medium', 'utm_medium'
-        )
-        if obj and obj.status == Campaign.STATUS_DRAFT:  # name field editable
+        readonly_fields = super().get_readonly_fields(request, obj)
+
+        if obj and CampaignReference.objects.filter(
+                campaign=obj,
+                ref_id__isnull=False
+        ).exists():
             return readonly_fields
         return readonly_fields + ('name',)
 
