@@ -22,10 +22,10 @@ def json_default():
 
 
 # --- Custom Managers ---
-class LiveCampaignManager(models.Manager):
+class CampaignManager(models.Manager):
 
-    def get_queryset(self):
-        return super().get_queryset().filter(
+    def live(self):
+        return self.get_queryset().filter(
             Q(end_date__gte=timezone.now().date()) | Q(end_date__isnull=True),
             is_enable=True,
             status=Campaign.STATUS_APPROVED,
@@ -33,10 +33,10 @@ class LiveCampaignManager(models.Manager):
         )
 
 
-class LiveCampaignReferenceManager(models.Manager):
+class CampaignReferenceManager(models.Manager):
 
-    def get_queryset(self):
-        return super().get_queryset().filter(
+    def live(self):
+        return self.get_queryset().filter(
             ref_id__isnull=False,
             schedule_range__startswith__date=timezone.now().date(),
             schedule_range__endswith__time__lte=timezone.now().time(),
@@ -94,8 +94,7 @@ class Campaign(models.Model):
 
     error_count = models.PositiveSmallIntegerField(default=0)
 
-    objects = models.Manager()
-    live = LiveCampaignManager()
+    objects = CampaignManager()
 
     class Meta:
         ordering = ('-created_time',)
@@ -181,8 +180,7 @@ class CampaignReference(models.Model):
     schedule_range = DateTimeRangeField(null=True, blank=True)
     updated_time = models.DateTimeField(null=True, blank=True)
 
-    objects = models.Manager()
-    live = LiveCampaignReferenceManager()
+    objects = CampaignReferenceManager()
 
 
 class TargetDevice(models.Model):
