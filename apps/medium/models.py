@@ -24,7 +24,7 @@ class Category(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.get_medium_display()} - {self.display_text}'
+        return f'{self.display_text}'
 
 
 class CostModelPrice(models.Model):
@@ -46,7 +46,8 @@ class CostModelPrice(models.Model):
             raise ValidationError(_('publisher price must be lower than advertiser price!'))
 
     def __str__(self):
-        return f'{self.grade}-{self.get_medium_display()}'
+        return f'G:{self.grade} - CM:{self.get_cost_model_display()}' \
+               f' - PP:{self.publisher_price} - AP:{self.advertiser_price}'
 
     @staticmethod
     def max_price(publishers, cost_model):
@@ -70,13 +71,13 @@ class Publisher(models.Model):
     STATUS_WAITING = 0
     STATUS_APPROVED = 1
     STATUS_REJECTED = 2
-    STATUS_BLOCKED = 3
+    # STATUS_BLOCKED = 3
 
     STATUS_CHOICES = (
         (STATUS_WAITING, 'waiting'),
         (STATUS_APPROVED, 'approved'),
         (STATUS_REJECTED, 'rejected'),
-        (STATUS_BLOCKED, 'blocked'),
+        # (STATUS_BLOCKED, 'blocked'),
     )
 
     cost_models = models.ManyToManyField(CostModelPrice, blank=True)

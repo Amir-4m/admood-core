@@ -417,7 +417,7 @@ class CampaignService(object):
             create_campaign_func(schedule.campaign, schedule_lower_range, schedule_upper_range)
 
         # create non scheduled campaigns if possible
-        concurrent_campaign_count = CampaignReference.live.all().count()
+        concurrent_campaign_count = CampaignReference.objects.live.all().count()
         if concurrent_campaign_count < ADBOT_MAX_CONCURRENT_CAMPAIGN:
             campaigns = campaigns.filter(
                 schedules__isnull=True

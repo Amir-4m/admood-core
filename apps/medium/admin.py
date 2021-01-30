@@ -19,6 +19,7 @@ class PublisherAdmin(admin.ModelAdmin, AutoFilter):
               'extra_data', 'description', 'url', 'ref_id']
     filter_horizontal = ['cost_models', 'categories']
     readonly_fields = ['medium', 'ref_id', 'url']
+    radio_fields = {'status': admin.VERTICAL}
     form = PublisherForm
 
     def has_add_permission(self, request):

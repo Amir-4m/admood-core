@@ -1,11 +1,9 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django_admin_json_editor import JSONEditorWidget
-from django.utils.translation import ugettext_lazy as _
 
+from django_admin_json_editor import JSONEditorWidget
 
 from apps.campaign.models import CampaignContent, Campaign
-from apps.medium.consts import Medium
 from apps.medium.models import Publisher
 
 
@@ -74,7 +72,7 @@ class CampaignAdminForm(forms.ModelForm):
 
     class Meta:
         model = Campaign
-        fields = '__all__'
+        exclude = ('extra_data',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -92,12 +90,8 @@ class CampaignAdminForm(forms.ModelForm):
     def clean(self):
         if self.instance:
             status = self.cleaned_data.get('status')
-            if self.instance.medium == Medium.TELEGRAM:
-                if status == Campaign.STATUS_APPROVED and not hasattr(self.instance, 'telegramcampaign'):
-                    raise ValidationError({'status': _('to approve the campaign upload the test screenshot.')})
-
-            # if status changed to approved, CampaignContent can not be empty
-            if not self.instance.contents.exists() and status == Campaign.STATUS_APPROVED:
-                raise ValidationError({'status': _('to approve the campaign, content can not be empty!')})
+            valid, msg_err = self.instance.approve_validate(status=status)
+            if not valid:
+                raise ValidationError({'status': msg_err})
 
         return self.cleaned_data

@@ -1,7 +1,6 @@
 import datetime
 
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Max, Q
 from django.db.models.functions import Coalesce
@@ -22,10 +21,10 @@ def json_default():
 
 
 # --- Custom Managers ---
-class LiveCampaignManager(models.Manager):
+class CampaignManager(models.Manager):
 
-    def get_queryset(self):
-        return super().get_queryset().filter(
+    def live(self):
+        return self.get_queryset().filter(
             Q(end_date__gte=timezone.now().date()) | Q(end_date__isnull=True),
             is_enable=True,
             status=Campaign.STATUS_APPROVED,
@@ -33,10 +32,10 @@ class LiveCampaignManager(models.Manager):
         )
 
 
-class LiveCampaignReferenceManager(models.Manager):
+class CampaignReferenceManager(models.Manager):
 
-    def get_queryset(self):
-        return super().get_queryset().filter(
+    def live(self):
+        return self.get_queryset().filter(
             ref_id__isnull=False,
             schedule_range__startswith__date=timezone.now().date(),
             schedule_range__endswith__time__lte=timezone.now().time(),
@@ -57,14 +56,14 @@ class Campaign(models.Model):
     STATUS_WAITING = 1
     STATUS_APPROVED = 2
     STATUS_REJECTED = 3
-    STATUS_BLOCKED = 4
+    # STATUS_BLOCKED = 4
 
     STATUS_CHOICES = (
         (STATUS_DRAFT, _("draft")),
         (STATUS_WAITING, _("waiting")),
         (STATUS_APPROVED, _("approved")),
         (STATUS_REJECTED, _("rejected")),
-        (STATUS_BLOCKED, _("blocked")),
+        # (STATUS_BLOCKED, _("blocked")),
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -99,8 +98,7 @@ class Campaign(models.Model):
 
     error_count = models.PositiveSmallIntegerField(default=0)
 
-    objects = models.Manager()
-    live = LiveCampaignManager()
+    objects = CampaignManager()
 
     class Meta:
         ordering = ('-created_time',)
@@ -174,6 +172,17 @@ class Campaign(models.Model):
                         continue
         return cost
 
+    def approve_validate(self, status):
+        if self.medium == Medium.TELEGRAM:
+            if status == Campaign.STATUS_APPROVED and not hasattr(self, 'telegramcampaign'):
+                return False, _('to approve the campaign upload the test screenshot.')
+
+        # if status changed to approved, CampaignContent can not be empty
+        if not self.contents.exists() and status == Campaign.STATUS_APPROVED:
+            return False, _('to approve the campaign, content can not be empty!')
+
+        return True, ''
+
     def create_publisher_list(self):
         pass
 
@@ -199,8 +208,7 @@ class CampaignReference(models.Model):
     schedule_range = DateTimeRangeField(null=True, blank=True)
     updated_time = models.DateTimeField(null=True, blank=True)
 
-    objects = models.Manager()
-    live = LiveCampaignReferenceManager()
+    objects = CampaignReferenceManager()
 
 
 class TargetDevice(models.Model):
@@ -229,7 +237,7 @@ class CampaignContent(models.Model):
     utm_term = models.CharField(max_length=100, blank=True, null=True)
 
     cost_model = models.PositiveSmallIntegerField(choices=CostModel.COST_MODEL_CHOICES)
-    cost_model_price = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    cost_model_price = models.PositiveIntegerField()
 
     is_hidden = models.BooleanField(default=False)
 
