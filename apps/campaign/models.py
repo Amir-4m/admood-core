@@ -70,7 +70,12 @@ class Campaign(models.Model):
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     publishers = models.ManyToManyField(Publisher, blank=True)
     categories = models.ManyToManyField(Category, blank=True)
-    final_publishers = models.ManyToManyField(Publisher, blank=True, related_name='final_campaigns')
+    final_publishers = models.ManyToManyField(
+        Publisher,
+        through='FinalPublisher',
+        blank=True,
+        related_name='final_campaigns'
+    )
 
     name = models.CharField(max_length=50)
     locations = models.ManyToManyField(Province, blank=True)
@@ -107,6 +112,21 @@ class Campaign(models.Model):
 
     def is_finished(self):
         return (self.end_date and self.end_date < timezone.now().date()) or (self.total_cost >= self.total_budget)
+
+    def update_final_publishers(self):
+        self.finalpublisher_set.all().delete()
+
+        publishers_by_categories = Publisher.get_by_categories(
+            categories=self.categories.all()
+        )
+        for publisher in publishers_by_categories:
+            try:
+                price = publisher.cost_models.filter(
+                        cost_model=CostModel.CPV
+                    ).order_by('-publisher_price').first().publisher_price
+            except:
+                price = 0
+            self.finalpublisher_set.create(publisher=publisher, tariff=price)
 
     @property
     def max_cost_model_price(self):
@@ -165,6 +185,15 @@ class Campaign(models.Model):
 
     def create_publisher_list(self):
         pass
+
+
+class FinalPublisher(models.Model):
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
+    tariff = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.publisher.name} - {self.tariff}"
 
 
 class CampaignReference(models.Model):

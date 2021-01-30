@@ -8,6 +8,7 @@ from .admin_filter import CampaignFilter
 from .models import (
     Province,
     Campaign,
+    FinalPublisher,
     CampaignContent,
     TargetDevice,
     CampaignSchedule,
@@ -15,6 +16,20 @@ from .models import (
     TelegramCampaign,
 )
 from .views import test_campaign
+from apps.core.consts import CostModel
+
+
+class FinalPublisherInline(admin.TabularInline):
+    model = FinalPublisher
+    fields = ('publisher', 'get_publisher_main_price', 'tariff')
+    readonly_fields = ('publisher', 'get_publisher_main_price')
+    extra = 0
+
+    def get_publisher_main_price(self, obj):
+        return obj.publisher.cost_models.filter(
+            cost_model=CostModel.CPV
+        ).order_by('-publisher_price').first().publisher_price
+    get_publisher_main_price.short_description = 'publisher main price'
 
 
 # --- Inlines ---
@@ -53,7 +68,7 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     form = CampaignAdminForm
     list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
-    inlines = [CampaignContentInline, TargetDeviceInline, CampaignScheduleInline]
+    inlines = [CampaignContentInline, TargetDeviceInline, FinalPublisherInline, CampaignScheduleInline]
     autocomplete_fields = ["owner"]
     actions = ['make_approve_campaigns']
     search_fields = ['medium', 'name', 'contents__title']
