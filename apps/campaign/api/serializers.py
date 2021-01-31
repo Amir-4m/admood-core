@@ -440,12 +440,6 @@ class CampaignReferenceContentReport(serializers.ModelSerializer):
         model = CampaignReference
         fields = ('id', 'title', 'date', 'content_reports')
 
-    def hour_view_formatter(self, data):
-        # `data`=> {12: 150} 12 o'clock and 150 view
-        return [
-            [key, data[key]] for key in data.keys()
-        ]
-
     def get_content_reports(self, obj):
         result = []
         campaign_contents = CampaignContent.objects.filter(
@@ -458,8 +452,8 @@ class CampaignReferenceContentReport(serializers.ModelSerializer):
                     result.append(
                         dict(
                             content_title=cc['title'],
-                            hourly_graph_cumulative=self.hour_view_formatter(content.get('hourly_cumulative')),
-                            hourly_graph_view=self.hour_view_formatter(content.get('hourly')))
+                            hourly_graph_cumulative=content.get('hourly_cumulative'),
+                            hourly_graph_view=content.get('hourly'))
                     )
         return result
 

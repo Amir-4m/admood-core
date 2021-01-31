@@ -70,19 +70,27 @@ def update_telegram_info_task():
             for report in reports:
                 if content["ref_id"] == report["content"]:
                     content["views"] = report["views"]
+                    report["hourly"] = {
+                        12: 4,
+                        15: 20,
+                        20: 40,
+                        16: 20,
+                    }
                     content["detail"] = report["detail"]
-                    content['hourly_cumulative'] = report['hourly']
+                    content['graph_hourly_cumulative'] = [
+                        [key, report['hourly'][key]] for key in report['hourly'].keys()
+                    ]
 
                     # creating the view by hour
-                    keys = sorted(report['hourly'].keys(), reverse=True)
+                    keys = sorted(report['hourly'].keys())
                     if keys:
-                        content['hourly'] = {}
-                        min_key = min(keys)
-                        for key in keys:
-                            if key != min_key:
-                                content['hourly'][key] = report['hourly'][key] - report['hourly'].get(key - 1)
-                            else:
-                                content['hourly'][key] = report['hourly'][key]
+                        content['graph_hourly'] = {}
+                        for index, key in enumerate(keys, 0):
+                            content['graph_hourly'][key] = report['hourly'][keys[index + 1]] - report['hourly'][key]
+
+                    print(content['graph_hourly'])
+                    # content['graph_hourly_cumulative'] =
+
         campaign_ref.report_time = timezone.now()
         campaign_ref.save()
 
