@@ -39,7 +39,7 @@ class CampaignReferenceManager(models.Manager):
             ref_id__isnull=False,
             schedule_range__startswith__date=timezone.now().date(),
             schedule_range__endswith__time__lte=timezone.now().time(),
-            updated_time__isnull=True
+            finish_time__isnull=True
         )
 
 
@@ -160,7 +160,7 @@ class Campaign(models.Model):
     def today_cost(self):
         cost = 0
         for campaign_reference in self.campaignreference_set.filter(
-                updated_time__date=timezone.now().date(),
+                created_time__date=timezone.now().date(),
                 ref_id__isnull=False
         ):
             if isinstance(campaign_reference.contents, list):
@@ -197,6 +197,9 @@ class FinalPublisher(models.Model):
 
 
 class CampaignReference(models.Model):
+    created_time = models.DateTimeField(_("created time"), auto_now_add=True)
+    updated_time = models.DateTimeField(_("updated time"), auto_now=True)
+
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     ref_id = models.IntegerField(null=True, blank=True)
     extra_data = JSONField(default=json_default)
@@ -206,7 +209,7 @@ class CampaignReference(models.Model):
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     schedule_range = DateTimeRangeField(null=True, blank=True)
-    updated_time = models.DateTimeField(null=True, blank=True)
+    finish_time = models.DateTimeField(null=True, blank=True)
 
     objects = CampaignReferenceManager()
 
