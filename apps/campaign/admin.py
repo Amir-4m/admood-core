@@ -68,7 +68,7 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     form = CampaignAdminForm
     list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
-    inlines = [CampaignContentInline, TargetDeviceInline, FinalPublisherInline, CampaignScheduleInline]
+    inlines = [CampaignContentInline, CampaignScheduleInline, TargetDeviceInline, FinalPublisherInline]
     autocomplete_fields = ["owner"]
     actions = ['make_approve_campaigns']
     search_fields = ['medium', 'name', 'contents__title']
@@ -77,7 +77,7 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     radio_fields = {'status': admin.VERTICAL}
     readonly_fields = (
         'owner', 'locations', 'description', 'start_date', 'end_date', 'publishers', 'categories', 'utm_campaign',
-        'utm_content', 'medium', 'utm_medium'
+        'utm_content', 'medium', 'utm_medium', 'error_count', 'is_enable'
     )
 
     def get_readonly_fields(self, request, obj=None):
