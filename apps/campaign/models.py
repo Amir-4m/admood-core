@@ -39,7 +39,7 @@ class CampaignReferenceManager(models.Manager):
             ref_id__isnull=False,
             schedule_range__startswith__date=timezone.now().date(),
             schedule_range__endswith__time__lte=timezone.now().time(),
-            updated_time__isnull=True
+            finish_time__isnull=True
         )
 
 
@@ -65,6 +65,9 @@ class Campaign(models.Model):
         (STATUS_REJECTED, _("rejected")),
         # (STATUS_BLOCKED, _("blocked")),
     )
+
+    created_time = models.DateTimeField(_("created time"), auto_now_add=True)
+    updated_time = models.DateTimeField(_("updated time"), auto_now=True)
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
@@ -94,7 +97,6 @@ class Campaign(models.Model):
     total_budget = models.PositiveIntegerField()
 
     is_enable = models.BooleanField(default=True)
-    created_time = models.DateTimeField(auto_now_add=True)
 
     error_count = models.PositiveSmallIntegerField(default=0)
 
@@ -197,6 +199,9 @@ class FinalPublisher(models.Model):
 
 
 class CampaignReference(models.Model):
+    created_time = models.DateTimeField(_("created time"), auto_now_add=True)
+    updated_time = models.DateTimeField(_("updated time"), auto_now=True)
+
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     ref_id = models.IntegerField(null=True, blank=True)
     extra_data = JSONField(default=json_default)
@@ -206,7 +211,7 @@ class CampaignReference(models.Model):
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     schedule_range = DateTimeRangeField(null=True, blank=True)
-    updated_time = models.DateTimeField(null=True, blank=True)
+    finish_time = models.DateTimeField(null=True, blank=True)
 
     objects = CampaignReferenceManager()
 
