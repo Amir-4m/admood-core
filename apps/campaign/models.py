@@ -160,7 +160,7 @@ class Campaign(models.Model):
     def today_cost(self):
         cost = 0
         for campaign_reference in self.campaignreference_set.filter(
-                created_time__date=timezone.now().date(),
+                updated_time__date=timezone.now().date(),
                 ref_id__isnull=False
         ):
             if isinstance(campaign_reference.contents, list):
