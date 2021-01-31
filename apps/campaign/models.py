@@ -222,7 +222,7 @@ class FinalPublisher(models.Model):
 
 class CampaignReference(models.Model):
     created_time = models.DateTimeField(_("created time"), auto_now_add=True)
-    updated_time = models.DateTimeField(_("updated time"), auto_now=True)
+    # updated_time = models.DateTimeField(_("updated time"), auto_now=True)
 
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     ref_id = models.IntegerField(null=True, blank=True)
