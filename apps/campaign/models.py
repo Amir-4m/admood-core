@@ -39,7 +39,7 @@ class CampaignReferenceManager(models.Manager):
             ref_id__isnull=False,
             schedule_range__startswith__date=timezone.now().date(),
             schedule_range__endswith__time__lte=timezone.now().time(),
-            updated_time__isnull=True
+            report_time__isnull=True
         )
 
 
@@ -114,6 +114,30 @@ class Campaign(models.Model):
         return (self.end_date and self.end_date < timezone.now().date()) or (self.total_cost >= self.total_budget)
 
     def update_final_publishers(self):
+        # TODO Implement This
+        # publishers_by_categories_ids = Publisher.get_by_categories(
+        #     categories=instance.categories.all()
+        # ).values_list('id', flat=True)
+        # print(publishers_by_categories_ids)
+        # current_publisher_ids = instance.publisher_price.all().values_list('publisher_id')
+        # inserting_publisher = set(current_publisher_ids) - set(publishers_by_categories_ids)
+        #
+        # for publisher in Publisher.objects.filter(id__in=inserting_publisher):
+        #     try:
+        #         price = publisher.cost_models.filter(
+        #                 cost_model=CostModel.CPV
+        #             ).order_by('-publisher_price').first().publisher_price
+        #     except:
+        #         price = 0
+        #     instance.publisher_price.create(
+        #         publisher=publisher,
+        #         publisher_price=price
+        #     )
+        #
+        # current_publisher_ids = instance.publisher_price.all().values_list('publisher_id')
+        # deleting_publisher_ids = set(publishers_by_categories_ids) - set(current_publisher_ids)
+        # instance.publisher_price.filter(publisher_id__in=deleting_publisher_ids).delete()
+
         self.finalpublisher_set.all().delete()
 
         publishers_by_categories = Publisher.get_by_categories(
@@ -197,6 +221,9 @@ class FinalPublisher(models.Model):
 
 
 class CampaignReference(models.Model):
+    created_time = models.DateTimeField(_("created time"), auto_now_add=True)
+    updated_time = models.DateTimeField(_("updated time"), auto_now=True)
+
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     ref_id = models.IntegerField(null=True, blank=True)
     extra_data = JSONField(default=json_default)
@@ -206,7 +233,7 @@ class CampaignReference(models.Model):
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     schedule_range = DateTimeRangeField(null=True, blank=True)
-    updated_time = models.DateTimeField(null=True, blank=True)
+    report_time = models.DateTimeField(null=True, blank=True)
 
     objects = CampaignReferenceManager()
 
