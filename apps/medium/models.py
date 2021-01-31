@@ -30,6 +30,7 @@ class Category(models.Model):
 class CostModelPrice(models.Model):
     created_time = models.DateTimeField(_("created time"), auto_now_add=True)
     updated_time = models.DateTimeField(_("updated time"), auto_now=True)
+
     medium = models.PositiveSmallIntegerField(_("medium"), choices=Medium.MEDIUM_CHOICES)
     cost_model = models.PositiveSmallIntegerField(_("cost model"), choices=CostModel.COST_MODEL_CHOICES)
     grade = models.CharField(_("grade"), max_length=32)
@@ -80,6 +81,9 @@ class Publisher(models.Model):
         # (STATUS_BLOCKED, 'blocked'),
     )
 
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
+
     cost_models = models.ManyToManyField(CostModelPrice, blank=True)
     categories = models.ManyToManyField(Category, blank=True)
 
@@ -91,8 +95,6 @@ class Publisher(models.Model):
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=STATUS_WAITING)
     ref_id = models.IntegerField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    created_time = models.DateTimeField(auto_now_add=True)
-    updated_time = models.DateTimeField(auto_now=True)
 
     objects = models.Manager()
     approved_objects = ApprovedPublisherManager()
