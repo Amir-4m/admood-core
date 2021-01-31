@@ -432,6 +432,38 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
         return publishers_detail
 
 
+class CampaignReferenceContentReport(serializers.ModelSerializer):
+    title = serializers.CharField(source='campaign.name')
+    content_reports = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CampaignReference
+        fields = ('id', 'title', 'date', 'content_reports')
+
+    def hour_view_formatter(self, data):
+        # `data`=> {12: 150} 12 o'clock and 150 view
+        return [
+            dict(hour=key, view=data[key]) for key in data.keys()
+        ]
+
+    def get_content_reports(self, obj):
+        result = []
+        campaign_contents = CampaignContent.objects.filter(
+            id__in=[item['content'] for item in obj.contents],
+            cost_model_price__gt=0
+        ).values('id', 'title')
+        for cc in campaign_contents:
+            for content in obj.contents:
+                if cc['id'] == content['content']:
+                    result.append(
+                        dict(
+                            content_title=cc['title'],
+                            hourly_cumulative=self.hour_view_formatter(content.get('hourly_cumulative')),
+                            hourly=self.hour_view_formatter(content.get('hourly')))
+                    )
+        return result
+
+
 class EstimateActionsSerializer(serializers.Serializer):
     publishers = serializers.ListField(child=serializers.IntegerField())
     categories = serializers.ListField(child=serializers.IntegerField())

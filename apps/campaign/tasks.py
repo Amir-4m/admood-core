@@ -42,13 +42,13 @@ def disable_finished_campaigns():
 @shared_task
 def create_telegram_campaign_task():
     # filter approved and enable telegram campaigns
-    campaigns = Campaign.objects.live.filter(medium=Medium.TELEGRAM)
+    campaigns = Campaign.objects.live().filter(medium=Medium.TELEGRAM)
     CampaignService.create_campaign_by_medium(campaigns, 'telegram')
 
 
 @shared_task
 def create_instagram_campaign_task():
-    campaigns = Campaign.objects.live.filter(
+    campaigns = Campaign.objects.live().filter(
         Q(medium=Medium.INSTAGRAM_POST) |
         Q(medium=Medium.INSTAGRAM_STORY)
     )
@@ -59,13 +59,11 @@ def create_instagram_campaign_task():
 @shared_task
 def update_telegram_info_task():
     # filter appropriate campaigns to save gotten views
-    campaign_refs = CampaignReference.objects.live.all()
+    campaign_refs = CampaignReference.objects.live()
 
     for campaign_ref in campaign_refs:
-
         # store telegram file hash of screenshot in TelegramCampaign model
         campaign_ref.campaign.telegramcampaign.telegram_file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
-
         # get each content views and store in content json field
         reports = TelegramCampaignServices().campaign_report(campaign_ref.ref_id)
         for content in campaign_ref.contents:
@@ -73,6 +71,18 @@ def update_telegram_info_task():
                 if content["ref_id"] == report["content"]:
                     content["views"] = report["views"]
                     content["detail"] = report["detail"]
+                    content['hourly_cumulative'] = report['hourly']
+
+                    # creating the view by hour
+                    keys = sorted(report['hourly'].keys(), reverse=True)
+                    if keys:
+                        content['hourly'] = {}
+                        min_key = min(keys)
+                        for key in keys:
+                            if key != min_key:
+                                content['hourly'][key] = report['hourly'][key] - report['hourly'].get(key - 1)
+                            else:
+                                content['hourly'][key] = report['hourly'][key]
         campaign_ref.report_time = timezone.now()
         campaign_ref.save()
 
