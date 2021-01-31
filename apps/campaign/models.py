@@ -96,7 +96,7 @@ class Campaign(models.Model):
     is_enable = models.BooleanField(default=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
-    error_count = models.PositiveSmallIntegerField(default=0)
+    error_count = models.PositiveSmallIntegerField(default=0, editable=False)
 
     objects = CampaignManager()
 
