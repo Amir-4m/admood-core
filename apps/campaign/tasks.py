@@ -61,9 +61,11 @@ def create_instagram_campaign_task():
 @shared_task
 def update_telegram_info_task():
     # filter appropriate campaigns to save gotten views
-    key_value_list_gen = lambda data: sorted([[key, data[key]] for key in data.keys()])
-    campaign_refs = CampaignReference.objects.live()
 
+    # y => hour, label => value
+    key_value_list_gen = lambda data: [dict(y=key, label=data[key]) for key in sorted(data.keys())]
+
+    campaign_refs = CampaignReference.objects.live()
     for campaign_ref in campaign_refs:
         # store telegram file hash of screenshot in TelegramCampaign model
         campaign_ref.campaign.telegramcampaign.telegram_file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
