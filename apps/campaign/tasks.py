@@ -62,8 +62,8 @@ def create_instagram_campaign_task():
 def update_telegram_info_task():
     # filter appropriate campaigns to save gotten views
 
-    # y => hour, label => value
-    key_value_list_gen = lambda data: [dict(y=key, label=data[key]) for key in sorted(data.keys())]
+    # y => value, label => hour
+    key_value_list_gen = lambda data: [dict(y=data[key], label=key) for key in sorted(data.keys())]
 
     campaign_refs = CampaignReference.objects.live()
     for campaign_ref in campaign_refs:
