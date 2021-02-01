@@ -13,7 +13,7 @@ from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
     CampaignContentSerializer, CampaignDuplicateSerializer, EstimateActionsSerializer,
-    CampaignReferenceSerializer, CampaignReferenceContentReport
+    CampaignReferenceSerializer
 )
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignReference
 from apps.core.consts import CostModel
@@ -175,16 +175,10 @@ class CampaignReferenceViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         return self.queryset.filter(campaign__owner=self.request.user)
 
+    # @method_decorator(cache_page(60 * 10))
     @action(detail=True, methods=['get'], url_path='report')
     def report(self, request, *args, **kwargs):
         obj = self.get_object()
         serializer = self.get_serializer(obj)
-        return Response(serializer.data)
-
-    # @method_decorator(cache_page(60 * 10))
-    @action(methods=['get'], detail=True, url_path='report-content-view')
-    def report_content_view(self, request, *args, **kwargs):
-        obj = self.get_object()
-        serializer = CampaignReferenceContentReport(obj)
         return Response(serializer.data)
 

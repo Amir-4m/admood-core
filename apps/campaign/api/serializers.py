@@ -396,7 +396,12 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
         for content in obj.contents:
             for cc in campaign_contents:
                 if cc['id'] == content['content']:
-                    result.append({'content_title': cc['title'], 'content_total_views': content['views']})
+                    result.append({
+                        'content_title': cc['title'],
+                        'content_total_views': content['views'],
+                        'hourly_graph_cumulative': content.get('graph_hourly_cumulative'),
+                        'hourly_graph_view': content.get('graph_hourly_view')
+                    })
         return result
 
     def get_contents_detail(self, obj):
@@ -430,32 +435,6 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
                         posts=detail['posts'])
                     )
         return publishers_detail
-
-
-class CampaignReferenceContentReport(serializers.ModelSerializer):
-    title = serializers.CharField(source='campaign.name')
-    content_reports = serializers.SerializerMethodField()
-
-    class Meta:
-        model = CampaignReference
-        fields = ('id', 'title', 'date', 'content_reports')
-
-    def get_content_reports(self, obj):
-        result = []
-        campaign_contents = CampaignContent.objects.filter(
-            id__in=[item['content'] for item in obj.contents],
-            cost_model_price__gt=0
-        ).values('id', 'title')
-        for cc in campaign_contents:
-            for content in obj.contents:
-                if cc['id'] == content['content']:
-                    result.append(
-                        dict(
-                            content_title=cc['title'],
-                            hourly_graph_cumulative=content.get('hourly_cumulative'),
-                            hourly_graph_view=content.get('hourly'))
-                    )
-        return result
 
 
 class EstimateActionsSerializer(serializers.Serializer):

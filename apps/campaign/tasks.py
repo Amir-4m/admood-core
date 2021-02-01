@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from celery.schedules import crontab
 from celery.task import periodic_task
 from celery import shared_task
@@ -59,6 +61,7 @@ def create_instagram_campaign_task():
 @shared_task
 def update_telegram_info_task():
     # filter appropriate campaigns to save gotten views
+    key_value_list_gen = lambda data: sorted([[key, data[key]] for key in data.keys()])
     campaign_refs = CampaignReference.objects.live()
 
     for campaign_ref in campaign_refs:
@@ -70,27 +73,19 @@ def update_telegram_info_task():
             for report in reports:
                 if content["ref_id"] == report["content"]:
                     content["views"] = report["views"]
-                    report["hourly"] = {
-                        12: 4,
-                        15: 20,
-                        20: 40,
-                        16: 20,
-                    }
                     content["detail"] = report["detail"]
-                    content['graph_hourly_cumulative'] = [
-                        [key, report['hourly'][key]] for key in report['hourly'].keys()
-                    ]
+                    content['graph_hourly_cumulative'] = key_value_list_gen(report['hourly'])
+                    content['graph_hourly_view'] = {}
 
                     # creating the view by hour
-                    keys = sorted(report['hourly'].keys())
+                    keys = sorted(report['hourly'].keys(), reverse=True)
                     if keys:
-                        content['graph_hourly'] = {}
                         for index, key in enumerate(keys, 0):
-                            content['graph_hourly'][key] = report['hourly'][keys[index + 1]] - report['hourly'][key]
-
-                    print(content['graph_hourly'])
-                    # content['graph_hourly_cumulative'] =
-
+                            if index + 1 == len(keys):
+                                content['graph_hourly_view'][keys[index]] = report['hourly'][keys[index]]
+                            else:
+                                content['graph_hourly_view'][key] = report['hourly'][key] - report['hourly'][keys[index + 1]]
+                        content['graph_hourly_view'] = key_value_list_gen(content['graph_hourly_view'])
         campaign_ref.report_time = timezone.now()
         campaign_ref.save()
 
