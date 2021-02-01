@@ -65,7 +65,7 @@ def update_telegram_info_task():
     # y => value, label => hour
     key_value_list_gen = lambda data: [dict(y=data[key], label=key) for key in sorted(data.keys())]
 
-    campaign_refs = CampaignReference.objects.live()
+    campaign_refs = CampaignReference.objects.live.all()
     for campaign_ref in campaign_refs:
         # store telegram file hash of screenshot in TelegramCampaign model
         campaign_ref.campaign.telegramcampaign.telegram_file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
