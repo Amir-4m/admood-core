@@ -59,13 +59,14 @@ def create_instagram_campaign_task():
 @shared_task
 def update_telegram_info_task():
     # filter appropriate campaigns to save gotten views
+
+    # y => value, label => hour
+    key_value_list_gen = lambda data: [dict(y=data[key], label=key) for key in sorted(data.keys())]
+
     campaign_refs = CampaignReference.objects.live()
-
     for campaign_ref in campaign_refs:
-
         # store telegram file hash of screenshot in TelegramCampaign model
         campaign_ref.campaign.telegramcampaign.telegram_file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
-
         # get each content views and store in content json field
         reports = TelegramCampaignServices().campaign_report(campaign_ref.ref_id)
         for content in campaign_ref.contents:
@@ -73,6 +74,18 @@ def update_telegram_info_task():
                 if content["ref_id"] == report["content"]:
                     content["views"] = report["views"]
                     content["detail"] = report["detail"]
+                    content['graph_hourly_cumulative'] = key_value_list_gen(report['hourly'])
+                    content['graph_hourly_view'] = {}
+
+                    # creating the view by hour
+                    keys = sorted(report['hourly'].keys(), reverse=True)
+                    if keys:
+                        for index, key in enumerate(keys, 0):
+                            if index + 1 == len(keys):
+                                content['graph_hourly_view'][keys[index]] = report['hourly'][keys[index]]
+                            else:
+                                content['graph_hourly_view'][key] = report['hourly'][key] - report['hourly'][keys[index + 1]]
+                        content['graph_hourly_view'] = key_value_list_gen(content['graph_hourly_view'])
         campaign_ref.report_time = timezone.now()
         campaign_ref.save()
 

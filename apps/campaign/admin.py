@@ -83,12 +83,12 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
 
-        if obj and CampaignReference.objects.filter(
+        if obj and not CampaignReference.objects.filter(
                 campaign=obj,
                 ref_id__isnull=False
         ).exists():
             return readonly_fields
-        return readonly_fields + ('name',)
+        return ('name',) + readonly_fields
 
     def render_change_form(self, request, context, **kwargs):
         return super().render_change_form(request, context, **kwargs)
@@ -142,6 +142,5 @@ class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
 @admin.register(TelegramCampaign)
 class TelegramCampaignAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "screenshot")
-    raw_id_fields = 'screenshot',
-    readonly_fields = ['campaign']
+    raw_id_fields = ('screenshot', 'campaign')
     list_filter = [CampaignFilter]

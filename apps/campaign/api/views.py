@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -11,7 +13,8 @@ from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
     CampaignContentSerializer, CampaignDuplicateSerializer, EstimateActionsSerializer,
-    CampaignReferenceSerializer)
+    CampaignReferenceSerializer
+)
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignReference
 from apps.core.consts import CostModel
 from apps.core.views import BaseViewSet
@@ -172,8 +175,10 @@ class CampaignReferenceViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         return self.queryset.filter(campaign__owner=self.request.user)
 
+    # @method_decorator(cache_page(60 * 10))
     @action(detail=True, methods=['get'], url_path='report')
     def report(self, request, *args, **kwargs):
         obj = self.get_object()
         serializer = self.get_serializer(obj)
         return Response(serializer.data)
+

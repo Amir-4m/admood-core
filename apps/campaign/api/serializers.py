@@ -396,7 +396,12 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
         for content in obj.contents:
             for cc in campaign_contents:
                 if cc['id'] == content['content']:
-                    result.append({'content_title': cc['title'], 'content_total_views': content['views']})
+                    result.append({
+                        'content_title': cc['title'],
+                        'content_total_views': content['views'],
+                        'hourly_graph_cumulative': content.get('graph_hourly_cumulative'),
+                        'hourly_graph_view': content.get('graph_hourly_view')
+                    })
         return result
 
     def get_contents_detail(self, obj):
