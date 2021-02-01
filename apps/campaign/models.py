@@ -37,8 +37,8 @@ class CampaignReferenceManager(models.Manager):
     def live(self):
         return self.get_queryset().filter(
             ref_id__isnull=False,
-            # schedule_range__startswith__date=timezone.now().date(),
-            # schedule_range__endswith__time__lte=timezone.now().time(),
+            schedule_range__startswith__date=timezone.now().date(),
+            schedule_range__endswith__time__lte=timezone.now().time(),
             finish_time__isnull=True
         )
 
