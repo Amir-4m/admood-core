@@ -42,7 +42,7 @@ def disable_finished_campaigns():
 @shared_task
 def create_telegram_campaign_task():
     # filter approved and enable telegram campaigns
-    campaigns = Campaign.objects.live().filter(medium=Medium.TELEGRAM)
+    campaigns = Campaign.objects.live().filter(medium=Medium.TELEGRAM, error_count__lt=5)
     CampaignService.create_campaign_by_medium(campaigns, 'telegram')
 
 
@@ -50,7 +50,8 @@ def create_telegram_campaign_task():
 def create_instagram_campaign_task():
     campaigns = Campaign.objects.live().filter(
         Q(medium=Medium.INSTAGRAM_POST) |
-        Q(medium=Medium.INSTAGRAM_STORY)
+        Q(medium=Medium.INSTAGRAM_STORY),
+        error_count__lt=5
     )
     CampaignService.create_campaign_by_medium(campaigns, 'instagram')
 

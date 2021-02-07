@@ -3,59 +3,33 @@ import logging
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainSerializer
-from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer, TokenObtainPairSerializer
 
-from apps.accounts.models import UserProfile, Verification
+
+from apps.accounts.models import UserProfile
 
 User = get_user_model()
 logger = logging.getLogger(__file__)
 
 
-class MyTokenObtainPairSerializer(TokenObtainSerializer):
-    @classmethod
-    def get_token(cls, user):
-        return RefreshToken.for_user(user)
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
+        # adding lifetime to data
         data = super().validate(attrs)
-
-        refresh = self.get_token(self.user)
-
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
-        data['lifetime'] = int(refresh.access_token.lifetime.total_seconds())
-
+        data['lifetime'] = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].seconds
         return data
 
 
-class MyTokenRefreshSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
+class MyTokenRefreshSerializer(TokenRefreshSerializer):
 
     def validate(self, attrs):
-        refresh = RefreshToken(attrs['refresh'])
-
-        data = {'access': str(refresh.access_token)}
-
-        if api_settings.ROTATE_REFRESH_TOKENS:
-            if api_settings.BLACKLIST_AFTER_ROTATION:
-                try:
-                    # Attempt to blacklist the given refresh token
-                    refresh.blacklist()
-                except AttributeError as e:
-                    # If blacklist app not installed, `blacklist` method will
-                    # not be present
-                    logger.error(f'[refresh token failed]-[exc: {e}]')
-
-            refresh.set_jti()
-            refresh.set_exp()
-
-            data['refresh'] = str(refresh)
-
-        data['lifetime'] = int(refresh.access_token.lifetime.total_seconds())
+        # adding lifetime to data
+        data = super().validate(attrs)
+        data['lifetime'] = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].seconds
         return data
 
 

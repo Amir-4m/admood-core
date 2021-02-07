@@ -110,7 +110,7 @@ class InstagramCampaignServices(object):
             f"[creating instagram campaign]-[campaign id: {campaign.id}]-[start time: {start_datetime}]-[end time: {end_datetime}]"
         )
         if campaign.error_count >= 5:
-            logger.critical(f"[creating instagram campaign failed]-[campaign id: {campaign.id}]")
+            logger.error(f"[creating instagram campaign failed]-[campaign id: {campaign.id}]")
             return
 
         try:
@@ -311,7 +311,7 @@ class TelegramCampaignServices(object):
     @staticmethod
     def create_telegram_campaign(campaign, start_datetime, end_datetime):
         if campaign.error_count >= 5:
-            logger.critical(f"[creating telegram campaign failed]-[campaign id: {campaign.id}]")
+            logger.error(f"[creating telegram campaign failed]-[campaign id: {campaign.id}]")
             return
         try:
             campaign_ref, created = CampaignReference.objects.get_or_create(
