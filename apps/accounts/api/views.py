@@ -10,8 +10,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from apps.accounts.api.serializers import (
-    MyTokenObtainPairSerializer,
-    MyTokenRefreshSerializer,
+    LifeTimeTokenObtainSerializer,
+    LifeTimeTokenRefreshSerializer,
     UserProfileSerializer,
     RegisterUserByEmailSerializer,
     SetPasswordSerializer,
@@ -25,11 +25,11 @@ User = get_user_model()
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
+    serializer_class = LifeTimeTokenObtainSerializer
 
 
 class MyTokenRefreshView(TokenRefreshView):
-    serializer_class = MyTokenRefreshSerializer
+    serializer_class = LifeTimeTokenRefreshSerializer
 
 
 class RegisterUserByEmailAPIView(GenericAPIView):

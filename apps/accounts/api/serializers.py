@@ -7,7 +7,7 @@ from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer, TokenObtainPairSerializer
-
+from rest_framework_simplejwt.settings import api_settings
 
 from apps.accounts.models import UserProfile
 
@@ -15,22 +15,21 @@ User = get_user_model()
 logger = logging.getLogger(__file__)
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+class LifeTimeTokenSerializer:
 
     def validate(self, attrs):
         # adding lifetime to data
         data = super().validate(attrs)
-        data['lifetime'] = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].seconds
+        data['lifetime'] = int(api_settings.ACCESS_TOKEN_LIFETIME.total_seconds())
         return data
 
 
-class MyTokenRefreshSerializer(TokenRefreshSerializer):
+class LifeTimeTokenObtainSerializer(LifeTimeTokenSerializer, TokenObtainPairSerializer):
+    pass
 
-    def validate(self, attrs):
-        # adding lifetime to data
-        data = super().validate(attrs)
-        data['lifetime'] = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].seconds
-        return data
+
+class LifeTimeTokenRefreshSerializer(LifeTimeTokenSerializer, TokenRefreshSerializer):
+    pass
 
 
 class RegisterUserByEmailSerializer(serializers.Serializer):
