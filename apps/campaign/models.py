@@ -137,13 +137,16 @@ class Campaign(models.Model):
         # current_publisher_ids = instance.publisher_price.all().values_list('publisher_id')
         # deleting_publisher_ids = set(publishers_by_categories_ids) - set(current_publisher_ids)
         # instance.publisher_price.filter(publisher_id__in=deleting_publisher_ids).delete()
-
         self.finalpublisher_set.all().delete()
 
-        publishers_by_categories = Publisher.get_by_categories(
-            categories=self.categories.all()
-        )
-        for publisher in publishers_by_categories:
+        if self.categories.exists():
+            publishers = Publisher.get_by_categories(
+                categories=self.categories.all()
+            )
+        else:
+            publishers = self.publishers.all()
+
+        for publisher in publishers:
             try:
                 price = publisher.cost_models.filter(
                         cost_model=CostModel.CPV

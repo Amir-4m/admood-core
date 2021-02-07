@@ -220,7 +220,7 @@ if DEVEL is False:
 
 LOG_DIR = BASE_DIR / 'logs'
 LOCALE_PATHS = [
-    BASE_DIR / 'locale',
+    BASE_DIR / 'apps/locale',
 ]
 
 EMAIL_HOST = config('EMAIL_HOST')
