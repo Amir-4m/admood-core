@@ -51,7 +51,18 @@ from apps.medium.models import Publisher
 #             }
 #     },
 # }
-#
+
+DATA_SCHEMA_CAMPAIGN = {
+    'type': 'object',
+    'title': 'extra data',
+    'properties': {
+        'post_limit': {
+            'title': 'Post Limit',
+            'type': 'integer',
+            'format': 'integer',
+        }
+    },
+}
 
 
 class ContentAdminForm(forms.ModelForm):
@@ -72,7 +83,10 @@ class CampaignAdminForm(forms.ModelForm):
 
     class Meta:
         model = Campaign
-        exclude = ('extra_data',)
+        fields = "__all__"
+        widgets = {
+            'extra_data': JSONEditorWidget(schema=DATA_SCHEMA_CAMPAIGN),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

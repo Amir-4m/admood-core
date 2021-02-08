@@ -117,7 +117,6 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
 @admin.register(CampaignContent)
 class CampaignContentAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "title", "data")
-    readonly_fields = ['data']
     list_filter = (CampaignFilter, "campaign__categories")
     raw_id_fields = ['campaign']
     search_fields = ("title",)
