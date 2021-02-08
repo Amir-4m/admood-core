@@ -175,6 +175,7 @@ class TelegramCampaignServices(object):
             publishers=publishers,
             max_view=campaign.remaining_views,
             agents=campaign.extra_data.get('agents', [ADBOT_AGENTS]) if campaign.extra_data else [ADBOT_AGENTS],
+            post_limit=campaign.extra_data.get('post_limit'),
             start_datetime=start_time.__str__(),
             end_datetime=end_time.__str__(),
         )
