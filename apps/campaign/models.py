@@ -110,6 +110,13 @@ class Campaign(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_all_publishers(cls, publishers_id, categories):
+        return Publisher.objects.filter(
+            Q(id__in=publishers_id) | Q(categories__in=categories),
+            cost_models__isnull=False
+        )
+
     def is_finished(self):
         return (self.end_date and self.end_date < timezone.now().date()) or (self.total_cost >= self.total_budget)
 
@@ -140,19 +147,17 @@ class Campaign(models.Model):
         self.finalpublisher_set.all().delete()
 
         if self.categories.exists():
-            publishers = Publisher.get_by_categories(
+            publishers = self.get_all_publishers(
+                publishers_id=self.publishers.values_list('id', flat=True),
                 categories=self.categories.all()
             )
         else:
             publishers = self.publishers.all()
 
         for publisher in publishers:
-            try:
-                price = publisher.cost_models.filter(
-                        cost_model=CostModel.CPV
-                    ).order_by('-publisher_price').first().publisher_price
-            except:
-                price = 0
+            price = publisher.cost_models.filter(
+                    cost_model=CostModel.CPV
+                ).order_by('-publisher_price').first().publisher_price
             self.finalpublisher_set.create(publisher=publisher, tariff=price)
 
     @property
