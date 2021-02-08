@@ -117,6 +117,7 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
 @admin.register(CampaignContent)
 class CampaignContentAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "title", "data")
+    readonly_fields = ['data']
     list_filter = (CampaignFilter, "campaign__categories")
     raw_id_fields = ['campaign']
     search_fields = ("title",)
@@ -134,6 +135,7 @@ class CampaignScheduleAdmin(admin.ModelAdmin, AutoFilter):
 @admin.register(CampaignReference)
 class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "ref_id", "date", "schedule_range")
+    readonly_fields = ['extra_data']
     raw_id_fields = ['campaign']
     search_fields = ('ref_id',)
     list_filter = (CampaignFilter, 'date', 'campaign__medium')

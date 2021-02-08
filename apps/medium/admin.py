@@ -18,7 +18,7 @@ class PublisherAdmin(admin.ModelAdmin, AutoFilter):
     fields = ['name', 'medium', 'is_enable', 'status', 'categories', 'cost_models',
               'extra_data', 'description', 'url', 'ref_id']
     filter_horizontal = ['cost_models', 'categories']
-    readonly_fields = ['medium', 'ref_id', 'url']
+    readonly_fields = ['medium', 'ref_id', 'url', 'extra_data']
     radio_fields = {'status': admin.VERTICAL}
     form = PublisherForm
 
