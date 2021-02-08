@@ -85,6 +85,7 @@ class CampaignAdminForm(forms.ModelForm):
         model = Campaign
         fields = "__all__"
         widgets = {
+            # TODO Changing this widget to another one
             'extra_data': JSONEditorWidget(schema=DATA_SCHEMA_CAMPAIGN),
         }
 

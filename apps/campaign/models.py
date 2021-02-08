@@ -146,18 +146,18 @@ class Campaign(models.Model):
         # instance.publisher_price.filter(publisher_id__in=deleting_publisher_ids).delete()
         self.finalpublisher_set.all().delete()
 
-        if self.categories.exists():
-            publishers = self.get_all_publishers(
-                publishers_id=self.publishers.values_list('id', flat=True),
-                categories=self.categories.all()
-            )
-        else:
-            publishers = self.publishers.all()
+        publishers = self.get_all_publishers(
+            publishers_id=self.publishers.values_list('id', flat=True),
+            categories=self.categories.all()
+        )
 
         for publisher in publishers:
-            price = publisher.cost_models.filter(
-                    cost_model=CostModel.CPV
-                ).order_by('-publisher_price').first().publisher_price
+            try:
+                price = publisher.cost_models.filter(
+                        cost_model=CostModel.CPV
+                    ).order_by('-publisher_price').first().publisher_price
+            except:
+                continue
             self.finalpublisher_set.create(publisher=publisher, tariff=price)
 
     @property
