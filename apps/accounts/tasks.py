@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core import mail
 from django.core.mail import EmailMessage
 
-from admood_core.settings import SITE_URL, USER_VERIFICATION_URL, USER_RESET_PASSWORD_URL
 from apps.core.utils.mail import Mail
 from apps.core.utils.sms import api_send_sms
 
@@ -16,7 +15,7 @@ logger = logging.getLogger(__file__)
 def send_verification_email(email_address, code):
     logger.debug(f'[sending verification email]-[email: {email_address}]')
 
-    verify_url = f'{SITE_URL}/{USER_VERIFICATION_URL}/?rc={code}'
+    verify_url = f'{settings.SITE_URL}/{settings.USER_VERIFICATION_URL}/?rc={code}'
     context = {
         'lang': 'fa',  # if settings.LANGUAGE_CODE.lower() == 'fa-ir' else 'en',
         'base_url': "127.0.0.1",
@@ -40,7 +39,7 @@ def send_verification_email(email_address, code):
 def send_reset_password(email_address, code):
     logger.debug(f'[sending reset password]-[email: {email_address}]')
 
-    url = f'{SITE_URL}/{USER_RESET_PASSWORD_URL}/?rc={code}'
+    url = f'{settings.SITE_URL}/{settings.USER_RESET_PASSWORD_URL}/?rc={code}'
     message = EmailMessage('reset password', url, to=[email_address], from_email=settings.EMAIL_HOST_USER)
 
     with mail.get_connection() as connection:

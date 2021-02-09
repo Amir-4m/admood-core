@@ -1,11 +1,11 @@
 import json
 
 from services.utils import custom_request
-from admood_core.settings import SMS_API_URL, SMS_API_TOKEN
+from django.conf import settings
 
 
-SMS_API_URL = SMS_API_URL
-SMS_API_TOKEN = SMS_API_TOKEN
+SMS_API_URL = settings.SMS_API_URL
+SMS_API_TOKEN = settings.SMS_API_TOKEN
 
 HEADERS = {
     'Content-Type': 'application/json',

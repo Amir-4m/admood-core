@@ -1,15 +1,11 @@
-import logging
+    import logging
 
 from datetime import datetime, timedelta
 
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils import timezone
+from django.conf import settings
 
-from admood_core.settings import (
-    ADBOT_MAX_CONCURRENT_CAMPAIGN, ADINSTA_API_TOKEN, ADINSTA_API_URL,
-    ADBOT_API_TOKEN, ADBOT_API_URL, ADBOT_AGENTS
-)
-from apps.core.consts import CostModel
 from apps.core.utils.get_file import get_file
 from apps.campaign.models import CampaignSchedule, CampaignReference, TelegramCampaign
 from services.utils import file_type, custom_request
@@ -19,18 +15,18 @@ logger = logging.getLogger(__name__)
 
 class InstagramCampaignServices(object):
     JSON_HEADERS = {
-        'Authorization': ADINSTA_API_TOKEN,
+        'Authorization': settings.ADINSTA_API_TOKEN,
         'Content-type': 'application/json'
     }
     HEADERS = {
-        'Authorization': ADINSTA_API_TOKEN,
+        'Authorization': settings.ADINSTA_API_TOKEN,
     }
 
-    CAMPAIGN_URL = f'{ADINSTA_API_URL}/api/v1/campaigns/'
-    CONTENT_URL = f'{ADINSTA_API_URL}/api/v1/contents/'
-    FILE_URL = f'{ADINSTA_API_URL}/api/v1/files/'
-    MEDIA_URL = f'{ADINSTA_API_URL}/api/v1/medias/'
-    PAGES_URL = f'{ADINSTA_API_URL}/api/v1/instagram/pages/'
+    CAMPAIGN_URL = f'{settings.ADINSTA_API_URL}/api/v1/campaigns/'
+    CONTENT_URL = f'{settings.ADINSTA_API_URL}/api/v1/contents/'
+    FILE_URL = f'{settings.ADINSTA_API_URL}/api/v1/files/'
+    MEDIA_URL = f'{settings.ADINSTA_API_URL}/api/v1/medias/'
+    PAGES_URL = f'{settings.ADINSTA_API_URL}/api/v1/instagram/pages/'
 
     def create_insta_campaign(self, campaign, start_time, end_time, status):
         logger.debug(
@@ -113,6 +109,14 @@ class InstagramCampaignServices(object):
             logger.critical(f"[creating instagram campaign failed]-[campaign id: {campaign.id}]")
             return
 
+        if CampaignReference.objects.filter(
+                campaign=campaign,
+                ref_id__isnull=False,
+                schedule_range__startswith__lte=timezone.now(),
+                schedule_range__endswith__gte=timezone.now(),
+        ).exists():
+            return
+
         try:
             campaign_ref, created = CampaignReference.objects.get_or_create(
                 campaign=campaign,
@@ -151,13 +155,13 @@ class InstagramCampaignServices(object):
 
 class TelegramCampaignServices(object):
     HEADERS = {
-        'Authorization': ADBOT_API_TOKEN,
+        'Authorization': settings.ADBOT_API_TOKEN,
     }
 
-    CAMPAIGN_URL = f'{ADBOT_API_URL}/api/v1/campaigns/'
-    CONTENT_URL = f'{ADBOT_API_URL}/api/v1/contents/'
-    FILE_URL = f'{ADBOT_API_URL}/api/v1/files/'
-    CHANNELS_URL = f'{ADBOT_API_URL}/api/v1/channels/'
+    CAMPAIGN_URL = f'{settings.ADBOT_API_URL}/api/v1/campaigns/'
+    CONTENT_URL = f'{settings.ADBOT_API_URL}/api/v1/contents/'
+    FILE_URL = f'{settings.ADBOT_API_URL}/api/v1/files/'
+    CHANNELS_URL = f'{settings.ADBOT_API_URL}/api/v1/channels/'
 
     def create_campaign(self, campaign, start_time, end_time, status):
         logger.debug(
@@ -174,10 +178,10 @@ class TelegramCampaignServices(object):
             is_enable=False,
             publishers=publishers,
             max_view=campaign.remaining_views,
-            agents=campaign.extra_data.get('agents', [ADBOT_AGENTS]) if campaign.extra_data else [ADBOT_AGENTS],
-            post_limit=campaign.extra_data.get('post_limit'),
-            start_datetime=start_time.__str__(),
-            end_datetime=end_time.__str__(),
+            agents=campaign.extra_data.get('agents', [settings.ADBOT_AGENTS]) if campaign.extra_data else [settings.ADBOT_AGENTS],
+            post_limit=campaign.extra_data.get('post_limit', 5),
+            start_datetime=str(start_time),
+            end_datetime=str(end_time),
         )
         response = custom_request(self.CAMPAIGN_URL, json=data, headers=self.HEADERS)
         return response.json()['id']
@@ -314,6 +318,15 @@ class TelegramCampaignServices(object):
         if campaign.error_count >= 5:
             logger.critical(f"[creating telegram campaign failed]-[campaign id: {campaign.id}]")
             return
+
+        if CampaignReference.objects.filter(
+                campaign=campaign,
+                ref_id__isnull=False,
+                schedule_range__startswith__lte=timezone.now(),
+                schedule_range__endswith__gte=timezone.now(),
+        ).exists():
+            return
+
         try:
             campaign_ref, created = CampaignReference.objects.get_or_create(
                 campaign=campaign,
@@ -419,13 +432,13 @@ class CampaignService(object):
 
         # create non scheduled campaigns if possible
         concurrent_campaign_count = CampaignReference.objects.live().count()
-        if concurrent_campaign_count < ADBOT_MAX_CONCURRENT_CAMPAIGN:
+        if concurrent_campaign_count < settings.ADBOT_MAX_CONCURRENT_CAMPAIGN:
             campaigns = campaigns.filter(
                 schedules__isnull=True
             ).annotate(
                 num_ref=Count('campaignreference')
             ).order_by('num_ref')
-            for campaign in campaigns[:ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
+            for campaign in campaigns[:settings.ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
                 start_datetime = datetime.now()
                 end_datetime = start_datetime + timedelta(hours=3)
                 create_campaign_func(campaign, start_datetime, end_datetime)
