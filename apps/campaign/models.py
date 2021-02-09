@@ -111,11 +111,14 @@ class Campaign(models.Model):
         return self.name
 
     @classmethod
-    def get_all_publishers(cls, publishers_id, categories):
-        return Publisher.objects.filter(
+    def get_all_publishers(cls, publishers_id, categories, cost_mode=None):
+        _qs = Publisher.objects.filter(
             Q(id__in=publishers_id) | Q(categories__in=categories),
-            cost_models__isnull=False
-        ).distinct()
+        )
+        if cost_mode:
+            _qs = _qs.filter(cost_models__cost_model=cost_mode)
+
+        return _qs.distinct()
 
     def is_finished(self):
         return (self.end_date and self.end_date < timezone.now().date()) or (self.total_cost >= self.total_budget)
@@ -148,7 +151,8 @@ class Campaign(models.Model):
 
         publishers = self.get_all_publishers(
             publishers_id=self.publishers.values_list('id', flat=True),
-            categories=self.categories.all()
+            categories=self.categories.all(),
+            cost_mode=CostModel.CPV
         )
 
         for publisher in publishers:
