@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.postgres.fields import JSONField
+
+from django_json_widget.widgets import JSONEditorWidget
 
 from services.utils import AutoFilter
 from .forms import PublisherForm
@@ -12,6 +15,10 @@ from .models import (
 
 @admin.register(Publisher)
 class PublisherAdmin(admin.ModelAdmin, AutoFilter):
+    form = PublisherForm
+    formfield_overrides = {
+        JSONField: {'widget': JSONEditorWidget},
+    }
     list_display = ['name', 'medium', 'status', 'is_enable', 'created_time', 'updated_time']
     list_filter = [CategoriesFilter, CostModelPriceFilter, 'medium', 'status', 'is_enable']
     search_fields = ['name']
@@ -20,7 +27,6 @@ class PublisherAdmin(admin.ModelAdmin, AutoFilter):
     filter_horizontal = ['cost_models', 'categories']
     readonly_fields = ['medium', 'ref_id', 'url']
     radio_fields = {'status': admin.VERTICAL}
-    form = PublisherForm
 
     def has_add_permission(self, request):
         return False

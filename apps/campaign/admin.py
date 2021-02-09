@@ -1,4 +1,7 @@
 from django.contrib import admin, messages
+from django.contrib.postgres.fields import JSONField
+
+from django_json_widget.widgets import JSONEditorWidget
 
 from apps.accounts.admin_filter import OwnerFilter
 from services.utils import AutoFilter
@@ -66,6 +69,9 @@ class ProvinceAdmin(admin.ModelAdmin):
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     form = CampaignAdminForm
+    formfield_overrides = {
+        JSONField: {'widget': JSONEditorWidget},
+    }
     list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
     inlines = [CampaignContentInline, CampaignScheduleInline, TargetDeviceInline, FinalPublisherInline]
@@ -134,6 +140,7 @@ class CampaignScheduleAdmin(admin.ModelAdmin, AutoFilter):
 @admin.register(CampaignReference)
 class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "ref_id", "date", "schedule_range")
+    readonly_fields = ['extra_data']
     raw_id_fields = ['campaign']
     search_fields = ('ref_id',)
     list_filter = (CampaignFilter, 'date', 'campaign__medium')

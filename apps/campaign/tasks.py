@@ -75,18 +75,19 @@ def update_telegram_info_task():
                 if content["ref_id"] == report["content"]:
                     content["views"] = report["views"]
                     content["detail"] = report["detail"]
-                    content['graph_hourly_cumulative'] = key_value_list_gen(report['hourly'])
-                    content['graph_hourly_view'] = {}
 
-                    # creating the view by hour
-                    keys = sorted(report['hourly'].keys(), reverse=True)
-                    if keys:
-                        for index, key in enumerate(keys, 0):
-                            if index + 1 == len(keys):
-                                content['graph_hourly_view'][keys[index]] = report['hourly'][keys[index]]
-                            else:
-                                content['graph_hourly_view'][key] = report['hourly'][key] - report['hourly'][keys[index + 1]]
-                        content['graph_hourly_view'] = key_value_list_gen(content['graph_hourly_view'])
+                    if 'hourly' in report.keys():
+                        content['graph_hourly_cumulative'] = key_value_list_gen(report['hourly'])
+                        content['graph_hourly_view'] = {}
+                        # creating the view by hour
+                        keys = sorted(report['hourly'].keys(), reverse=True)
+                        if keys:
+                            for index, key in enumerate(keys, 0):
+                                if index + 1 == len(keys):
+                                    content['graph_hourly_view'][keys[index]] = report['hourly'][keys[index]]
+                                else:
+                                    content['graph_hourly_view'][key] = report['hourly'][key] - report['hourly'][keys[index + 1]]
+                            content['graph_hourly_view'] = key_value_list_gen(content['graph_hourly_view'])
         campaign_ref.report_time = timezone.now()
         campaign_ref.save()
 

@@ -19,5 +19,5 @@ jsonschema
 khayyam
 
 django-admin-json-editor
-django-json-widget
+django-json-widget==1.0.1
 django-admin-autocomplete-filter==0.6.1

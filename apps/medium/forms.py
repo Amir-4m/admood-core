@@ -17,9 +17,15 @@ class PublisherForm(forms.ModelForm):
 
     def clean(self):
         status = self.cleaned_data.get('status')
+        view_efficiency = self.cleaned_data.get('extra_data').get('view_efficiency', 0)
+
         # to approving the status of publisher cost_models field could not be empty
         if not self.cleaned_data.get('cost_models') and status == Publisher.STATUS_APPROVED:
             raise ValidationError({'status': _("to approve the publisher, cost models can not be empty.")})
+
+        # to approve the publisher view efficiency must greater than 0
+        if view_efficiency <= 0 and status == Publisher.STATUS_APPROVED:
+            raise ValidationError({'extra_data': _("to approve the publisher, view efficiency must greater than 0.")})
 
         # validating publisher medium and category medium be same
         for category in self.cleaned_data.get('categories', []):

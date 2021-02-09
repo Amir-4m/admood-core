@@ -99,8 +99,7 @@ class CampaignViewSet(BaseViewSet,
         publishers = serializer.data['publishers']
         categories = serializer.data['categories']
 
-        publishers_by_categories = Publisher.get_by_categories(categories)
-        publishers = {*publishers, *publishers_by_categories}
+        publishers = Campaign.get_all_publishers(publishers, categories)
 
         budget = serializer.data['budget']
 

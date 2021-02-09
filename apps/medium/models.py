@@ -99,6 +99,9 @@ class Publisher(models.Model):
     objects = models.Manager()
     approved_objects = ApprovedPublisherManager()
 
+    class Meta:
+        unique_together = ['medium', 'ref_id']
+
     def __str__(self):
         return f'{self.name} - {self.get_medium_display()}'
 

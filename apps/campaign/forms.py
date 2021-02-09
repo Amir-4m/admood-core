@@ -51,7 +51,6 @@ from apps.medium.models import Publisher
 #             }
 #     },
 # }
-#
 
 
 class ContentAdminForm(forms.ModelForm):
@@ -72,7 +71,7 @@ class CampaignAdminForm(forms.ModelForm):
 
     class Meta:
         model = Campaign
-        exclude = ('extra_data',)
+        fields = "__all__"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
