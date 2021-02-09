@@ -115,7 +115,7 @@ class Campaign(models.Model):
         return Publisher.objects.filter(
             Q(id__in=publishers_id) | Q(categories__in=categories),
             cost_models__isnull=False
-        )
+        ).distinct()
 
     def is_finished(self):
         return (self.end_date and self.end_date < timezone.now().date()) or (self.total_cost >= self.total_budget)
