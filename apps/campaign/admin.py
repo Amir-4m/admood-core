@@ -53,8 +53,6 @@ class CampaignContentInline(admin.TabularInline):
 class CampaignScheduleInline(admin.TabularInline):
     model = CampaignSchedule
     fields = ('week_day', 'start_time', 'end_time')
-    readonly_fields = ('week_day', 'start_time', 'end_time')
-    can_delete = False
     show_change_link = True
     extra = 0
 
