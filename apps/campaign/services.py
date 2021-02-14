@@ -1,6 +1,6 @@
 import logging
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.db.models import Count
 from django.utils import timezone
@@ -328,7 +328,7 @@ class TelegramCampaignServices(object):
             return
 
         try:
-            campaign_ref, created = CampaignReference.objects.get_or_create(
+            campaign_ref = CampaignReference.objects.create(
                 campaign=campaign,
                 schedule_range=(start_datetime, end_datetime),
                 max_view=campaign.remaining_views,
@@ -418,12 +418,12 @@ class CampaignService(object):
         )
 
         for schedule in schedules:
-            schedule_lower_range = datetime.now().replace(
+            schedule_lower_range = timezone.now().replace(
                 hour=schedule.start_time.hour,
                 minute=schedule.start_time.minute
             )
 
-            schedule_upper_range = datetime.now().replace(
+            schedule_upper_range = timezone.now().replace(
                 hour=schedule.end_time.hour,
                 minute=schedule.end_time.minute
             )
@@ -439,6 +439,6 @@ class CampaignService(object):
                 num_ref=Count('campaignreference')
             ).order_by('num_ref')
             for campaign in campaigns[:settings.ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
-                start_datetime = datetime.now()
+                start_datetime = timezone.now()
                 end_datetime = start_datetime + timedelta(hours=3)
                 create_campaign_func(campaign, start_datetime, end_datetime)
