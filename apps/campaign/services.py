@@ -333,8 +333,7 @@ class TelegramCampaignServices(object):
                 schedule_range=(start_datetime, end_datetime),
                 max_view=campaign.remaining_views,
             )
-            if campaign_ref.ref_id:
-                return
+
             # create telegram service
             ref_id = TelegramCampaignServices().create_campaign(
                 campaign,
