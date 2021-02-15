@@ -13,7 +13,7 @@ from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
     CampaignContentSerializer, CampaignDuplicateSerializer, EstimateActionsSerializer,
-    CampaignReferenceSerializer
+    CampaignReferenceSerializer, CampaignDashboardReportSerializer
 )
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignReference
 from apps.core.consts import CostModel
@@ -147,6 +147,18 @@ class CampaignViewSet(BaseViewSet,
         serializer = self.get_serializer(campaign_references, many=True)
         return Response(serializer.data)
 
+    @action(
+        detail=False,
+        methods=['post'],
+        url_path='dashboard-report',
+        serializer_class=CampaignDashboardReportSerializer
+    )
+    def dashboard_report(self, request, *args, **kwargs):
+        data = request.data
+        serializer = self.get_serializer(data, context=dict(owner_id=request.user.id))
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
+
 
 class ContentViewSet(BaseViewSet,
                      mixins.ListModelMixin,
@@ -174,7 +186,7 @@ class CampaignReferenceViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         return self.queryset.filter(campaign__owner=self.request.user)
 
-    # @method_decorator(cache_page(60 * 10))
+    @method_decorator(cache_page(60 * 10))
     @action(detail=True, methods=['get'], url_path='report')
     def report(self, request, *args, **kwargs):
         obj = self.get_object()
