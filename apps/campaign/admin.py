@@ -138,6 +138,9 @@ class CampaignScheduleAdmin(admin.ModelAdmin, AutoFilter):
 @admin.register(CampaignReference)
 class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ("campaign", "ref_id", "date", "schedule_range")
+    formfield_overrides = {
+        JSONField: {'widget': JSONEditorWidget},
+    }
     readonly_fields = ['extra_data']
     raw_id_fields = ['campaign']
     search_fields = ('ref_id',)
