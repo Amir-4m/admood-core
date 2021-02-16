@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -106,7 +106,7 @@ class PasswordResetConfirmAPIView(GenericAPIView):
         return Response({'email': user.email})
 
 
-class SetPasswordAPIView(UpdateModelMixin, GenericAPIView):
+class SetPasswordAPIView(UpdateAPIView):
     serializer_class = SetPasswordSerializer
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -114,12 +114,6 @@ class SetPasswordAPIView(UpdateModelMixin, GenericAPIView):
 
     def get_object(self):
         return self.request.user
-
-    # def put(self, request):
-    #     serializer = self.serializer_class(instance=request.user, data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response()
 
 
 class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
