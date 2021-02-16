@@ -1,7 +1,8 @@
+import copy
 import logging
 import datetime
+from datetime import timedelta
 
-from django.db.models import Sum
 from django.db.models.functions import Lower
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
@@ -445,53 +446,78 @@ class EstimateActionsSerializer(serializers.Serializer):
 
 
 class CampaignDashboardReportSerializer(serializers.Serializer):
-    start_date = serializers.DateField(required=False)
-    end_date = serializers.DateField(required=False)
+    medium = serializers.ChoiceField(choices=Medium.MEDIUM_CHOICES, required=True, write_only=True)
 
-    medium = serializers.ChoiceField(choices=Medium.MEDIUM_CHOICES, required=True)
+    start_date = serializers.DateField(required=False, write_only=True)
+    end_date = serializers.DateField(required=False, write_only=True)
+    last_days = serializers.IntegerField(required=False, write_only=True)
+
     data = serializers.SerializerMethodField()
     active_campaigns = serializers.SerializerMethodField()
-    cost_chart_data = serializers.SerializerMethodField()
 
-    # def validate_start_date(self, value):
-    #     if value and self.validated_data.get('end_date', None):
-    #         raise serializers.ValidationError({"campaign": _("album posts can not have more 10 files!")})
+    def handle_filter_data(self):
+        start_date = self.validated_data.get('start_date')
+        end_date = self.validated_data.get('end_date') or timezone.now().date()
+        last_days = self.validated_data.get('last_days') or 0
+
+        if start_date:
+            return dict(
+                created_time__date__gte=start_date,
+                created_time__date__lte=end_date
+            )
+        return dict(created_time__date__gte=timezone.now() - timedelta(days=last_days))
 
     def campaigns(self):
-        start_date = self.validated_data.get('start_date') or timezone.now().date()
-        end_date = self.validated_data.get('end_date') or timezone.now().date()
-
-        return Campaign.objects.filter(
+        filter_kwargs = dict(
             owner_id=self.context.get('owner_id'),
             status=Campaign.STATUS_APPROVED,
-            medium=self.validated_data.get('medium'),
-            created_time__gte=start_date, created_time__lte=end_date
+            medium=self.validated_data.get('medium')
         )
+        filter_kwargs.update(self.handle_filter_data())
+        return Campaign.objects.filter(**filter_kwargs)
 
-    def campaign_content(self):
-        campaign_reference = CampaignReference.objects.filter(
-            campaign=self.campaigns(),
-            ref_id__isnull=False,
-        )
-        campaign_contents = CampaignContent.objects.filter(
-            id__in=[item['content'] for item in campaign_reference.contents],
-            cost_model_price__gt=0
-        )
-        return campaign_contents
-
-    def get_active_campaigns(self):
+    def get_active_campaigns(self, obj):
         return self.campaigns().count()
 
-    def get_data(self):
+    def get_data(self, obj):
         total_view = 0
         total_cost = 0
-        campaign_contents = self.campaign_content()
+        cost_chart = []
+        view_chart = []
+        campaign_ids = self.campaigns().values_list('id', flat=True)
 
-        for cr in campaign_contents.content:
-            for cc in campaign_contents:
-                if cr['id'] == cr['content']:
-                    total_cost += cc['views'] * cc.cost_model_price
-                    total_view += cc['views']
+        filter_kwargs = dict(campaign_id__in=campaign_ids, ref_id__isnull=False)
+        filter_kwargs.update(self.handle_filter_data())
+        campaign_references = CampaignReference.objects.filter(**filter_kwargs)
 
-        return dict(total_view=total_view, total_cost=total_cost)
+        campaign_contents = CampaignContent.objects.filter(
+            campaign_id__in=campaign_ids,
+            cost_model_price__gt=0
+        )
 
+        for cr in campaign_references:
+            for cr_content in cr.contents:
+                for cc in campaign_contents:
+                    if cr_content['content'] == cc.id:
+                        total_cost += cr_content.get('views', 0) * cc.cost_model_price
+                        total_view += cr_content.get('views', 0)
+
+                        # y => value, label => hour
+                        for data in cr_content.get('graph_hourly_view', []):  # total_chart_cost
+                            for costs in cost_chart:
+                                if data['label'] == costs['label']:
+                                    costs.update({"y": (data['y'] * cc.cost_model_price) + costs['y']})
+                        cost_chart = cost_chart or copy.deepcopy(cr_content.get('graph_hourly_view', []))
+
+                        for data in cr_content.get('graph_hourly_view', []):  # total_chart_view
+                            for view in view_chart:
+                                if data['label'] == view['label']:
+                                    view.update({"y": data['y'] + view['y']})
+                        view_chart = view_chart or copy.deepcopy(cr_content.get('graph_hourly_view', []))
+
+        return dict(
+            total_view=total_view,
+            total_cost=total_cost,
+            total_view_chart=view_chart,
+            total_cost_chart=cost_chart
+        )

@@ -149,13 +149,16 @@ class CampaignViewSet(BaseViewSet,
 
     @action(
         detail=False,
-        methods=['post'],
+        methods=['get'],
         url_path='dashboard-report',
         serializer_class=CampaignDashboardReportSerializer
     )
     def dashboard_report(self, request, *args, **kwargs):
-        data = request.data
-        serializer = self.get_serializer(data, context=dict(owner_id=request.user.id))
+        data = request.query_params
+        serializer = CampaignDashboardReportSerializer(
+            data=data,
+            context=dict(owner_id=request.user.id)
+        )
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
 
