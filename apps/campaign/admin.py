@@ -76,7 +76,7 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     autocomplete_fields = ["owner"]
     actions = ['make_approve_campaigns']
     search_fields = ['medium', 'name', 'contents__title']
-    list_filter = [OwnerFilter, 'medium', 'status', 'is_enable']
+    list_filter = [OwnerFilter, 'medium', 'status', 'is_enable', 'created_time']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
     readonly_fields = (
