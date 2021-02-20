@@ -96,8 +96,7 @@ def update_campaign_reference_adtel(campaign_ref):
                             if index + 1 == len(keys):
                                 content['graph_hourly_view'][keys[index]] = report['hourly'][keys[index]]
                             else:
-                                content['graph_hourly_view'][key] = report['hourly'][key] - report['hourly'][
-                                    keys[index + 1]]
+                                content['graph_hourly_view'][key] = abs(report['hourly'][key] - report['hourly'][keys[index + 1]])
                         content['graph_hourly_view'] = key_value_list_gen(content['graph_hourly_view'])
 
                     # end of getting report for this campaign
