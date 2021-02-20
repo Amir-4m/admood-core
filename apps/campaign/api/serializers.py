@@ -429,12 +429,12 @@ class CampaignReferenceSerializer(serializers.ModelSerializer):
         publishers_detail = []
         if obj.campaign.medium == Medium.TELEGRAM:
             for content in obj.contents:
-                for detail in content['detail']:
+                for detail in content.get('detail', []):
                     publishers_detail.append(dict(
-                        publishers=Publisher.objects.filter(ref_id__in=detail['channel_ids']).values(
+                        publishers=Publisher.objects.filter(ref_id__in=detail.get('channel_ids', [])).values(
                             'name', 'extra_data__tag'
                         ),
-                        posts=detail['posts'])
+                        posts=detail.get('posts', []))
                     )
         return publishers_detail
 
@@ -498,7 +498,7 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
         for cr in campaign_references:
             for cr_content in cr.contents:
                 for cc in campaign_contents:
-                    if cr_content['content'] == cc.id:
+                    if cr_content.get('content') == cc.id:
                         total_cost += cr_content.get('views', 0) * cc.cost_model_price
                         total_view += cr_content.get('views', 0)
 
