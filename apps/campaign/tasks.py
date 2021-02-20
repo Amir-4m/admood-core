@@ -1,3 +1,5 @@
+import datetime
+
 from celery.schedules import crontab
 from celery.task import periodic_task
 from celery import shared_task
@@ -64,7 +66,8 @@ def update_telegram_info_task():
     # y => value, label => hour
     key_value_list_gen = lambda data: [dict(y=data[key], label=key) for key in sorted(data.keys())]
 
-    campaign_refs = CampaignReference.objects.live()
+    campaign_refs = CampaignReference.objects.monitor_report()
+
     for campaign_ref in campaign_refs:
         # store telegram file hash of screenshot in TelegramCampaign model
         campaign_ref.campaign.telegramcampaign.telegram_file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
@@ -88,7 +91,13 @@ def update_telegram_info_task():
                                 else:
                                     content['graph_hourly_view'][key] = report['hourly'][key] - report['hourly'][keys[index + 1]]
                             content['graph_hourly_view'] = key_value_list_gen(content['graph_hourly_view'])
-        campaign_ref.report_time = timezone.now()
+
+                        # end of getting report for this campaign
+                        # TODO telegram issue - If telegram can't read new reports on end time of campaign reference
+                        end_time_campaign = campaign_ref.schedule_range.upper
+                        if timezone.now() > end_time_campaign and end_time_campaign.hour in report['hourly'].keys():
+                            campaign_ref.report_time = timezone.now()
+
         campaign_ref.save()
 
         camp = campaign_ref.campaign

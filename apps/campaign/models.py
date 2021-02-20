@@ -37,9 +37,15 @@ class CampaignReferenceManager(models.Manager):
     def live(self):
         return self.get_queryset().filter(
             ref_id__isnull=False,
-            schedule_range__startswith__date=timezone.now().date(),
-            schedule_range__endswith__time__lte=timezone.now().time(),
-            report_time__isnull=True
+            schedule_range__startswith__lte=timezone.now(),
+            schedule_range__endswith__gte=timezone.now()
+        )
+
+    def monitor_report(self):
+        return self.get_queryset().filter(
+            ref_id__isnull=False,
+            report_time__isnull=True,
+            schedule_range__endswith__lte=timezone.now() + datetime.timedelta(hours=3),
         )
 
 
@@ -241,9 +247,9 @@ class CampaignReference(models.Model):
     extra_data = JSONField(default=json_default)
     contents = JSONField(default=list)
     max_view = models.IntegerField()
-    date = models.DateField(null=True, blank=True)
-    start_time = models.TimeField(null=True, blank=True)
-    end_time = models.TimeField(null=True, blank=True)
+    # date = models.DateField(null=True, blank=True)
+    # start_time = models.TimeField(null=True, blank=True)
+    # end_time = models.TimeField(null=True, blank=True)
     schedule_range = DateTimeRangeField(null=True, blank=True)
     report_time = models.DateTimeField(null=True, blank=True)
 
