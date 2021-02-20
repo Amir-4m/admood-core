@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django_json_widget.widgets import JSONEditorWidget
 
 from apps.accounts.admin_filter import OwnerFilter
+from apps.campaign.tasks import update_campaign_reference_adtel
 from services.utils import AutoFilter
 from .forms import ContentAdminForm, CampaignAdminForm
 from .admin_filter import CampaignFilter
@@ -74,7 +75,7 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     change_form_template = 'campaign/change_form.html'
     inlines = [CampaignContentInline, CampaignScheduleInline, TargetDeviceInline, FinalPublisherInline]
     autocomplete_fields = ["owner"]
-    actions = ['make_approve_campaigns']
+    actions = ['make_approve_campaigns', 'update_views_from_adtel']
     search_fields = ['medium', 'name', 'contents__title']
     list_filter = [OwnerFilter, 'medium', 'status', 'is_enable', 'created_time']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
@@ -116,6 +117,12 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
                 messages.error(request, f"{msg_err}, campaign id: {q.id} - name: {q.name}")
         Campaign.objects.bulk_update(valid_objs, fields=['status'])
         messages.info(request, f'{len(valid_objs)} Campaign updated!')
+
+    def update_views_from_adtel(self, request, queryset):
+        for campaign_ref in CampaignReference.objects.monitor_report().filter(
+            campaign__in=queryset
+        ):
+            update_campaign_reference_adtel(campaign_ref)
 
 
 @admin.register(CampaignContent)

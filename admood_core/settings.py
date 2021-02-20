@@ -237,28 +237,28 @@ CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB = ast.literal_eval(config("CREATE_TELEGRAM
 UPDATE_TELEGRAM_INFO_TASK_CRONTAB = ast.literal_eval(config('UPDATE_TELEGRAM_INFO_TASK_CRONTAB'))
 UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB = ast.literal_eval(config('UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB'))
 
-CELERY_BEAT_SCHEDULE = {
-    "create_telegram_campaign_task": {
-        "task": "apps.campaign.tasks.create_telegram_campaign_task",
-        "schedule": crontab(**CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB),
-    },
-    "update_telegram_info_task": {
-        "task": "apps.campaign.tasks.update_telegram_info_task",
-        "schedule": crontab(**UPDATE_TELEGRAM_INFO_TASK_CRONTAB),
-    },
-    "update_telegram_publishers_task": {
-        "task": "apps.medium.tasks.update_telegram_publishers_task",
-        "schedule": crontab(**UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB)
-    },
-    # "create_instagram_campaign_task": {
-    #     "task": "apps.campaign.tasks.create_instagram_campaign_task",
-    #     "schedule": crontab(minute="*/1"),
-    # },
-    # "update_instagram_publishers_task": {
-    #     "task": "apps.medium.tasks.update_instagram_publishers",
-    #     "schedule": crontab(hour=0, minute=0)
-    # },
-}
+# CELERY_BEAT_SCHEDULE = {
+#     "create_telegram_campaign_task": {
+#         "task": "apps.campaign.tasks.create_telegram_campaign_task",
+#         "schedule": crontab(**CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB),
+#     },
+#     "update_telegram_info_task": {
+#         "task": "apps.campaign.tasks.update_telegram_info_task",
+#         "schedule": crontab(**UPDATE_TELEGRAM_INFO_TASK_CRONTAB),
+#     },
+#     "update_telegram_publishers_task": {
+#         "task": "apps.medium.tasks.update_telegram_publishers_task",
+#         "schedule": crontab(**UPDATE_TELEGRAM_PUBLISHERS_TASK_CRONTAB)
+#     },
+#     "create_instagram_campaign_task": {
+#         "task": "apps.campaign.tasks.create_instagram_campaign_task",
+#         "schedule": crontab(minute="*/1"),
+#     },
+#     "update_instagram_publishers_task": {
+#         "task": "apps.medium.tasks.update_instagram_publishers",
+#         "schedule": crontab(hour=0, minute=0)
+#     },
+# }
 
 LOGGING = {
     'version': 1,
