@@ -119,9 +119,7 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
         messages.info(request, f'{len(valid_objs)} Campaign updated!')
 
     def update_views_from_adtel(self, request, queryset):
-        for campaign_ref in CampaignReference.objects.monitor_report().filter(
-            campaign__in=queryset
-        ):
+        for campaign_ref in CampaignReference.objects.filter(campaign__in=queryset):
             update_campaign_reference_adtel(campaign_ref)
 
 
