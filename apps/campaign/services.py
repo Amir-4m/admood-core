@@ -303,7 +303,7 @@ class TelegramCampaignServices(object):
 
     def campaign_telegram_file_hash(self, campaign_id):
         campaign = self.get_campaign(campaign_id)
-        file = campaign.get('file')['telegram_file_hash']
+        file = campaign.get('file').get('telegram_file_hash')
         return file
 
     def test_campaign(self, campaign_id):

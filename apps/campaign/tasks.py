@@ -74,8 +74,10 @@ def update_campaign_reference_adtel(campaign_ref):
     key_value_list_gen = lambda data: [dict(y=data[key], label=key) for key in sorted(data.keys())]
 
     # store telegram file hash of screenshot in TelegramCampaign model
-    campaign_ref.campaign.telegramcampaign.telegram_file_hash = TelegramCampaignServices().campaign_telegram_file_hash(
-        campaign_ref.ref_id)
+    file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
+    if file_hash:
+        campaign_ref.campaign.telegramcampaign.telegram_file_hash = file_hash
+
     # get each content views and store in content json field
     reports = TelegramCampaignServices().campaign_report(campaign_ref.ref_id)
     for content in campaign_ref.contents:
