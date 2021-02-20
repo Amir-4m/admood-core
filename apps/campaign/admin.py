@@ -137,7 +137,7 @@ class CampaignScheduleAdmin(admin.ModelAdmin, AutoFilter):
 
 @admin.register(CampaignReference)
 class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
-    list_display = ("campaign", "ref_id", "date", "schedule_range")
+    list_display = ("campaign", "ref_id", "date", "schedule_range_start", "schedule_range_end", "views", "message_id")
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget},
     }
@@ -145,6 +145,28 @@ class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
     raw_id_fields = ['campaign']
     search_fields = ('ref_id',)
     list_filter = (CampaignFilter, 'date', 'campaign__medium')
+
+    def iterate_contents(self, contents, key):
+        result = []
+        for detail in contents[0].get('detail', []):
+            for post in detail.get('posts', []):
+                result.append(post.get(key, '_'))
+        return result
+
+    # custom fields
+    def schedule_range_start(self, obj):
+        return getattr(obj.schedule_range, 'lower', '')
+
+    def schedule_range_end(self, obj):
+        return getattr(obj.schedule_range, 'upper', '')
+
+    def views(self, obj):
+        all_views = self.iterate_contents(obj.contents, 'views')
+        return str(all_views) if all_views else ""
+
+    def message_id(self, obj):
+        all_message_id = self.iterate_contents(obj.contents, 'message_id')
+        return str(all_message_id).replace('\'', '') if all_message_id else ""
 
 
 @admin.register(TelegramCampaign)
