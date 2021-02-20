@@ -1,4 +1,3 @@
-import copy
 import logging
 import datetime
 from datetime import timedelta
@@ -482,8 +481,11 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
     def get_data(self, obj):
         total_view = 0
         total_cost = 0
+        chart = {}
         cost_chart = []
         view_chart = []
+        temp_reports = []
+
         campaign_ids = self.campaigns().values_list('id', flat=True)
 
         filter_kwargs = dict(campaign_id__in=campaign_ids, ref_id__isnull=False)
@@ -502,18 +504,27 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
                         total_cost += cr_content.get('views', 0) * cc.cost_model_price
                         total_view += cr_content.get('views', 0)
 
-                        # y => value, label => hour
-                        for data in cr_content.get('graph_hourly_view', []):  # total_chart_cost
-                            for costs in cost_chart:
-                                if data['label'] == costs['label']:
-                                    costs.update({"y": (data['y'] * cc.cost_model_price) + costs['y']})
-                        cost_chart = cost_chart or copy.deepcopy(cr_content.get('graph_hourly_view', []))
+                        # collecting all reports for each campaign
+                        reports = cr_content.get('graph_hourly_view', [])
+                        for report in reports:
+                            report['cc_price'] = cc.cost_model_price
+                            temp_reports.append(report)
 
-                        for data in cr_content.get('graph_hourly_view', []):  # total_chart_view
-                            for view in view_chart:
-                                if data['label'] == view['label']:
-                                    view.update({"y": data['y'] + view['y']})
-                        view_chart = view_chart or copy.deepcopy(cr_content.get('graph_hourly_view', []))
+        # collecting all values for each time
+        for rep in temp_reports:
+            if rep['label'] in chart:
+                chart[f'{rep["label"]}-{rep["cc_price"]}'].append(rep['y'])
+            else:
+                chart[f'{rep["label"]}-{rep["cc_price"]}'] = [rep['y']]
+
+        # calculating the view chart
+        for key in chart.keys():
+            view_chart.append({f'{key[:key.find("-")]}': sum(chart[key])})
+
+        # calculating the cost chart
+        for key in chart.keys():
+            cost = int(key[key.find("-")+1:])
+            cost_chart.append({f'{key[:key.find("-")]}': sum(chart[key]) * cost})
 
         return dict(
             total_view=total_view,
