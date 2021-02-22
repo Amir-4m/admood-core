@@ -520,12 +520,12 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
         keys = sorted(chart.keys())
         # calculating the view chart
         for key in keys:
-            view_chart.append({"label": f'{key[:key.find("-")]}', "y": sum(chart[key])})
+            view_chart.append({"name": f'{key[:key.find("-")]}', "y": sum(chart[key])})
 
         # calculating the cost chart
         for key in keys:
             cost = int(key[key.find("-")+1:])
-            cost_chart.append({"label": f'{key[:key.find("-")]}', "y": sum(chart[key]) * cost})
+            cost_chart.append({"name": f'{key[:key.find("-")]}', "y": sum(chart[key]) * cost})
 
         return dict(
             total_view=total_view,
