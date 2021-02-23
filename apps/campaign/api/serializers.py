@@ -512,10 +512,10 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
 
         # collecting all values for each time
         for rep in temp_reports:
-            if rep['label'] in chart:
-                chart[f'{rep["label"]}-{rep["cc_price"]}'].append(rep['y'])
+            if rep['name'] in chart:
+                chart[f'{rep["name"]}-{rep["cc_price"]}'].append(rep['y'])
             else:
-                chart[f'{rep["label"]}-{rep["cc_price"]}'] = [rep['y']]
+                chart[f'{rep["name"]}-{rep["cc_price"]}'] = [rep['y']]
 
         keys = sorted(chart.keys())
         # calculating the view chart
