@@ -4,8 +4,9 @@ from django.contrib.postgres.fields import JSONField
 from django_json_widget.widgets import JSONEditorWidget
 
 from apps.accounts.admin_filter import OwnerFilter
-from apps.campaign.tasks import update_campaign_reference_adtel
+
 from services.utils import AutoFilter
+from .tasks import update_telegram_reports_from_admin
 from .forms import ContentAdminForm, CampaignAdminForm
 from .admin_filter import CampaignFilter
 
@@ -119,8 +120,9 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
         messages.info(request, f'{len(valid_objs)} Campaign updated!')
 
     def update_views_from_adtel(self, request, queryset):
-        for campaign_ref in CampaignReference.objects.filter(campaign__in=queryset):
-            update_campaign_reference_adtel(campaign_ref)
+        update_telegram_reports_from_admin.apply_async(
+            args=tuple(CampaignReference.objects.filter(campaign__in=queryset).values_list('id', flat=True))
+        )
 
 
 @admin.register(CampaignContent)
