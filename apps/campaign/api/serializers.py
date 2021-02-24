@@ -5,9 +5,11 @@ from datetime import timedelta
 from django.db.models.functions import Lower
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from khayyam import JalaliDatetime
 from rest_framework import serializers
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignReference
+from apps.campaign.utils import get_hourly_report_dashboard
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.medium.consts import Medium
@@ -445,14 +447,20 @@ class EstimateActionsSerializer(serializers.Serializer):
 
 
 class CampaignDashboardReportSerializer(serializers.Serializer):
+    CHART_LINE = 'line'
+    CHART_COLUMN = 'column'
+    CHART_AREA = 'area'
+    DAILY = 'daily'
+    HOURLY = 'hourly'
+
     medium = serializers.ChoiceField(choices=Medium.MEDIUM_CHOICES, required=True, write_only=True)
 
     start_date = serializers.DateField(required=False, write_only=True)
     end_date = serializers.DateField(required=False, write_only=True)
     last_days = serializers.IntegerField(required=False, write_only=True)
 
-    data = serializers.SerializerMethodField()
     active_campaigns = serializers.SerializerMethodField()
+    report = serializers.SerializerMethodField()
 
     def handle_filter_data(self):
         start_date = self.validated_data.get('start_date')
@@ -466,6 +474,15 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
             )
         return dict(created_time__date__gte=timezone.now() - timedelta(days=last_days))
 
+    def handle_display_type(self):
+        last_days = self.validated_data.get('last_days')
+
+        if last_days and last_days <= 1:
+            return self.HOURLY
+        else:
+            return self.DAILY
+
+    @property  # TODO test this to does work correctly or cause the invalid data for two user ?
     def campaigns(self):
         filter_kwargs = dict(
             owner_id=self.context.get('owner_id'),
@@ -476,21 +493,20 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
         return Campaign.objects.filter(**filter_kwargs)
 
     def get_active_campaigns(self, obj):
-        return self.campaigns().count()
+        return self.campaigns.count()
 
-    def get_data(self, obj):
+    def get_report(self, obj):
         total_view = 0
         total_cost = 0
-        chart = {}
-        cost_chart = []
-        view_chart = []
         temp_reports = []
-
-        campaign_ids = self.campaigns().values_list('id', flat=True)
+        view_chart_type, cost_chart_type = self.CHART_LINE, self.CHART_AREA
+        campaign_ids = self.campaigns.values_list('id', flat=True)
 
         filter_kwargs = dict(campaign_id__in=campaign_ids, ref_id__isnull=False)
         filter_kwargs.update(self.handle_filter_data())
-        campaign_references = CampaignReference.objects.filter(**filter_kwargs)
+        campaign_references = CampaignReference.objects.filter(
+            **filter_kwargs
+        ).order_by('created_time')
 
         campaign_contents = CampaignContent.objects.filter(
             campaign_id__in=campaign_ids,
@@ -505,31 +521,23 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
                         total_view += cr_content.get('views', 0)
 
                         # collecting all reports for each campaign
-                        reports = cr_content.get('graph_hourly_view', [])
-                        for report in reports:
-                            report['cc_price'] = cc.cost_model_price
-                            temp_reports.append(report)
+                        reports = cr_content.get('graph_hourly_cumulative', [])
+                        for rep in reports:
+                            rep.update({
+                                'y-cost': rep['y'] * cc.cost_model_price,
+                                'cr-date': JalaliDatetime(cr.schedule_range.lower).strftime('%y-%m-%d')
+                            })
+                            temp_reports.append(rep)
 
-        # collecting all values for each time
-        for rep in temp_reports:
-            if rep['name'] in chart:
-                chart[f'{rep["name"]}-{rep["cc_price"]}'].append(rep['y'])
-            else:
-                chart[f'{rep["name"]}-{rep["cc_price"]}'] = [rep['y']]
-
-        keys = sorted(chart.keys())
-        # calculating the view chart
-        for key in keys:
-            view_chart.append({"name": f'{key[:key.find("-")]}', "y": sum(chart[key])})
-
-        # calculating the cost chart
-        for key in keys:
-            cost = int(key[key.find("-")+1:])
-            cost_chart.append({"name": f'{key[:key.find("-")]}', "y": sum(chart[key]) * cost})
+        if self.handle_display_type() == self.HOURLY:
+            cost_chart, view_chart = get_hourly_report_dashboard(temp_reports, 'name')
+        else:
+            cost_chart, view_chart = get_hourly_report_dashboard(temp_reports, 'cr-date')  # data of charts
+            cost_chart_type, view_chart_type = self.CHART_COLUMN, self.CHART_COLUMN  # type of charts
 
         return dict(
             total_view=total_view,
             total_cost=total_cost,
-            total_view_chart=view_chart,
-            total_cost_chart=cost_chart
+            total_view_chart=dict(type=view_chart_type, data=view_chart),
+            total_cost_chart=dict(type=cost_chart_type, data=cost_chart),
         )
