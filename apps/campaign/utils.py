@@ -4,8 +4,11 @@ from apps.campaign.services import TelegramCampaignServices
 
 
 def update_campaign_reference_adtel(campaign_ref):
+    """
+        Updating `views`, `detail` and hourly report of the campaign reference object from ad-tel.
+    """
     # y => value, label => hour
-    key_value_list_gen = lambda data: [dict(y=data[key], name=key) for key in sorted(data.keys())]
+    key_value_list_gen = lambda data: [dict(y=data[key], name=key) for key in data.keys()]
 
     # store telegram file hash of screenshot in TelegramCampaign model
     file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
@@ -40,3 +43,39 @@ def update_campaign_reference_adtel(campaign_ref):
                         campaign_ref.report_time = timezone.now()
 
     campaign_ref.save()
+
+
+def get_hourly_report_dashboard(temp_reports, sort_key):
+    """
+        "temp_reports" is a object that contains:
+        { "name": 15, "y": 52, "y-cost": 52000, "cr-date": datetime.datetime(2021, 2, 14, 16, 55) }
+        `y`=> views
+        `y-cost`=> views * cost_model_price of content
+        `name`=> time of report
+        `cr-date`=> start time of campaign reference `campaign_reference.schedule_range.lower`
+         ``
+        These reports after calculating changes to blow.
+        report object contains the cost and view data like this
+        report => { "17": [ [4, 5], [4000, 5000] ] }
+        collecting all values for each time and sum of this become the result for view chart and cost chart
+    """
+    chart = {}
+    cost_chart = []
+    view_chart = []
+
+    for rep in temp_reports:
+        if rep[sort_key] in chart:
+            chart[f'{rep[sort_key]}'][0].append(rep['y'])
+            chart[f'{rep[sort_key]}'][1].append(rep['y-cost'])
+        else:
+            chart[f'{rep[sort_key]}'] = [[rep['y']], [rep['y-cost']]]
+    keys = chart.keys()
+    # calculating the view chart
+    for key in keys:
+        view_chart.append({"name": f'{key}', "y": sum(chart[key][0])})
+
+    # calculating the cost chart
+    for key in keys:
+        cost_chart.append({"name": f'{key}', "y": sum(chart[key][1])})
+
+    return cost_chart, view_chart

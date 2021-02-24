@@ -155,6 +155,8 @@ class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
 
     def iterate_contents(self, contents, key):
         result = []
+        if len(contents) == 0:
+            return []
         for detail in contents[0].get('detail', []):
             for post in detail.get('posts', []):
                 result.append(post.get(key, '_'))
