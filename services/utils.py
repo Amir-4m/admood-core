@@ -1,5 +1,7 @@
 import os
 import logging
+import string
+import random
 
 import requests
 
@@ -55,3 +57,6 @@ class AutoFilter:
     class Media:
         pass
 
+
+def random_string(length):
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))

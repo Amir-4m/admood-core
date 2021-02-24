@@ -144,7 +144,7 @@ class CampaignScheduleAdmin(admin.ModelAdmin, AutoFilter):
 
 @admin.register(CampaignReference)
 class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
-    list_display = ("campaign", "ref_id", "schedule_range_start", "schedule_range_end", "views", "message_id")
+    list_display = ("campaign", "ref_id", "schedule_range_start", "schedule_range_end", "views", "ref_ids")
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget},
     }
@@ -156,9 +156,8 @@ class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
     def iterate_contents(self, contents, key):
         result = []
         if len(contents) != 0:
-            for detail in contents[0].get('detail', []):
-                for post in detail.get('posts', []):
-                    result.append(post.get(key, '_'))
+            for content in contents:
+                result.append(content.get(key, '_'))
         return result
 
     # custom fields
@@ -172,8 +171,8 @@ class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
         all_views = self.iterate_contents(obj.contents, 'views')
         return str(all_views) if all_views else ""
 
-    def message_id(self, obj):
-        all_message_id = self.iterate_contents(obj.contents, 'message_id')
+    def ref_ids(self, obj):
+        all_message_id = self.iterate_contents(obj.contents, 'ref_id')
         return str(all_message_id).replace('\'', '') if all_message_id else ""
 
 
