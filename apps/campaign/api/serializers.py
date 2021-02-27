@@ -477,7 +477,7 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
     def handle_display_type(self):
         last_days = self.validated_data.get('last_days')
 
-        if last_days and last_days <= 1:
+        if last_days and last_days == 0:
             return self.HOURLY
         else:
             return self.DAILY
