@@ -35,7 +35,7 @@ class PublisherViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         queryset = super().get_queryset().filter(
             cost_models__isnull=False,
-            medium=self.kwargs.get('medium')
+            medium=self.kwargs['medium']
         ).prefetch_related('categories')
 
         category = self.request.query_params.get('category', '')
@@ -54,7 +54,7 @@ class CategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         queryset = super().get_queryset().filter(
             publisher__categories__campaign__isnull=False,
-            medium=self.kwargs.get('medium')
+            medium=self.kwargs['medium']
         ).distinct()
 
         return queryset
