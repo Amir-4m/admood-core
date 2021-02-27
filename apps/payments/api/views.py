@@ -61,9 +61,8 @@ class DepositViewSet(ListModelMixin,
                     'price': obj.price,
                     'service_reference': str(obj.invoice_number),
                     'is_paid': obj.is_paid,
-                    "properties": {
-                        "redirect_url": request.build_absolute_uri(reverse('payment-done')),
-                    }
+                    "redirect_url": request.build_absolute_uri(reverse('payment-done')),
+                    "phone_number": request.user.phone_number
                 }
             )
             transaction_id = order_response.json().get('transaction_id')
