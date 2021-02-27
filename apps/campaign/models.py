@@ -45,7 +45,7 @@ class CampaignReferenceManager(models.Manager):
         return self.get_queryset().filter(
             ref_id__isnull=False,
             report_time__isnull=True,
-            schedule_range__endswith__lte=timezone.now() + datetime.timedelta(hours=3),
+            schedule_range__endswith__gte=timezone.now() - datetime.timedelta(hours=3),
         )
 
 
