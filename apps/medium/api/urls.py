@@ -5,9 +5,10 @@ from apps.medium.api.views import PublisherViewSet, CategoryViewSet, UpdatePubli
 from .views import MediumViewSet
 
 router = DefaultRouter()
-router.register('publishers', PublisherViewSet)
-router.register('categories', CategoryViewSet)
 router.register('update-publishers', UpdatePublisherViewSet, basename='update-publisher')
+
 urlpatterns = [
                   path('choices/', MediumViewSet.as_view({'get': 'list'})),
+                  path('publishers/<int:medium>/', PublisherViewSet.as_view({'get': 'list'})),
+                  path('categories/<int:medium>/', CategoryViewSet.as_view({'get': 'list'}))
               ] + router.urls
