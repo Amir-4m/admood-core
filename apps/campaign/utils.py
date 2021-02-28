@@ -1,15 +1,38 @@
+from datetime import timedelta
 from django.utils import timezone
 
 from apps.campaign.services import TelegramCampaignServices
+
+
+def sort_reports_by_hour(data, start_date, end_date):
+    """Sort reports by campaign reference start date"""
+    if len(data) <= 1:
+        return [dict(y=data[key], name=key) for key in data.keys()]
+    result = []
+    keys = data.keys()
+    diff = end_date - start_date
+    days, seconds = diff.days, diff.seconds
+    diff_hours = (days * 24 + seconds // 3600) + 1
+    hour = start_date.hour
+
+    sorted_hours = []
+    for i in range(diff_hours):
+        sorted_hours.append(str(hour))
+        hour += 1
+        if hour >= 24:
+            hour = 0
+
+    # y => value, label => hour
+    for key in sorted_hours:
+        if key in keys:
+            result.append(dict(y=data[key], name=key))
+    return result
 
 
 def update_campaign_reference_adtel(campaign_ref):
     """
         Updating `views`, `detail` and hourly report of the campaign reference object from ad-tel.
     """
-    # y => value, label => hour
-    key_value_list_gen = lambda data: [dict(y=data[key], name=key) for key in data.keys()]
-
     # store telegram file hash of screenshot in TelegramCampaign model
     file_hash = TelegramCampaignServices().campaign_telegram_file_hash(campaign_ref.ref_id)
     if file_hash:
@@ -20,11 +43,16 @@ def update_campaign_reference_adtel(campaign_ref):
     for content in campaign_ref.contents:
         for report in reports:
             if content["ref_id"] == report["content"]:
+                start_date = campaign_ref.schedule_range.lower
+                end_date = campaign_ref.schedule_range.upper
+
                 content["views"] = report["views"]
                 content["detail"] = report["detail"]
 
                 if 'hourly' in report.keys():
-                    content['graph_hourly_cumulative'] = key_value_list_gen(report['hourly'])
+                    # hourly cumulative
+                    content['graph_hourly_cumulative'] = sort_reports_by_hour(report['hourly'], start_date, end_date)
+
                     content['graph_hourly_view'] = {}
                     # creating the view by hour
                     keys = sorted(report['hourly'].keys(), reverse=True)
@@ -34,7 +62,10 @@ def update_campaign_reference_adtel(campaign_ref):
                                 content['graph_hourly_view'][keys[index]] = report['hourly'][keys[index]]
                             else:
                                 content['graph_hourly_view'][key] = abs(report['hourly'][key] - report['hourly'][keys[index + 1]])
-                        content['graph_hourly_view'] = key_value_list_gen(content['graph_hourly_view'])
+
+                        content['graph_hourly_view'] = sort_reports_by_hour(
+                            content['graph_hourly_view'], start_date, end_date
+                        )
 
                     # end of getting report for this campaign
                     # TODO telegram issue - If telegram can't read new reports on end time of campaign reference

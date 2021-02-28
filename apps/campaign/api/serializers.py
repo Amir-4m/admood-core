@@ -14,6 +14,7 @@ from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.medium.consts import Medium
 from apps.medium.models import Publisher
+from apps.medium.api.serializers import CategorySerializer, MinorPublisherSerializer
 from apps.payments.models import Transaction
 from services.utils import file_type
 
@@ -63,6 +64,9 @@ class CampaignSerializer(serializers.ModelSerializer):
     utm_medium_default = serializers.SerializerMethodField()
     utm_content_default = serializers.SerializerMethodField()
     status_label = serializers.CharField(source='get_status_display', read_only=True)
+    categories = CategorySerializer(many=True)
+    publishers = MinorPublisherSerializer(many=True)
+    final_publishers = MinorPublisherSerializer(many=True)
 
     class Meta:
         model = Campaign
