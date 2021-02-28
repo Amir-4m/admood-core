@@ -69,7 +69,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = '__all__'
-        read_only_fields = ['status', 'final_publishers']
+        read_only_fields = ['status']
 
     def to_representation(self, instance):
         data = super(CampaignSerializer, self).to_representation(instance)
