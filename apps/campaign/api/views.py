@@ -13,12 +13,12 @@ from apps.campaign.api.serializers import (
     ProvinceSerializer,
     CampaignSerializer,
     CampaignContentSerializer, CampaignDuplicateSerializer, EstimateActionsSerializer,
-    CampaignReferenceSerializer, CampaignDashboardReportSerializer
+    CampaignReferenceSerializer, CampaignDashboardReportSerializer, CampaignEnableSerializer
 )
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignReference
 from apps.core.consts import CostModel
 from apps.core.views import BaseViewSet
-from apps.medium.models import Publisher, CostModelPrice
+from apps.medium.models import CostModelPrice
 from apps.payments.models import Transaction
 
 
@@ -49,13 +49,13 @@ class CampaignViewSet(BaseViewSet,
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
-    @action(detail=True, methods=["patch"])
+    @action(detail=True, methods=["patch"], serializer_class=CampaignEnableSerializer)
     def enable(self, request, *args, **kwargs):
         instance = self.get_object()
         is_enable = request.data.get('is_enable', instance.is_enable)
-        serializer = self.get_serializer(instance, data={'is_enable': is_enable}, partial=True)
+        serializer = self.get_serializer(instance, data={'is_enable': is_enable})
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        serializer.save()
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'])

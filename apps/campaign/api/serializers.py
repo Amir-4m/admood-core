@@ -9,7 +9,7 @@ from khayyam import JalaliDatetime
 from rest_framework import serializers
 
 from apps.campaign.models import Province, Campaign, CampaignContent, CampaignSchedule, TargetDevice, CampaignReference
-from apps.campaign.utils import get_hourly_report_dashboard
+from apps.campaign.utils import get_hourly_report_dashboard, compute_telegram_cost
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.medium.consts import Medium
@@ -118,10 +118,6 @@ class CampaignSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        action = self.context['view'].action
-        if action in ['enable']:
-            return attrs
-
         if self.instance:
             if self.instance.status != Campaign.STATUS_DRAFT:
                 raise serializers.ValidationError({"non_field_errors": [_("only draft campaigns are editable.")]})
@@ -208,6 +204,11 @@ class CampaignEnableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = ["is_enable"]
+
+    def validate(self, attrs):
+        if attrs['is_enable'] and self.instance.is_finished:
+            raise serializers.ValidationError(_("campaign total budget is low or time has been expired."))
+        return attrs
 
 
 class CampaignRepeatSerializer(serializers.ModelSerializer):
@@ -522,14 +523,19 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
             for cr_content in cr.contents:
                 for cc in campaign_contents:
                     if cr_content.get('content') == cc.id:
-                        total_cost += cr_content.get('views', 0) * cc.cost_model_price
+                        # total cost
+                        total_cost += compute_telegram_cost(
+                            views=cr_content.get('views', 0),
+                            cost_model_price=cc.cost_model_price
+                        )
+                        # total view
                         total_view += cr_content.get('views', 0)
 
                         # collecting all reports for each campaign
                         reports = cr_content.get('graph_hourly_cumulative', [])
                         for rep in reports:
                             rep.update({
-                                'y-cost': rep['y'] * cc.cost_model_price,
+                                'y-cost': compute_telegram_cost(views=rep['y'], cost_model_price=cc.cost_model_price),
                                 'cr-date': JalaliDatetime(cr.schedule_range.lower).strftime('%y-%m-%d')
                             })
                             temp_reports.append(rep)
