@@ -13,7 +13,7 @@ from apps.campaign.utils import get_hourly_report_dashboard, compute_telegram_co
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.medium.consts import Medium
-from apps.medium.models import Publisher
+from apps.medium.models import Publisher, Category
 from apps.medium.api.serializers import CategorySerializer, MinorPublisherSerializer
 from apps.payments.models import Transaction
 from services.utils import file_type
@@ -64,15 +64,24 @@ class CampaignSerializer(serializers.ModelSerializer):
     utm_medium_default = serializers.SerializerMethodField()
     utm_content_default = serializers.SerializerMethodField()
     status_label = serializers.CharField(source='get_status_display', read_only=True)
-    categories = CategorySerializer(many=True)
-    publishers = MinorPublisherSerializer(many=True)
-    final_publishers = MinorPublisherSerializer(many=True)
-    locations = ProvinceSerializer(many=True)
+    final_publishers = MinorPublisherSerializer(many=True, read_only=True)
 
     class Meta:
         model = Campaign
         fields = '__all__'
         read_only_fields = ['status', 'final_publishers']
+
+    def to_representation(self, instance):
+        data = super(CampaignSerializer, self).to_representation(instance)
+        data['categories'] = CategorySerializer(Category.objects.filter(id__in=data['categories']),many=True).data
+
+        data['publishers'] = MinorPublisherSerializer(
+            Publisher.objects.filter(id__in=data['publishers']),
+            many=True
+        ).data
+        data['locations'] = ProvinceSerializer(Province.objects.filter(id__in=data['locations']), many=True).data
+
+        return data
 
     def get_extra_kwargs(self):
         extra_kwargs = super().get_extra_kwargs()
@@ -206,8 +215,10 @@ class CampaignEnableSerializer(serializers.ModelSerializer):
         fields = ["is_enable"]
 
     def validate(self, attrs):
-        if attrs['is_enable'] and self.instance.is_finished:
-            raise serializers.ValidationError(_("campaign total budget is low or time has been expired."))
+        if self.instance.is_finished():
+            raise serializers.ValidationError(
+                {"is_enable": _("campaign total budget is low or time has been expired.")}
+            )
         return attrs
 
 
