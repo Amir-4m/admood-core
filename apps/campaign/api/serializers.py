@@ -67,6 +67,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     categories = CategorySerializer(many=True)
     publishers = MinorPublisherSerializer(many=True)
     final_publishers = MinorPublisherSerializer(many=True)
+    locations = ProvinceSerializer(many=True)
 
     class Meta:
         model = Campaign
@@ -481,7 +482,7 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
     def handle_display_type(self):
         last_days = self.validated_data.get('last_days')
 
-        if last_days and last_days == 0:
+        if last_days == 0:
             return self.HOURLY
         else:
             return self.DAILY
