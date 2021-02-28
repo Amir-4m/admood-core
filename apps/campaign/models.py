@@ -2,18 +2,19 @@ import datetime
 
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField
 from django.db import models
-from django.db.models import Max, Q
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
-from admood_core import settings
 from apps.core.consts import CostModel
 from apps.core.models import File
 from apps.device.consts import ServiceProvider
 from apps.device.models import Device
 from apps.medium.consts import Medium
 from apps.medium.models import Publisher, Category
+
+from .utils import compute_telegram_cost
 
 
 def json_default():
@@ -25,7 +26,7 @@ class CampaignManager(models.Manager):
 
     def live(self):
         return self.get_queryset().filter(
-            Q(end_date__gte=timezone.now().date()) | Q(end_date__isnull=True),
+            models.Q(end_date__gte=timezone.now().date()) | models.Q(end_date__isnull=True),
             is_enable=True,
             status=Campaign.STATUS_APPROVED,
             start_date__lte=timezone.now().date(),
@@ -119,7 +120,7 @@ class Campaign(models.Model):
     @classmethod
     def get_all_publishers(cls, publishers_id, categories, cost_mode=None):
         _qs = Publisher.objects.filter(
-            Q(id__in=publishers_id) | Q(categories__in=categories),
+            models.Q(id__in=publishers_id) | models.Q(categories__in=categories),
         )
         if cost_mode:
             _qs = _qs.filter(cost_models__cost_model=cost_mode)
@@ -173,7 +174,7 @@ class Campaign(models.Model):
     @property
     def max_cost_model_price(self):
         return self.contents.aggregate(
-            max_cost_model_price=Coalesce(Max('cost_model_price'), 0)
+            max_cost_model_price=Coalesce(models.Max('cost_model_price'), 0)
         )['max_cost_model_price']
 
     @property
@@ -193,7 +194,7 @@ class Campaign(models.Model):
                 for obj in campaign_reference.contents:
                     try:
                         content = self.contents.get(pk=obj['content'])
-                        cost += obj['views'] * content.cost_model_price
+                        cost += compute_telegram_cost(obj['views'], content.cost_model_price)
                     except:
                         continue
         return cost
@@ -209,7 +210,7 @@ class Campaign(models.Model):
                 for obj in campaign_reference.contents:
                     try:
                         content = self.contents.get(pk=obj['content'])
-                        cost += obj['views'] * content.cost_model_price
+                        cost += compute_telegram_cost(obj['views'], content.cost_model_price)
                     except:
                         continue
         return cost

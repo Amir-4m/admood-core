@@ -110,3 +110,7 @@ def get_hourly_report_dashboard(temp_reports, sort_key):
         cost_chart.append({"name": f'{key}', "y": sum(chart[key][1])})
 
     return cost_chart, view_chart
+
+
+def compute_telegram_cost(views, cost_model_price):
+    return int(views / 1000 * cost_model_price)
