@@ -1,7 +1,4 @@
-from datetime import timedelta
 from django.utils import timezone
-
-from apps.campaign.services import TelegramCampaignServices
 
 
 def sort_reports_by_hour(data, start_date, end_date):
@@ -30,6 +27,8 @@ def sort_reports_by_hour(data, start_date, end_date):
 
 
 def update_campaign_reference_adtel(campaign_ref):
+    from apps.campaign.services import TelegramCampaignServices
+
     """
         Updating `views`, `detail` and hourly report of the campaign reference object from ad-tel.
     """
