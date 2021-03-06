@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.postgres.fields import JSONField
+from django.db.models import Count
+from django.utils.translation import ugettext_lazy as _
 
 from django_json_widget.widgets import JSONEditorWidget
 
@@ -34,9 +36,23 @@ class PublisherAdmin(admin.ModelAdmin, AutoFilter):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['title', 'medium', 'display_text', 'ref_id', 'created_time', 'updated_time']
+    list_display = [
+        'title', 'medium', 'display_text', 'ref_id', 'created_time', 'updated_time', 'number_of_publishers'
+    ]
     search_fields = ['title', 'display_text']
     list_filter = ('medium',)
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.annotate(
+            _publisher_count=Count("publisher", distinct=True),
+        )
+        return queryset
+
+    def number_of_publishers(self, obj):
+        return obj._publisher_count
+    number_of_publishers.short_description = _('number of publishers')
+    number_of_publishers.admin_order_field = '_publisher_count'
 
 
 @admin.register(CostModelPrice)
