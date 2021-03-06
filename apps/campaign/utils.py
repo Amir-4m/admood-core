@@ -1,12 +1,7 @@
 from django.utils import timezone
 
 
-def sort_reports_by_hour(data, start_date, end_date):
-    """Sort reports by campaign reference start date"""
-    if len(data) <= 1:
-        return [dict(y=data[key], name=key) for key in data.keys()]
-    result = []
-    keys = data.keys()
+def sort_hours(start_date, end_date):
     diff = end_date - start_date
     days, seconds = diff.days, diff.seconds
     diff_hours = (days * 24 + seconds // 3600) + 1
@@ -18,9 +13,18 @@ def sort_reports_by_hour(data, start_date, end_date):
         hour += 1
         if hour >= 24:
             hour = 0
+    return sorted_hours
+
+
+def sort_reports_by_hour(data, start_date, end_date):
+    """Sort reports by campaign reference start date"""
+    if len(data) <= 1:
+        return [dict(y=data[key], name=key) for key in data.keys()]
+    result = []
+    keys = data.keys()
 
     # y => value, label => hour
-    for key in sorted_hours:
+    for key in sort_hours(start_date, end_date):
         if key in keys:
             result.append(dict(y=data[key], name=key))
     return result
@@ -54,18 +58,20 @@ def update_campaign_reference_adtel(campaign_ref):
 
                     content['graph_hourly_view'] = {}
                     # creating the view by hour
-                    keys = sorted(report['hourly'].keys(), reverse=True)
-                    if keys:
-                        for index, key in enumerate(keys, 0):
-                            if index + 1 == len(keys):
-                                content['graph_hourly_view'][keys[index]] = report['hourly'][keys[index]]
+                    keys = sort_hours(start_date, end_date)
+                    for index, key in enumerate(keys, 0):
+                        try:
+                            if index + 1 == len(report['hourly']):
+                                content['graph_hourly_view'][key] = report['hourly'][key]
                             else:
-                                content['graph_hourly_view'][key] = abs(report['hourly'][key] - report['hourly'][keys[index + 1]])
-
-                        content['graph_hourly_view'] = sort_reports_by_hour(
-                            content['graph_hourly_view'], start_date, end_date
-                        )
-
+                                content['graph_hourly_view'][keys[index + 1]] = abs(report['hourly'][key] - report['hourly'][keys[index + 1]])
+                                if index == 0:
+                                    content['graph_hourly_view'][key] = report['hourly'][key]
+                        except:
+                            continue
+                    content['graph_hourly_view'] = sort_reports_by_hour(
+                        content['graph_hourly_view'], start_date, end_date
+                    )
                     # end of getting report for this campaign
                     # TODO telegram issue - If telegram can't read new reports on end time of campaign reference
                     end_time_campaign = campaign_ref.schedule_range.upper
