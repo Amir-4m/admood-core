@@ -62,10 +62,12 @@ def update_campaign_reference_adtel(campaign_ref):
                     for index, key in enumerate(keys, 0):
                         try:
                             if index + 1 == len(report['hourly']):
-                                content['graph_hourly_view'][key] = report['hourly'][key]
+                                # calculate the last one
+                                content['graph_hourly_view'][key] = abs(report['hourly'][key] - report['hourly'][keys[index - 1]])
                             else:
                                 content['graph_hourly_view'][keys[index + 1]] = abs(report['hourly'][key] - report['hourly'][keys[index + 1]])
                                 if index == 0:
+                                    # calculate the first one
                                     content['graph_hourly_view'][key] = report['hourly'][key]
                         except:
                             continue
