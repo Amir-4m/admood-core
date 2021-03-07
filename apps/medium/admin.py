@@ -14,6 +14,10 @@ from .models import (
     CostModelPrice,
 )
 
+class InlinePublisher(admin.TabularInline):
+    model = Category.publishers.through
+    raw_id_fields = ['publisher']
+    extra = 0
 
 @admin.register(Publisher)
 class PublisherAdmin(admin.ModelAdmin, AutoFilter):
@@ -36,6 +40,7 @@ class PublisherAdmin(admin.ModelAdmin, AutoFilter):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    inlines = [InlinePublisher]
     list_display = [
         'title', 'medium', 'display_text', 'ref_id', 'created_time', 'updated_time', 'number_of_publishers'
     ]
@@ -45,7 +50,7 @@ class CategoryAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         queryset = queryset.annotate(
-            _publisher_count=Count("publisher", distinct=True),
+            _publisher_count=Count("publishers", distinct=True),
         )
         return queryset
 
