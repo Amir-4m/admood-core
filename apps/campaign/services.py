@@ -420,12 +420,16 @@ class CampaignService(object):
         for schedule in schedules:
             schedule_lower_range = timezone.now().replace(
                 hour=schedule.start_time.hour,
-                minute=schedule.start_time.minute
+                minute=schedule.start_time.minute,
+                second=0,
+                microsecond=0
             )
 
             schedule_upper_range = timezone.now().replace(
                 hour=schedule.end_time.hour,
-                minute=schedule.end_time.minute
+                minute=schedule.end_time.minute,
+                second=0,
+                microsecond=0
             )
 
             create_campaign_func(schedule.campaign, schedule_lower_range, schedule_upper_range)
