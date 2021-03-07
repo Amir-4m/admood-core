@@ -316,6 +316,9 @@ class TelegramCampaignServices(object):
 
     @staticmethod
     def create_telegram_campaign(campaign, start_datetime, end_datetime):
+        start_datetime = start_datetime.replace(second=0, microsecond=0)
+        end_datetime = end_datetime.replace(second=0, microsecond=0)
+
         if campaign.error_count >= 5:
             logger.error(f"[creating telegram campaign failed]-[campaign id: {campaign.id}]")
             return
@@ -420,12 +423,12 @@ class CampaignService(object):
         for schedule in schedules:
             schedule_lower_range = timezone.now().replace(
                 hour=schedule.start_time.hour,
-                minute=schedule.start_time.minute
+                minute=schedule.start_time.minute,
             )
 
             schedule_upper_range = timezone.now().replace(
                 hour=schedule.end_time.hour,
-                minute=schedule.end_time.minute
+                minute=schedule.end_time.minute,
             )
 
             create_campaign_func(schedule.campaign, schedule_lower_range, schedule_upper_range)
@@ -440,5 +443,6 @@ class CampaignService(object):
             ).order_by('num_ref')
             for campaign in campaigns[:settings.ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
                 start_datetime = timezone.now()
-                end_datetime = start_datetime + timedelta(hours=3)
+                end_datetime = start_datetime + timedelta(hours=18)
+
                 create_campaign_func(campaign, start_datetime, end_datetime)
