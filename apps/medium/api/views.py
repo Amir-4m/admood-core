@@ -53,9 +53,10 @@ class CategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(
-            publishers__categories__campaign__isnull=False,
+            # publishers__categories__campaign__isnull=False,
             medium=self.kwargs['medium']
-        ).distinct()
+        )
+        # ).distinct()
 
         return queryset
 
