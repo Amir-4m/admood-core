@@ -52,19 +52,24 @@ class DepositViewSet(ListModelMixin,
             price=data['price'],
             user=request.user
         )
+        
+        post_data = {
+            'price': obj.price,
+            'service_reference': str(obj.invoice_number),
+            'is_paid': obj.is_paid,
+            "redirect_url": request.build_absolute_uri(reverse('payment-done')),
+        }
+        
+        phone_number = request.user.phone_number
+        if phone_number:
+            post_data["phone_number"] = f'98{phone_number}'
+
         try:
             # creating order in payment system
             order_response = payment_request(
                 'orders',
                 'post',
-                data={
-                    'price': obj.price,
-                    'service_reference': str(obj.invoice_number),
-                    'is_paid': obj.is_paid,
-                    "properties": {
-                        "redirect_url": request.build_absolute_uri(reverse('payment-done')),
-                    }
-                }
+                data=post_data
             )
             transaction_id = order_response.json().get('transaction_id')
         except Exception as e:
