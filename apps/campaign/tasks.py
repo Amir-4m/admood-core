@@ -44,7 +44,7 @@ def disable_finished_campaigns():
 def create_telegram_campaign_task():
     # filter approved and enable telegram campaigns
     with transaction.atomic():
-        campaigns = Campaign.objects.select_for_update().live().filter(medium=Medium.TELEGRAM, error_count__lt=5)
+        campaigns = Campaign.objects.live().select_for_update().filter(medium=Medium.TELEGRAM, error_count__lt=5)
         CampaignService.create_campaign_by_medium(campaigns, 'telegram')
 
 
