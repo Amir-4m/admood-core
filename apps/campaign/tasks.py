@@ -43,9 +43,8 @@ def disable_finished_campaigns():
 @periodic_task(run_every=crontab(**settings.CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB))
 def create_telegram_campaign_task():
     # filter approved and enable telegram campaigns
-    with transaction.atomic():
-        campaigns = Campaign.objects.live().select_for_update().filter(medium=Medium.TELEGRAM, error_count__lt=5)
-        CampaignService.create_campaign_by_medium(campaigns, 'telegram')
+    campaigns = Campaign.objects.live().filter(medium=Medium.TELEGRAM, error_count__lt=5)
+    CampaignService.create_campaign_by_medium(campaigns, 'telegram')
 
 
 # update content view in Campaign Reference model and add telegram file hashes
