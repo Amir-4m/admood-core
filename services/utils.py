@@ -21,7 +21,7 @@ def file_type(name):
         audio: ['.mp3', '.wav', '.aac', '.ogg', '.wma'],
     }
 
-    _, ext = os.path.splitext(name)
+    _, ext = os.path.splitext(name.lower())
 
     for k, v in file_types.items():
         if ext in v:
