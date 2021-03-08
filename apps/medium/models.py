@@ -85,7 +85,7 @@ class Publisher(models.Model):
     updated_time = models.DateTimeField(auto_now=True)
 
     cost_models = models.ManyToManyField(CostModelPrice, blank=True)
-    categories = models.ManyToManyField(Category, blank=True)
+    categories = models.ManyToManyField(Category, blank=True, related_name='publishers')
 
     medium = models.PositiveSmallIntegerField(choices=Medium.MEDIUM_CHOICES)
     name = models.CharField(max_length=50)
