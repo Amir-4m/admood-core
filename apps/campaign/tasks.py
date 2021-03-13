@@ -10,6 +10,7 @@ from django.conf import settings
 from apps.campaign.models import Campaign, CampaignReference, CampaignContent
 from apps.medium.consts import Medium
 from apps.payments.models import Transaction
+from services.utils import stop_duplicate_task
 
 from .services import CampaignService, TelegramCampaignServices
 from .utils import update_campaign_reference_adtel
@@ -42,6 +43,11 @@ def disable_finished_campaigns():
 
 @periodic_task(run_every=crontab(**settings.CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB))
 def create_telegram_campaign_task():
+    create_telegram_campaign()
+
+
+@stop_duplicate_task
+def create_telegram_campaign():
     # filter approved and enable telegram campaigns
     campaigns = Campaign.objects.live().filter(medium=Medium.TELEGRAM, error_count__lt=5)
     CampaignService.create_campaign_by_medium(campaigns, 'telegram')
