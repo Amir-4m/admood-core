@@ -1,11 +1,12 @@
-from celery.schedules import crontab
-from celery.task import periodic_task
-from celery import shared_task
 import logging
 
 from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
+
+from celery.schedules import crontab
+from celery.task import periodic_task
+from celery import shared_task
 
 from apps.campaign.models import Campaign, CampaignReference, CampaignContent
 from apps.medium.consts import Medium
@@ -41,7 +42,7 @@ def disable_finished_campaigns():
                 campaign.save()
 
 
-@periodic_task(run_every=crontab(**settings.CREATE_TELEGRAM_CAMPAIGN_TASK_CRONTAB))
+@periodic_task(run_every=crontab(minute="*/1"))
 def create_telegram_campaign_task():
     create_telegram_campaign()
 
