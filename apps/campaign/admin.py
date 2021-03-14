@@ -82,8 +82,9 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
     readonly_fields = (
-        'owner', 'locations', 'description', 'start_date', 'end_date', 'publishers', 'categories', 'utm_campaign',
-        'utm_content', 'medium', 'utm_medium', 'error_count', 'total_cost', 'remaining_views', 'today_cost'
+        'owner', 'is_enable', 'locations', 'description', 'start_date', 'end_date', 'publishers', 'categories',
+        'utm_campaign', 'utm_content', 'medium', 'utm_medium', 'error_count', 'total_cost', 'remaining_views',
+        'today_cost'
     )
 
     def get_readonly_fields(self, request, obj=None):
