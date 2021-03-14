@@ -4,6 +4,7 @@ import string
 import random
 
 import requests
+from pid import PidFile
 
 
 logger = logging.getLogger(__name__)
@@ -60,3 +61,27 @@ class AutoFilter:
 
 def random_string(length):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+
+
+def check_running(function_name):
+    if not os.path.exists('/tmp'):
+        os.mkdir('/tmp')
+    file_lock = PidFile(str(function_name), piddir='/tmp')
+    try:
+        file_lock.create()
+        return file_lock
+    except:
+        return None
+
+
+def stop_duplicate_task(func):
+    def inner_function():
+        file_lock = check_running(func.__name__)
+        if not file_lock:
+            logger.info(f">> [Another {func.__name__} is already running]")
+            return False
+        func()
+        if file_lock:
+            file_lock.close()
+        return True
+    return inner_function
