@@ -64,9 +64,9 @@ def random_string(length):
 
 
 def check_running(function_name):
-    if not os.path.exists('./temps'):
-        os.mkdir('./temps')
-    file_lock = PidFile(str(function_name), piddir='./temps')
+    if not os.path.exists('/tmp'):
+        os.mkdir('/tmp')
+    file_lock = PidFile(str(function_name), piddir='/tmp')
     try:
         file_lock.create()
         return file_lock
