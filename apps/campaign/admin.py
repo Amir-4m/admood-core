@@ -87,6 +87,10 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
         'today_cost'
     )
 
+    def has_add_permission(self, request):
+        """Creating new campaign from admin panel is disabled."""
+        return False
+
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
 
