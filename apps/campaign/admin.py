@@ -1,5 +1,8 @@
+from django.utils.translation import ugettext_lazy as _
 from django.contrib import admin, messages
 from django.contrib.postgres.fields import JSONField
+from django.db.models import Q, Count
+from django.utils import timezone
 
 from django_json_widget.widgets import JSONEditorWidget
 
@@ -23,7 +26,21 @@ from .models import (
 from .views import test_campaign
 from apps.core.consts import CostModel
 
+# --- Custom Filter ---
+class IsLiveCampaignReferenceFilter(admin.SimpleListFilter):
+    title = _('is live')
+    parameter_name = 'is_live'
 
+    def lookups(self, request, model_admin):
+        return (1, _('yes')), (0, _('no'))
+
+    def queryset(self, request, queryset):
+        if self.value() == "1":
+            return queryset.filter(**CampaignReference.objects.live_conditions)
+        return queryset
+
+
+# --- Inlines ---
 class FinalPublisherInline(admin.TabularInline):
     model = FinalPublisher
     fields = ('publisher', 'get_publisher_main_price', 'tariff')
@@ -37,7 +54,6 @@ class FinalPublisherInline(admin.TabularInline):
     get_publisher_main_price.short_description = 'publisher main price'
 
 
-# --- Inlines ---
 class TargetDeviceInline(admin.TabularInline):
     model = TargetDevice
     extra = 1
@@ -149,14 +165,17 @@ class CampaignScheduleAdmin(admin.ModelAdmin, AutoFilter):
 
 @admin.register(CampaignReference)
 class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
-    list_display = ("campaign", "ref_id", "schedule_range_start", "schedule_range_end", "views", "ref_ids", 'created_time')
+    list_display = (
+        "campaign", "ref_id", "schedule_range_start", "schedule_range_end", "views", "ref_ids", 'created_time',
+        'is_live'
+    )
     formfield_overrides = {
         JSONField: {'widget': JSONEditorWidget},
     }
     readonly_fields = ['extra_data', 'created_time', 'updated_time']
     raw_id_fields = ['campaign']
     search_fields = ('ref_id',)
-    list_filter = (CampaignFilter, 'campaign__medium')
+    list_filter = (CampaignFilter, 'campaign__medium', IsLiveCampaignReferenceFilter)  # 'is_live'
 
     def iterate_contents(self, contents, key):
         result = []
@@ -165,7 +184,23 @@ class CampaignReferenceAdmin(admin.ModelAdmin, AutoFilter):
                 result.append(content.get(key, '_'))
         return result
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.annotate(
+            # live condition
+            _is_live=Count(
+                'id',
+                filter=Q(**CampaignReference.objects.live_conditions)
+            )
+        )
+        return queryset
+
     # custom fields
+    def is_live(self, obj):
+        return obj._is_live
+    is_live.admin_order_field = '_is_live'
+    is_live.boolean = True
+
     def schedule_range_start(self, obj):
         return getattr(obj.schedule_range, 'lower', '')
 
