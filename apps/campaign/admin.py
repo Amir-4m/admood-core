@@ -91,12 +91,12 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
     list_display = ['name', 'owner', 'medium', 'status', 'is_enable']
     change_form_template = 'campaign/change_form.html'
     inlines = [CampaignContentInline, CampaignScheduleInline, TargetDeviceInline, FinalPublisherInline]
-    autocomplete_fields = ["owner"]
     actions = ['make_approve_campaigns', 'update_views_from_adtel']
     search_fields = ['medium', 'name', 'contents__title']
     list_filter = [OwnerFilter, 'medium', 'status', 'is_enable', 'created_time']
     filter_horizontal = ['categories', 'locations', 'publishers', 'final_publishers']
     radio_fields = {'status': admin.VERTICAL}
+    raw_id_fields = ['owner']
     readonly_fields = (
         'owner', 'is_enable', 'locations', 'description', 'start_date', 'end_date', 'publishers', 'categories',
         'utm_campaign', 'utm_content', 'medium', 'utm_medium', 'error_count', 'total_cost', 'remaining_views',
@@ -108,14 +108,18 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
         return False
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super().get_readonly_fields(request, obj)
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+
+        if request.user.is_superuser:
+            readonly_fields.remove('owner')
 
         if obj and not CampaignReference.objects.filter(
                 campaign=obj,
                 ref_id__isnull=False
         ).exists():
             return readonly_fields
-        return ('name',) + readonly_fields
+
+        return ['name'] + readonly_fields
 
     def render_change_form(self, request, context, **kwargs):
         return super().render_change_form(request, context, **kwargs)
