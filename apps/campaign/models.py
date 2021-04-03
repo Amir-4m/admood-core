@@ -35,12 +35,16 @@ class CampaignManager(models.Manager):
 
 class CampaignReferenceManager(models.Manager):
 
-    def live(self):
-        return self.get_queryset().filter(
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.live_conditions = dict(
             ref_id__isnull=False,
             schedule_range__startswith__lte=timezone.now(),
             schedule_range__endswith__gte=timezone.now()
         )
+
+    def live(self):
+        return self.get_queryset().filter(**self.live_conditions)
 
     def monitor_report(self):
         return self.get_queryset().filter(

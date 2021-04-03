@@ -78,7 +78,7 @@ def stop_duplicate_task(func):
     def inner_function():
         file_lock = check_running(func.__name__)
         if not file_lock:
-            logger.info(f">> [Another {func.__name__} is already running]")
+            logger.error(f"[Another {func.__name__} is already running]")
             return False
         func()
         if file_lock:

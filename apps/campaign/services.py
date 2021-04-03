@@ -178,8 +178,8 @@ class TelegramCampaignServices(object):
             is_enable=False,
             publishers=publishers,
             max_view=campaign.remaining_views,
-            agents=campaign.extra_data.get('agents', [settings.ADBOT_AGENTS]) if campaign.extra_data else [settings.ADBOT_AGENTS],
-            post_limit=campaign.extra_data.get('post_limit', 5),
+            agents=campaign.extra_data.get('agents'),
+            post_limit=campaign.extra_data.get('post_limit'),
             start_datetime=str(start_time),
             end_datetime=str(end_time),
         )
@@ -198,6 +198,7 @@ class TelegramCampaignServices(object):
                 display_text=content.title,
                 post_link=content.data.get('post_link'),
                 view_type=content.data.get('view_type'),
+                mother_channel=content.data.get('mother_channel', None),
             )
         else:
             utm_source = "admood"
