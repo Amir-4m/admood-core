@@ -42,8 +42,10 @@ class IsLiveCampaignReferenceFilter(admin.SimpleListFilter):
 
 # --- Inlines ---
 class FinalPublisherInline(admin.TabularInline):
+    # TODO add new final_publisher has a conflict with publishers field of campaign
     model = FinalPublisher
     fields = ('publisher', 'get_publisher_main_price', 'tariff')
+    # raw_id_fields = ('publisher',)
     readonly_fields = ('publisher', 'get_publisher_main_price')
     extra = 0
 

@@ -19,16 +19,27 @@ def test_campaign(request, pk):
     if campaign.medium == Medium.TELEGRAM:
 
         # validating the extra_data field
-        telegram_require_data = ['post_limit', 'agents']
+        telegram_require_campaign_extra_data = ['post_limit', 'agents']
         extra_data_keys = campaign.extra_data.keys()
         has_error = False
 
-        for key in telegram_require_data:
+        for key in telegram_require_campaign_extra_data:
             if key not in extra_data_keys:
                 has_error = True
                 messages.error(request, _(f'this value ({key}) is required on extra_data field.'))
 
-        # create telegram campaign
+        # validating the mother_channel on data field of campaign's contents
+        # mother_channel is required for CampaignContent.data JSON field on telegram medium
+        for content in campaign.contents.all():
+            if not content.data.get('mother_channel', None):
+                has_error = True
+                messages.error(
+                    request,
+                    _(f'(mother_channel) field is required or has a invalid data. please check it on (data) field on '
+                      f'campaign content {content.id}.')
+                )
+
+        # create telegram campaign if has no error
         if not has_error:
             try:
                 result = TelegramCampaignServices.create_telegram_test_campaign(campaign)
