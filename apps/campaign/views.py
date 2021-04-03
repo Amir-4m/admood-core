@@ -19,7 +19,7 @@ def test_campaign(request, pk):
     if campaign.medium == Medium.TELEGRAM:
 
         # validating the extra_data field
-        telegram_require_campaign_extra_data = ['post_limit', 'agents']
+        telegram_require_campaign_extra_data = ['post_limit']
         extra_data_keys = campaign.extra_data.keys()
         has_error = False
 
@@ -47,11 +47,7 @@ def test_campaign(request, pk):
                 logger.error(f"[testing campaign failed]-[campaign id: {campaign.id}]-[exc: {e}]")
                 messages.error(request, _(e.__str__()))
             else:
-                messages.info(request, _(result))
-                if result is True:
-                    messages.info(request, _("The test was performed correctly."))
-                else:
-                    messages.info(request, _(result))
+                messages.info(request, _("The test was performed correctly."))
     else:
         messages.warning(request, _("Currently only Telegram medium can be tested."))
 
