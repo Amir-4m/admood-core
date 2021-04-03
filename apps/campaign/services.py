@@ -198,6 +198,7 @@ class TelegramCampaignServices(object):
                 display_text=content.title,
                 post_link=content.data.get('post_link'),
                 view_type=content.data.get('view_type'),
+                mother_channel=content.data.get('mother_channel', None),
             )
         else:
             utm_source = "admood"
