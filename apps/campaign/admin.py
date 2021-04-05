@@ -46,6 +46,7 @@ class FinalPublisherInline(admin.TabularInline):
     model = FinalPublisher
     fields = ('publisher', 'get_publisher_main_price', 'tariff')
     # raw_id_fields = ('publisher',)
+    classes = ['collapse']
     readonly_fields = ('publisher', 'get_publisher_main_price')
     extra = 0
 
