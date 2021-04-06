@@ -17,16 +17,25 @@ logger = logging.getLogger(__name__)
 def test_campaign(request, pk):
     campaign = get_object_or_404(Campaign, pk=pk)
     if campaign.medium == Medium.TELEGRAM:
+        has_error = False
 
-        # validating the extra_data field
+        # validating the extra_data field on campaign
         telegram_require_campaign_extra_data = ['post_limit']
         extra_data_keys = campaign.extra_data.keys()
-        has_error = False
 
         for key in telegram_require_campaign_extra_data:
             if key not in extra_data_keys:
                 has_error = True
                 messages.error(request, _(f'this value ({key}) is required on extra_data field.'))
+
+        # validating the data field on campaign content TODO not important for now
+        # required_campaign_content_key = ['message_id']
+        # for content in campaign.contents.all():
+        #     for key in required_campaign_content_key:
+        #         if key not in content.data.keys():
+        #             has_error = True
+        #             messages.error(
+        #                 request, _(f'this value ({key}) is required on data field in campaign content {content.id}.'))
 
         # validating the mother_channel on data field of campaign's contents
         # mother_channel is required for CampaignContent.data JSON field on telegram medium
