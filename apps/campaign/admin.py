@@ -10,7 +10,7 @@ from apps.accounts.admin_filter import OwnerFilter
 
 from services.utils import AutoFilter
 from .tasks import update_telegram_reports_from_admin
-from .forms import ContentAdminForm, CampaignAdminForm
+from .forms import CampaignAdminForm
 from .admin_filter import CampaignFilter
 
 from .models import (
@@ -155,12 +155,14 @@ class CampaignAdmin(admin.ModelAdmin, AutoFilter):
 
 @admin.register(CampaignContent)
 class CampaignContentAdmin(admin.ModelAdmin, AutoFilter):
+    formfield_overrides = {
+        JSONField: {'widget': JSONEditorWidget},
+    }
     list_display = ("campaign", "title", "data")
     list_filter = (CampaignFilter, "campaign__categories")
     raw_id_fields = ['campaign']
     search_fields = ("title",)
     ordering = ['-id']
-    form = ContentAdminForm
 
 
 @admin.register(CampaignSchedule)

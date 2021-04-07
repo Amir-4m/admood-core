@@ -54,6 +54,8 @@ from apps.medium.models import Publisher
 
 
 class ContentAdminForm(forms.ModelForm):
+    # TODO is not using
+
     class Meta:
         model = CampaignContent
         fields = '__all__'

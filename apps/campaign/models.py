@@ -298,6 +298,13 @@ class CampaignContent(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if 'mother_channel' not in self.data.keys():
+            self.data.update(dict(mother_channel=None))
+
+        super().save(force_insert, force_update, using, update_fields)
+
     @property
     def file(self):
         try:
