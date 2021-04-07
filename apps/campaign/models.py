@@ -274,8 +274,7 @@ class TargetDevice(models.Model):
 
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='target_devices')
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
-    service_provider = models.PositiveSmallIntegerField(choices=ServiceProvider.SERVICE_PROVIDER_CHOICES,
-                                                        null=True, blank=True)
+    service_provider = models.PositiveSmallIntegerField(choices=ServiceProvider.SERVICE_PROVIDER_CHOICES, null=True, blank=True)
 
 
 class CampaignContent(models.Model):
@@ -298,12 +297,10 @@ class CampaignContent(models.Model):
     def __str__(self):
         return self.title
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        if 'mother_channel' not in self.data.keys():
-            self.data.update(dict(mother_channel=None))
-
-        super().save(force_insert, force_update, using, update_fields)
+    def save(self, *args, **kwargs):
+        if 'mother_channel' not in self.data:
+            self.data['mother_channel'] = None
+        super().save(*args, **kwargs)
 
     @property
     def file(self):
