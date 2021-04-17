@@ -1,6 +1,6 @@
 import logging
 
-from datetime import timedelta
+from datetime import timedelta, datetime, time
 
 from django.db.models import Count
 from django.utils import timezone
@@ -445,6 +445,9 @@ class CampaignService(object):
             ).order_by('num_ref')
             for campaign in campaigns[:settings.ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
                 start_datetime = timezone.now()
-                end_datetime = start_datetime + timedelta(hours=18)
+                end_datetime = min(
+                    start_datetime + timedelta(hours=18),
+                    datetime.combine(campaign.end_date, time(hour=0))
+                )
 
                 create_campaign_func(campaign, start_datetime, end_datetime)
