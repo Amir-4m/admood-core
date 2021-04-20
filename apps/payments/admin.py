@@ -17,6 +17,11 @@ class TransactionAdmin(admin.ModelAdmin, AutoFilter):
     def has_add_permission(self, request):
         return request.user.is_superuser
 
+    def add_view(self, request, form_url='', extra_context=None):
+        if request.user.is_superuser:
+            self.readonly_fields = ()
+        return super().add_view(request, form_url, extra_context)
+
 
 @admin.register(Deposit)
 class PaymentAdmin(admin.ModelAdmin, AutoFilter):
