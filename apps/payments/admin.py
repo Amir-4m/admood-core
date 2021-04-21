@@ -18,8 +18,7 @@ class TransactionAdmin(admin.ModelAdmin, AutoFilter):
         return request.user.is_superuser
 
     def add_view(self, request, form_url='', extra_context=None):
-        if request.user.is_superuser:
-            self.readonly_fields = ()
+        self.readonly_fields = ()
         return super().add_view(request, form_url, extra_context)
 
 
