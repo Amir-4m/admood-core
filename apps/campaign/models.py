@@ -17,8 +17,8 @@ from apps.medium.models import Publisher, Category
 from .utils import compute_telegram_cost
 
 
-def json_default():
-    return {'': ''}
+def campaign_content_default():
+    return dict(mother_channel=None, view_type='', content='')
 
 
 # --- Custom Managers ---
@@ -95,7 +95,7 @@ class Campaign(models.Model):
     start_date = models.DateField(default=datetime.date.today, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
-    extra_data = JSONField(default=json_default)
+    extra_data = JSONField(default=dict)
 
     utm_campaign = models.CharField(max_length=50, null=True, blank=True)
     utm_medium = models.CharField(max_length=50, null=True, blank=True)
@@ -249,7 +249,7 @@ class CampaignReference(models.Model):
 
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     ref_id = models.IntegerField(null=True, blank=True)
-    extra_data = JSONField(default=json_default)
+    extra_data = JSONField(default=dict)
     contents = JSONField(default=list)
     max_view = models.IntegerField()
     # date = models.DateField(null=True, blank=True)
@@ -281,7 +281,7 @@ class CampaignContent(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='contents')
     title = models.CharField(max_length=250)
     landing_url = models.URLField(blank=True, null=True)
-    data = JSONField(default=json_default)
+    data = JSONField(default=campaign_content_default)
     description = models.TextField(blank=True, null=True)
     utm_term = models.CharField(max_length=100, blank=True, null=True)
 
@@ -296,11 +296,6 @@ class CampaignContent(models.Model):
 
     def __str__(self):
         return self.title
-
-    def save(self, *args, **kwargs):
-        if 'mother_channel' not in self.data:
-            self.data['mother_channel'] = None
-        super().save(*args, **kwargs)
 
     @property
     def file(self):
