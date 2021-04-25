@@ -17,6 +17,10 @@ from apps.medium.models import Publisher, Category
 from .utils import compute_telegram_cost
 
 
+def json_default():
+    return {'': ''}
+
+
 def campaign_content_default():
     return dict(mother_channel=None, view_type='', content='')
 
