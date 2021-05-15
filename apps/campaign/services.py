@@ -445,9 +445,13 @@ class CampaignService(object):
             ).order_by('num_ref')
             for campaign in campaigns[:settings.ADBOT_MAX_CONCURRENT_CAMPAIGN - concurrent_campaign_count]:
                 start_datetime = timezone.now()
-                end_datetime = min(
-                    start_datetime + timedelta(hours=18),
-                    datetime.combine(campaign.end_date, time(hour=0))
-                )
+
+                if campaign.end_date:
+                    end_datetime = min(
+                        start_datetime + timedelta(hours=18),
+                        datetime.combine(campaign.end_date, time(hour=0))
+                    )
+                else:
+                    end_datetime = start_datetime + timedelta(hours=18)
 
                 create_campaign_func(campaign, start_datetime, end_datetime)
