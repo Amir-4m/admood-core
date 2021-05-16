@@ -491,14 +491,17 @@ class CampaignDashboardReportSerializer(serializers.Serializer):
         else:
             return self.DAILY
 
-    @property  # TODO test this to does work correctly or cause the invalid data for two user ?
+    @property
     def campaigns(self):
         filter_kwargs = dict(
-            owner_id=self.context.get('owner_id'),
             status=Campaign.STATUS_APPROVED,
             medium=self.validated_data.get('medium')
         )
         filter_kwargs.update(self.handle_filter_data())
+
+        if 'owner_id' in self.context.keys():
+            filter_kwargs.update(dict(owner_id=self.context.get('owner_id')))
+
         return Campaign.objects.filter(**filter_kwargs)
 
     def get_active_campaigns(self, obj):
