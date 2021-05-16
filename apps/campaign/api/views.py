@@ -44,6 +44,8 @@ class CampaignViewSet(BaseViewSet,
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
+        if self.request.user.is_superuser:
+            return super().get_queryset()
         return self.queryset.filter(owner=self.request.user)
 
     def update(self, request, *args, **kwargs):
@@ -160,9 +162,13 @@ class CampaignViewSet(BaseViewSet,
     )
     def dashboard_report(self, request, *args, **kwargs):
         data = request.query_params
+        context = dict(owner_id=request.user.id)
+        if request.user.is_superuser:
+            context = {}
+
         serializer = CampaignDashboardReportSerializer(
             data=data,
-            context=dict(owner_id=request.user.id)
+            context=context
         )
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
@@ -182,6 +188,8 @@ class ContentViewSet(BaseViewSet,
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
+        if self.request.user.is_superuser:
+            return self.queryset.filter(campaign__id=self.kwargs['campaign_id'])
         return self.queryset.filter(campaign__owner=self.request.user, campaign__id=self.kwargs['campaign_id'])
 
 
@@ -192,6 +200,8 @@ class CampaignReferenceViewSet(viewsets.GenericViewSet):
     serializer_class = CampaignReferenceSerializer
 
     def get_queryset(self):
+        if self.request.user.is_superuser:
+            return super().get_queryset()
         return self.queryset.filter(campaign__owner=self.request.user)
 
     @method_decorator(cache_page(60 * 10))
