@@ -432,8 +432,11 @@ class CampaignService(object):
                 hour=schedule.end_time.hour,
                 minute=schedule.end_time.minute,
             )
-
-            create_campaign_func(schedule.campaign, schedule_lower_range, schedule_upper_range)
+            try:
+                create_campaign_func(schedule.campaign, schedule_lower_range, schedule_upper_range)
+            except Exception as e:
+                logger.error(f'[creating campaign by medium failed]-[medium: {medium}]-[exc: {e}]')
+                continue
 
         # create non scheduled campaigns if possible
         concurrent_campaign_count = CampaignReference.objects.live().count()
@@ -453,5 +456,8 @@ class CampaignService(object):
                     )
                 else:
                     end_datetime = start_datetime + timedelta(hours=18)
-
-                create_campaign_func(campaign, start_datetime, end_datetime)
+                try:
+                    create_campaign_func(campaign, start_datetime, end_datetime)
+                except Exception as e:
+                    logger.error(f'[creating campaign by medium failed]-[medium: {medium}]-[exc: {e}]')
+                continue
