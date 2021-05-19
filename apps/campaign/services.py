@@ -449,7 +449,7 @@ class CampaignService(object):
                 if campaign.end_date:
                     end_datetime = min(
                         start_datetime + timedelta(hours=18),
-                        datetime.combine(campaign.end_date, time(hour=0))
+                        datetime.combine(campaign.end_date, time(hour=23, minute=59))
                     )
                 else:
                     end_datetime = start_datetime + timedelta(hours=18)
