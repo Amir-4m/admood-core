@@ -44,14 +44,16 @@ def disable_finished_campaigns():
 
 @periodic_task(run_every=crontab(minute="*/1"))
 def create_telegram_campaign_task():
-    create_telegram_campaign()
-
-
-@stop_duplicate_task
-def create_telegram_campaign():
     # filter approved and enable telegram campaigns
     campaigns = Campaign.objects.live().filter(medium=Medium.TELEGRAM, error_count__lt=5)
     CampaignService.create_campaign_by_medium(campaigns, 'telegram')
+
+
+# @stop_duplicate_task
+# def create_telegram_campaign():
+#     # filter approved and enable telegram campaigns
+#     campaigns = Campaign.objects.live().filter(medium=Medium.TELEGRAM, error_count__lt=5)
+#     CampaignService.create_campaign_by_medium(campaigns, 'telegram')
 
 
 # update content view in Campaign Reference model and add telegram file hashes
